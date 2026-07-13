@@ -28,7 +28,7 @@ const queryClient = new QueryClient();
 
 const Chrome = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
-  const immersive = /^\/story\/[^/]+/.test(pathname) || pathname.startsWith("/admin");
+  const immersive = /^\/story\/[^/]+/.test(pathname);
   return (
     <>
       <Toaster />
