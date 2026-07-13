@@ -11,8 +11,6 @@ const SUGGESTIONS = [
   "ذَهَبَ الطِّفْلُ إِلى الحَديقَة",
 ];
 
-interface Letter { char: string; ok: boolean; note?: string; correct_hint?: string; }
-interface Result { transcription: string; target: string; overall_score: number; feedback: string; letters: Letter[]; }
 
 export default function VoiceCoachDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [target, setTarget] = useState(SUGGESTIONS[0]);
