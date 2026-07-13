@@ -311,8 +311,8 @@ const SirajCompanion = () => {
         >
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center gap-3 border-b border-accent/40">
-            <span className="w-11 h-11 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-xl shrink-0">
-              {initial}
+            <span className="w-12 h-12 rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent shrink-0">
+              <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
             </span>
             <div className="flex-1 min-w-0">
               <p className="font-display italic font-semibold text-lg leading-tight truncate">{tutorName}</p>
