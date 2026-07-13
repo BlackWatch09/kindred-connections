@@ -2,6 +2,7 @@
 // Plays browser speech immediately inside the user's click gesture, then warms
 // the premium TTS cache when the edge function is available.
 import { supabase } from "@/lib/supabase";
+import { TTS_AUDIO } from "@/generated/ttsManifest";
 
 const TTS_URL = `https://zekkojrgknpvmxskyqno.supabase.co/functions/v1/tts`;
 const SUPABASE_ANON = "sb_publishable_fbcN8yLZl8_5VMGokMH24g_4LaaOnCu";
@@ -75,6 +76,21 @@ async function fetchPremiumSpeech(text: string): Promise<string | null> {
 export async function speakArabic(text: string): Promise<void> {
   if (!text) return;
   stopSpeaking();
+
+  const localUrl = TTS_AUDIO[text];
+  if (localUrl) {
+    try {
+      const audio = new Audio(localUrl);
+      audio.preload = "auto";
+      currentAudio = audio;
+      await audio.play();
+      return;
+    } catch (err) {
+      console.warn("[tts] local audio blocked, using browser speech:", err);
+      speakWithBrowser(text);
+      return;
+    }
+  }
 
   const cachedUrl = cache.get(text);
   if (cachedUrl) {
