@@ -164,9 +164,9 @@ const StoryScene = () => {
       try {
         const res = await checkGrammar(text, world.level);
         if (res.has_error && res.hint) {
-          setHint({ text: res.hint, corrected: res.corrected });
+          setHint({ text: res.hint, corrected: res.corrected, original: text });
           if (hintTimeoutRef.current) window.clearTimeout(hintTimeoutRef.current);
-          hintTimeoutRef.current = window.setTimeout(() => setHint(null), 6000);
+          hintTimeoutRef.current = window.setTimeout(() => setHint(null), 9000);
         }
         // Save new words
         for (const w of res.new_words ?? []) {
@@ -299,7 +299,7 @@ const StoryScene = () => {
                 {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 -rotate-180" />}
               </button>
             </form>
-            <WhisperHints hint={currentHint} />
+            <WhisperHints hint={currentHint} onClose={() => setHint(null)} />
           </div>
         </div>
       </div>

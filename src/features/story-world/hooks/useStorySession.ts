@@ -7,7 +7,7 @@ interface StoryState {
   messages: StoryMessage[];
   streamingText: string;
   isStreaming: boolean;
-  currentHint: { text: string; corrected?: string } | null;
+  currentHint: { text: string; corrected?: string; original?: string } | null;
   learnedThisSession: LearnedWord[];
   sceneSeed: SceneSeed | null;
   priorScenarios: string[];
