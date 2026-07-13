@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { BookOpen, Loader2, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BookOpen, Loader2, Sparkles, Check, X, Trophy, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import ToolShell from "./ToolShell";
-import { generateStory, type StoryResult as Story } from "@/lib/aiFn";
+import { generateStory, type StoryResult as Story, type StoryQuestion } from "@/lib/aiFn";
+import { addPoints } from "@/lib/points";
+import { useAuth } from "@/hooks/useAuth";
 
 type Level = "beginner" | "intermediate" | "advanced";
-
 
 const LEVELS: { id: Level; label: string }[] = [
   { id: "beginner", label: "مبتدئ" },
@@ -14,8 +15,10 @@ const LEVELS: { id: Level; label: string }[] = [
 ];
 
 const INTEREST_CHIPS = ["مغامرات", "رياضة", "طبخ", "فضاء", "حيوانات", "تاريخ", "صداقة", "بحر"];
+const POINTS_PER_CORRECT = 10;
 
 export default function StoryGeneratorDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { user } = useAuth();
   const [level, setLevel] = useState<Level>("beginner");
   const [interests, setInterests] = useState("");
   const [length, setLength] = useState<"short" | "medium">("short");
@@ -23,8 +26,19 @@ export default function StoryGeneratorDialog({ open, onClose }: { open: boolean;
   const [error, setError] = useState<string | null>(null);
   const [story, setStory] = useState<Story | null>(null);
 
+  // quiz state
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [awardedPoints, setAwardedPoints] = useState<number | null>(null);
+
+  const resetQuiz = () => {
+    setAnswers({});
+    setSubmitted(false);
+    setAwardedPoints(null);
+  };
+
   const generate = async () => {
-    setLoading(true); setError(null); setStory(null);
+    setLoading(true); setError(null); setStory(null); resetQuiz();
     try {
       const data = await generateStory(level, interests, length);
       setStory(data);
@@ -32,9 +46,31 @@ export default function StoryGeneratorDialog({ open, onClose }: { open: boolean;
     finally { setLoading(false); }
   };
 
+  const questions: StoryQuestion[] = story?.questions ?? [];
+  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] !== undefined);
+  const correctCount = useMemo(
+    () => questions.reduce((n, q, i) => (answers[i] === q.correct_index ? n + 1 : n), 0),
+    [questions, answers],
+  );
+
+  const submitQuiz = () => {
+    if (!allAnswered || submitted) return;
+    const earned = correctCount * POINTS_PER_CORRECT;
+    setSubmitted(true);
+    setAwardedPoints(earned);
+    if (earned > 0) {
+      addPoints(user?.id, {
+        tool: "story-quiz",
+        label: `اختبار قصة: ${story?.title || ""}`.trim(),
+        points: earned,
+        meta: { level, length, total: questions.length, correct: correctCount },
+      });
+    }
+  };
+
   return (
     <ToolShell open={open} onClose={onClose} icon={<BookOpen className="w-5 h-5" />}
-      title="مولّد القصص التفاعلية" subtitle="قصة مشكّلة كاملة مصمّمة لمستواك واهتماماتك">
+      title="مولّد القصص التفاعلية" subtitle="قصة مشكّلة + اختبار فهم وكسب نقاط">
       <div className="space-y-5">
         <div>
           <label className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">المستوى</label>
@@ -103,17 +139,95 @@ export default function StoryGeneratorDialog({ open, onClose }: { open: boolean;
               </div>
             )}
 
-            {story.questions?.length > 0 && (
-              <div>
-                <p className="eyebrow">— أسئلة للتفكير —</p>
-                <ol dir="rtl" className="mt-2 space-y-2 list-decimal list-inside text-sm">
-                  {story.questions.map((q, i) => <li key={i}>{q}</li>)}
+            {questions.length > 0 && (
+              <div className="space-y-3" dir="rtl">
+                <div className="flex items-center justify-between">
+                  <p className="eyebrow">— اختبر فهمك —</p>
+                  <span className="text-xs text-muted-foreground">
+                    {questions.length} أسئلة · {POINTS_PER_CORRECT} نقاط لكل إجابة صحيحة
+                  </span>
+                </div>
+
+                <ol className="space-y-4">
+                  {questions.map((q, qi) => {
+                    const chosen = answers[qi];
+                    return (
+                      <li key={qi} className="border border-border p-4 bg-card">
+                        <p className="font-semibold text-foreground mb-3">
+                          <span className="text-accent">{qi + 1}.</span> {q.question}
+                        </p>
+                        <div className="grid gap-2">
+                          {q.options.map((opt, oi) => {
+                            const isChosen = chosen === oi;
+                            const isCorrect = oi === q.correct_index;
+                            let cls = "border-border hover:border-accent";
+                            if (submitted) {
+                              if (isCorrect) cls = "border-emerald-500 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300";
+                              else if (isChosen) cls = "border-red-400 bg-red-500/10 text-red-800 dark:text-red-300";
+                              else cls = "border-border opacity-70";
+                            } else if (isChosen) {
+                              cls = "border-accent bg-accent/10";
+                            }
+                            return (
+                              <button
+                                key={oi}
+                                type="button"
+                                disabled={submitted}
+                                onClick={() => setAnswers((a) => ({ ...a, [qi]: oi }))}
+                                className={`text-right p-3 border transition text-sm flex items-center justify-between gap-3 ${cls} disabled:cursor-default`}
+                              >
+                                <span className="flex-1">{opt}</span>
+                                {submitted && isCorrect && <Check className="w-4 h-4 shrink-0 text-emerald-600" />}
+                                {submitted && isChosen && !isCorrect && <X className="w-4 h-4 shrink-0 text-red-600" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {submitted && q.explanation && (
+                          <p className="mt-3 text-xs text-muted-foreground border-r-2 border-accent/40 pr-2">
+                            {q.explanation}
+                          </p>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ol>
+
+                {!submitted ? (
+                  <button
+                    onClick={submitQuiz}
+                    disabled={!allAnswered}
+                    className="w-full py-3 bg-accent text-accent-foreground font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Trophy className="w-4 h-4" />
+                    {allAnswered ? "احتساب النتيجة" : `أجب عن كل الأسئلة (${Object.keys(answers).length}/${questions.length})`}
+                  </button>
+                ) : (
+                  <div className="border border-accent/50 bg-accent/5 p-4 text-center space-y-2">
+                    <div className="inline-flex items-center gap-2 text-accent font-bold text-lg">
+                      <Trophy className="w-5 h-5" />
+                      {correctCount} / {questions.length} إجابات صحيحة
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      كسبت <span className="font-bold text-accent">{awardedPoints ?? 0}</span> نقطة —
+                      محفوظة في لوحة تحكمك.
+                    </p>
+                    <button
+                      onClick={resetQuiz}
+                      className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 border border-border text-xs hover:border-accent"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> إعادة المحاولة (بدون نقاط إضافية)
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
             <div className="pt-2 flex flex-wrap gap-3">
               <button onClick={generate} className="px-4 py-2 border border-border hover:border-accent text-sm font-semibold">قصة جديدة</button>
+              <Link to="/dashboard" onClick={onClose} className="px-4 py-2 border border-accent text-accent text-sm font-semibold">
+                لوحة التحكم
+              </Link>
               <Link to="/story" onClick={onClose} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold">
                 دخول عالم القصص التفاعلي ←
               </Link>
