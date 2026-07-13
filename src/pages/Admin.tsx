@@ -10,8 +10,8 @@ import {
   ensureDefaultPassword, verifyPassword, changePassword,
   startSession, isAuthed, endSession,
 } from "@/lib/adminAuth";
-import { content, type Teacher, type Course, type FAQItem, type Announcement } from "@/lib/siteContent";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { content, pickLocalized, type Teacher, type Course, type FAQItem, type Announcement, type AiPersona, type Localized } from "@/lib/siteContent";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import logo from "@/assets/lugha-logo.png";
 
 type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aicontent" | "settings" | "security" | "backup";
