@@ -213,10 +213,10 @@ const StoryScene = () => {
   }
 
   return (
-    <div className="relative z-10 min-h-screen" dir="rtl">
-      <div className="flex flex-col lg:flex-row min-h-screen">
+    <div className="relative z-10 h-[100dvh] overflow-hidden" dir="rtl">
+      <div className="flex flex-col lg:flex-row h-full">
         {/* Scene panel */}
-        <div className="relative lg:w-3/5 lg:min-h-screen h-[45vh] lg:h-auto overflow-hidden bg-black">
+        <div className="relative lg:w-3/5 lg:h-full h-[32dvh] flex-shrink-0 overflow-hidden bg-black">
           <motion.img
             src={world.worldImage}
             alt={world.nameAr}
@@ -229,31 +229,31 @@ const StoryScene = () => {
 
           <button
             onClick={() => navigate("/story")}
-            className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur text-white text-sm border border-white/20 hover:bg-black/70"
+            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur text-white text-xs border border-white/20 hover:bg-black/70"
           >
-            <ArrowRight className="w-4 h-4" /> العوالم
+            <ArrowRight className="w-3.5 h-3.5" /> العوالم
           </button>
 
-          <div className="absolute top-4 left-4 z-10">
+          <div className="absolute top-3 left-3 z-10">
             <button
               onClick={finish}
-              className="px-4 py-1.5 rounded-full bg-accent text-accent-foreground text-sm font-semibold font-arabic hover:opacity-90"
+              className="px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-semibold font-arabic hover:opacity-90"
             >
               إنهاء المشهد
             </button>
           </div>
 
           <div className="absolute bottom-0 right-0 left-0">
-            <div className="flex items-end gap-3 p-6 text-white">
+            <div className="flex items-end gap-2.5 px-4 pt-4 pb-2 text-white lg:gap-3 lg:p-6">
               <img
                 src={world.characterImage}
                 alt={world.characterName}
-                className="w-20 h-20 rounded-full object-cover border-2 border-white/80 shadow-xl"
+                className="w-12 h-12 lg:w-20 lg:h-20 rounded-full object-cover border-2 border-white/80 shadow-xl"
               />
-              <div>
-                <p className="text-sm text-white/80 font-arabic">تتحدث الآن مع</p>
-                <p className="font-arabic text-2xl font-bold">{world.characterName}</p>
-                <p className="text-xs text-white/70 font-arabic">{world.nameAr}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] lg:text-sm text-white/80 font-arabic leading-tight">تتحدث الآن مع</p>
+                <p className="font-arabic text-base lg:text-2xl font-bold leading-tight truncate">{world.characterName}</p>
+                <p className="text-[10px] lg:text-xs text-white/70 font-arabic truncate">{world.nameAr}</p>
               </div>
             </div>
             <VocabularyBar words={learnedThisSession} target={world.targetVocab} />
@@ -261,7 +261,7 @@ const StoryScene = () => {
         </div>
 
         {/* Dialogue panel */}
-        <div className="lg:w-2/5 flex flex-col bg-card border-t lg:border-t-0 lg:border-r border-border min-h-[55vh] lg:min-h-screen">
+        <div className="flex-1 min-h-0 flex flex-col bg-card border-t lg:border-t-0 lg:border-r border-border">
           {!ready ? (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <Loader2 className="w-5 h-5 animate-spin ml-2" />
