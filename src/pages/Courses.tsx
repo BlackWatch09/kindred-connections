@@ -151,6 +151,9 @@ const Courses = () => {
           </div>
         </button>
 
+        <div className="space-y-10">
+
+
           {courses.map((course, ci) => {
             const allDone =
               course.unlocked && course.lessons.every((l) => completedLessons.includes(l));
