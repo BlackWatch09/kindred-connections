@@ -14,9 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Space Grotesk', 'sans-serif'],
-        body: ['DM Sans', 'sans-serif'],
-        arabic: ['Noto Naskh Arabic', 'serif'],
+        display: ['Fraunces', 'Georgia', 'serif'],
+        body: ['Inter Tight', 'system-ui', 'sans-serif'],
+        arabic: ['Amiri', 'Noto Naskh Arabic', 'serif'],
+        'arabic-display': ['Reem Kufi', 'Amiri', 'serif'],
       },
 
       colors: {
