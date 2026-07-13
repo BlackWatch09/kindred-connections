@@ -14,7 +14,7 @@ const Footer = () => {
               <img src={logo} alt="Lugha" className="w-12 h-12 object-contain invert-0" />
               <div>
                 <h3 className="font-display text-2xl font-bold tracking-tight">Lugha</h3>
-                <p className="text-[10px] uppercase tracking-[0.32em] text-primary-foreground/60">لُغة · {t("footer.est")}</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-primary-foreground/60">لُغة · {t("footer.est")}</p>
               </div>
             </div>
             <p className="text-sm text-primary-foreground/70 max-w-sm leading-relaxed">
