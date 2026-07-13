@@ -80,7 +80,16 @@ function read(): Store {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULTS);
     const parsed = JSON.parse(raw);
-    return { ...structuredClone(DEFAULTS), ...parsed };
+    const base = structuredClone(DEFAULTS);
+    return {
+      ...base,
+      ...parsed,
+      settings: {
+        ...base.settings,
+        ...(parsed.settings ?? {}),
+        aiPersona: { ...base.settings.aiPersona, ...(parsed.settings?.aiPersona ?? {}) },
+      },
+    };
   } catch {
     return structuredClone(DEFAULTS);
   }
