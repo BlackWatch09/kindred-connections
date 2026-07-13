@@ -22,12 +22,13 @@ import StoryWorld from "./pages/StoryWorld";
 import StoryWorldScene from "./pages/StoryWorldScene";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
 const Chrome = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
-  const immersive = /^\/story\/[^/]+/.test(pathname);
+  const immersive = /^\/story\/[^/]+/.test(pathname) || pathname.startsWith("/admin");
   return (
     <>
       <Toaster />
@@ -83,6 +84,7 @@ const App = () => (
                   }
                 />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Chrome>
