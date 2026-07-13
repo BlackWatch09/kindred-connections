@@ -282,18 +282,18 @@ const SirajCompanion = () => {
 
   return (
     <>
-      {/* Floating trigger — always bottom-left */}
+      {/* Floating trigger — glued to bottom-left corner */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className="fixed bottom-4 left-4 z-[60] group focus:outline-none"
+          className="fixed -bottom-10 -left-10 md:-bottom-14 md:-left-14 z-[60] group focus:outline-none"
         >
           {/* Glow halo */}
           <span
             aria-hidden
-            className="absolute inset-6 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.5),transparent_70%)] blur-3xl animate-siraj-glow"
+            className="absolute inset-10 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.5),transparent_70%)] blur-3xl animate-siraj-glow"
           />
           {/* Avatar (no card) */}
           <img
@@ -305,10 +305,11 @@ const SirajCompanion = () => {
           {/* Online dot */}
           <span
             aria-hidden
-            className="absolute bottom-10 right-10 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
+            className="absolute top-16 right-16 md:top-24 md:right-24 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
           />
         </button>
       )}
+
 
 
 
