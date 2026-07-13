@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -26,17 +26,30 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const Chrome = ({ children }: { children: React.ReactNode }) => {
+  const { pathname } = useLocation();
+  const immersive = /^\/story\/[^/]+/.test(pathname);
+  return (
+    <>
+      <Toaster />
+      <Sonner />
+      {!immersive && <BackgroundLogo />}
+      {!immersive && <Navbar />}
+      <main className={immersive ? "" : "relative z-10 min-h-screen"}>
+        {children}
+      </main>
+      {!immersive && <Footer />}
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <LanguageProvider>
         <BrowserRouter>
           <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <BackgroundLogo />
-            <Navbar />
-            <main className="relative z-10 min-h-screen">
+            <Chrome>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/courses" element={<Courses />} />
