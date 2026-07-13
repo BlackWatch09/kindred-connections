@@ -128,13 +128,13 @@ const Navbar = () => {
             <>
               <Link
                 to="/login"
-                className="px-3 py-2 text-xs font-medium uppercase tracking-widest text-foreground hover:text-accent transition-colors"
+                className="px-3 py-2 text-sm font-medium uppercase tracking-widest text-foreground hover:text-accent transition-colors"
               >
                 {t("nav.login")}
               </Link>
               <Link
                 to="/login?mode=signup"
-                className="px-5 py-2.5 text-xs font-semibold uppercase tracking-widest bg-primary text-primary-foreground hover:bg-emerald transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold uppercase tracking-widest bg-primary text-primary-foreground hover:bg-emerald transition-colors"
               >
                 {t("nav.signup")}
               </Link>
