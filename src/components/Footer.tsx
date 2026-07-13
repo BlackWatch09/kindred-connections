@@ -23,13 +23,15 @@ const Footer = () => {
           </div>
 
           <div className="md:col-span-2">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">{t("footer.study")}</p>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
+            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.study")}</p>
+            <ul className="space-y-2 text-[15px] text-primary-foreground/85">
               <li><Link to="/courses" className="hover:text-accent transition-colors">{t("nav.courses")}</Link></li>
               <li><Link to="/learn" className="hover:text-accent transition-colors">{t("nav.learn")}</Link></li>
               <li><Link to="/placement-test" className="hover:text-accent transition-colors">{t("footer.placement")}</Link></li>
             </ul>
           </div>
+
+
 
           <div className="md:col-span-2">
             <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">{t("footer.house")}</p>
