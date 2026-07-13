@@ -13,6 +13,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "Dashboard",
     "nav.logout": "Log out",
     "nav.teachers": "Teachers",
+    "nav.faq": "FAQ",
     // Hero
     "hero.title": "From Ahlan to Fluency",
     "hero.subtitle": "Master Arabic with interactive courses, quizzes, and personalized learning paths designed for every level.",
@@ -273,6 +274,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "لوحة التحكم",
     "nav.logout": "تسجيل الخروج",
     "nav.teachers": "المعلمون",
+    "nav.faq": "الأسئلة",
     "hero.title": "من أهلاً إلى الطلاقة",
     "hero.subtitle": "أتقن العربية مع دورات تفاعلية واختبارات ومسارات تعلم مخصصة لكل مستوى.",
     "hero.cta": "ابدأ التعلم",
@@ -517,6 +519,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "Kontrol Paneli",
     "nav.logout": "Çıkış Yap",
     "nav.teachers": "Öğretmenler",
+    "nav.faq": "SSS",
     "hero.title": "Merhaba'dan Akıcılığa",
     "hero.subtitle": "Her seviye için tasarlanmış interaktif kurslar, quizler ve kişiselleştirilmiş öğrenme yollarıyla Arapçayı öğrenin.",
     "hero.cta": "Öğrenmeye Başla",
