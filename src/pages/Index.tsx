@@ -125,7 +125,7 @@ const Index = () => {
             <span className="eyebrow">{t("home.dispatches.eyebrow")}</span>
             <h2 className="font-display text-2xl md:text-3xl font-bold text-primary mt-2">{t("home.dispatches.title")}</h2>
           </div>
-          <Link to="/courses" className="text-xs uppercase tracking-[0.18em] text-primary hover:text-accent border-b border-primary hover:border-accent pb-0.5 font-semibold">
+          <Link to="/courses" className="text-sm uppercase tracking-[0.16em] text-primary hover:text-accent border-b border-primary hover:border-accent pb-0.5 font-semibold">
             {t("home.dispatches.all")}
           </Link>
         </div>
@@ -133,15 +133,15 @@ const Index = () => {
         <div className="grid md:grid-cols-3 gap-x-8 gap-y-10">
           {dispatches.map((d, i) => (
             <Link key={d.no} to={d.href} className="group block" style={{ animation: `fade-in-up 0.6s ease-out ${i * 0.1}s both` }}>
-              <div className="flex items-baseline justify-between mb-2 text-xs uppercase tracking-[0.22em]">
+              <div className="flex items-baseline justify-between mb-2 text-sm uppercase tracking-[0.18em]">
                 <span className="text-accent font-semibold">{d.no}</span>
-                <span className="text-muted-foreground">{d.kind}</span>
+                <span className="text-muted-foreground font-medium">{d.kind}</span>
               </div>
               <div className="h-px w-full bg-primary mb-4" />
-              <h3 className="font-display text-xl md:text-2xl font-bold text-primary leading-[1.15] group-hover:text-accent transition-colors">
+              <h3 className="font-display text-2xl md:text-[26px] font-bold text-primary leading-[1.15] group-hover:text-accent transition-colors">
                 {d.title}
               </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed">{d.lead}</p>
+              <p className="text-base text-foreground/75 mt-3 leading-relaxed">{d.lead}</p>
             </Link>
           ))}
         </div>
