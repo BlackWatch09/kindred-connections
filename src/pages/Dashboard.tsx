@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Flame, Star, BookOpen, ArrowRight, Play, Sparkles, Wand2,
-  Trophy, Search, Compass, Calendar, MessageCircle, Target,
+  Trophy, Search, Compass, Calendar, MessageCircle, Target, Award,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { WORLDS as worlds } from "@/features/story-world/data/worlds";
+import { getPoints, type PointsLedger } from "@/lib/points";
+
 
 type StorySession = {
   id: string;
@@ -54,7 +56,9 @@ const Dashboard = () => {
   const [vocab, setVocab] = useState<Vocab[]>([]);
   const [corrections, setCorrections] = useState<LocalCorrection[]>([]);
   const [localSessions, setLocalSessions] = useState<LocalSession[]>([]);
+  const [points, setPointsLedger] = useState<PointsLedger>({ total: 0, log: [] });
   const [vocabQuery, setVocabQuery] = useState("");
+
 
   const displayName =
     profile?.full_name ||
