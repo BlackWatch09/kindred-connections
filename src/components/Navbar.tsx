@@ -42,12 +42,12 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4 flex items-center justify-between h-14">
+      <div className="container mx-auto px-4 flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="Lugha" className="w-9 h-9 object-contain" />
+          <img src={logo} alt="Lugha" className="w-10 h-10 object-contain" />
           <div className="leading-none">
-            <span className="font-display text-[26px] font-semibold text-primary tracking-tight italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}>Lugha</span>
-            <span className="block font-arabic text-[10px] tracking-[0.32em] text-muted-foreground mt-1">لُغة</span>
+            <span className="font-display text-[28px] font-semibold text-primary tracking-tight italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}>Lugha</span>
+            <span className="block font-arabic text-[13px] tracking-[0.28em] text-muted-foreground mt-1">لُغة</span>
           </div>
         </Link>
 
@@ -57,7 +57,7 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`text-[13px] font-medium tracking-wide transition-colors hover:text-primary relative ${
+              className={`text-[15px] font-medium tracking-wide transition-colors hover:text-primary relative ${
                 isActive(link.to) ? "text-primary" : "text-muted-foreground"
               }`}
             >
@@ -73,9 +73,9 @@ const Navbar = () => {
           <div className="relative">
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-foreground hover:text-accent transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-foreground hover:text-accent transition-colors"
             >
-              <Globe className="w-3.5 h-3.5" />
+              <Globe className="w-4 h-4" />
               {langLabels[language]}
             </button>
             {langOpen && (
