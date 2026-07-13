@@ -7,6 +7,7 @@ import {
 import { pickLocalized } from "@/lib/siteContent";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { openSiraj } from "@/components/SirajCompanion";
 
 type Tool = {
   key: string;
