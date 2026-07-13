@@ -46,16 +46,16 @@ const Index = () => {
 
             <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-5 max-w-md">
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.lessons")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">200+</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.lessons")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">200+</dd>
               </div>
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.teachers")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">18</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.teachers")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">18</dd>
               </div>
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.cities")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">07</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.cities")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">07</dd>
               </div>
             </dl>
           </div>
