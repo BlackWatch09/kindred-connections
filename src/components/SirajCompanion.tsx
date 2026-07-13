@@ -278,38 +278,38 @@ const SirajCompanion = () => {
 
   if (hidden) return null;
 
-  const posSide = dir === "rtl" ? "left-5" : "right-5";
   const panelSide = dir === "rtl" ? "left-5" : "right-5";
 
   return (
     <>
-      {/* Floating trigger */}
+      {/* Floating trigger — always bottom-left */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className={`fixed bottom-6 ${posSide} z-[60] group focus:outline-none`}
+          className="fixed bottom-4 left-4 z-[60] group focus:outline-none"
         >
           {/* Glow halo */}
           <span
             aria-hidden
-            className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.55),transparent_65%)] blur-2xl animate-siraj-glow"
+            className="absolute inset-6 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.5),transparent_70%)] blur-3xl animate-siraj-glow"
           />
           {/* Avatar (no card) */}
           <img
             src={sirajAvatar.url}
             alt={tutorName}
             draggable={false}
-            className="relative w-64 h-64 md:w-80 md:h-80 object-contain select-none drop-shadow-[0_25px_40px_rgba(6,78,59,0.5)] animate-siraj-float transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-active:scale-95"
+            className="relative w-72 h-72 md:w-96 md:h-96 object-contain select-none drop-shadow-[0_30px_45px_rgba(6,78,59,0.55)] animate-siraj-float transition-transform duration-500 ease-out group-hover:scale-105 group-hover:-translate-y-1 group-active:scale-95"
           />
           {/* Online dot */}
           <span
             aria-hidden
-            className="absolute bottom-6 right-6 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
+            className="absolute bottom-10 right-10 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
           />
         </button>
       )}
+
 
 
 
