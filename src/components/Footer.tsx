@@ -17,7 +17,7 @@ const Footer = () => {
                 <p className="text-xs uppercase tracking-[0.28em] text-primary-foreground/60">لُغة · {t("footer.est")}</p>
               </div>
             </div>
-            <p className="text-sm text-primary-foreground/70 max-w-sm leading-relaxed">
+            <p className="text-base text-primary-foreground/75 max-w-sm leading-relaxed">
               {t("footer.tagline")}
             </p>
           </div>
