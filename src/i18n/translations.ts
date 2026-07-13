@@ -519,6 +519,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "login.or": "veya şununla devam edin",
     "login.google": "Google",
     "login.facebook": "Facebook",
+    "login.comingsoon": "Yakında",
+    "login.socialnote": "Sosyal giriş çok yakında — şimdilik e-posta ile kaydolun.",
     "login.noaccount": "Hesabınız yok mu?",
     "login.hasaccount": "Zaten hesabınız var mı?",
     "login.name": "Ad Soyad",
