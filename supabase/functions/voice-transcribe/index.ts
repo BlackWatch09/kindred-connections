@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     const { audio_base64, mime_type } = await req.json();
     if (!audio_base64 || !mime_type) return json({ error: "Missing audio_base64 or mime_type" }, 400);
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
