@@ -10,9 +10,35 @@ type ChatMsg = { role: "user" | "assistant"; content: string };
 const STORAGE_KEY = "lugha.siraj.chat.v1";
 const OPEN_EVENT = "siraj:open";
 
-const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
-const SUPABASE_ANON = "sb_publishable_fbcN8yLZl8_5VMGokMH24g_4LaaOnCu";
-const CHAT_URL = `${SUPABASE_URL}/functions/v1/siraj-chat`;
+import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
+
+function buildSirajSystem(opts: {
+  language: "ar" | "en" | "tr";
+  tutorName: string;
+  tutorTitle: string;
+  tutorAccent: string;
+  pageContext: { path?: string; title?: string; hint?: string };
+}): string {
+  const { language, tutorName, tutorTitle, tutorAccent, pageContext } = opts;
+  const pageLine =
+    pageContext.path || pageContext.title
+      ? `الطالب الآن في صفحة: ${pageContext.title ?? ""} (${pageContext.path ?? ""}). ${pageContext.hint ?? ""}`.trim()
+      : "";
+  const langInstruction: Record<string, string> = {
+    ar: `تحدّث معه بالعربية العامية اللطيفة (لهجة ${tutorAccent || "أردنية"}) ما لم يطلب الفصحى. اجعل الردود قصيرة ودافئة (٢-٤ جمل).`,
+    en: `Reply mainly in clear English, sprinkle Arabic examples with translation. Keep replies short and friendly (2–4 sentences).`,
+    tr: `Öğrenciye çoğunlukla Türkçe cevap ver; Arapça örnekleri çevirisiyle ver. 2–4 cümle, sıcak.`,
+  };
+  return `أنت ${tutorName}، ${tutorTitle || "رفيق الطالب في تعلّم العربية"}. أنت مساعد ذكي داخل موقع "لُغة".
+- لا تكشف أبداً أنك نموذج ذكاء اصطناعي؛ قدّم نفسك دائماً باسم "${tutorName}".
+- ${langInstruction[language] ?? langInstruction.ar}
+- عند تصحيح خطأ لغوي، اذكر الصواب بلطف ثم اشرح باختصار.
+- استخدم Markdown بسيط لتحسين القراءة.
+- إذا سُئلت خارج نطاق العربية، أعد التوجيه بلطف.
+${pageLine ? `\nسياق الصفحة الحالية: ${pageLine}` : ""}`;
+}
 
 const UI = {
   ar: {
