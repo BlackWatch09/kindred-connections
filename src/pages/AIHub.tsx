@@ -101,11 +101,15 @@ const AIHub = () => {
                 </div>
               </div>
             );
-            return href ? (
-              <Link key={key} to={href}>{CardBody}</Link>
-            ) : (
-              <div key={key} className="cursor-pointer">{CardBody}</div>
-            );
+            if (href) return <Link key={key} to={href}>{CardBody}</Link>;
+            if (key === "tutor") {
+              return (
+                <button key={key} type="button" onClick={openSiraj} className="text-start">
+                  {CardBody}
+                </button>
+              );
+            }
+            return <div key={key} className="cursor-pointer">{CardBody}</div>;
           })}
         </div>
 
