@@ -52,7 +52,7 @@ export async function checkGrammar(text: string, level: string) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
   const { data, error } = await supabase.functions.invoke("grammar-check", {
-    body: JSON.stringify({ text, level }),
+    body: { text, level },
     headers: { Authorization: `Bearer ${session.access_token}` },
   });
   if (error) throw new Error(error.message || "grammar-check failed");
@@ -68,7 +68,7 @@ export async function transcribeAudio(base64: string, mimeType: string) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
   const { data, error } = await supabase.functions.invoke("voice-transcribe", {
-    body: JSON.stringify({ audio_base64: base64, mime_type: mimeType }),
+    body: { audio_base64: base64, mime_type: mimeType },
     headers: { Authorization: `Bearer ${session.access_token}` },
   });
   if (error) throw new Error(error.message || "voice-transcribe failed");

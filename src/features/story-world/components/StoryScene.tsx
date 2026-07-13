@@ -118,7 +118,12 @@ const StoryScene = () => {
       });
     } catch (e) {
       console.error(e);
-      toast.error("انقطع الاتصال — تحقق من مفتاح Gemini في Supabase Secrets");
+      const message = e instanceof Error ? e.message : "";
+      toast.error(
+        message.includes("not found") || message.includes("404")
+          ? "الميزة غير منشورة بعد — أعد نشر الدوال الخلفية ثم جرّب مرة ثانية"
+          : "انقطع الاتصال — تعذر الوصول لخدمة المحادثة الآن",
+      );
       setStreaming(false);
     }
   }, [world, user, sceneSeed, priorScenarios, unknownWords, appendStream, finalizeStream, setStreaming]);
