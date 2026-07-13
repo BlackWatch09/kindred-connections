@@ -12,6 +12,7 @@ import VoiceCoachDialog from "@/components/ai-tools/VoiceCoachDialog";
 import StoryGeneratorDialog from "@/components/ai-tools/StoryGeneratorDialog";
 import WritingAssistDialog from "@/components/ai-tools/WritingAssistDialog";
 import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog";
+import DailyChallengeDialog from "@/components/ai-tools/DailyChallengeDialog";
 
 type Tool = {
   key: string;
@@ -32,7 +33,7 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
-  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing">(null);
+  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily">(null);
 
   const tools: Tool[] = [
     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
