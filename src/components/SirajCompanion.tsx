@@ -288,7 +288,7 @@ const SirajCompanion = () => {
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className="fixed -bottom-5 -left-5 md:-bottom-7 md:-left-7 z-[60] group focus:outline-none"
+          className="fixed -bottom-5 left-4 md:-bottom-7 md:left-6 z-[60] group focus:outline-none"
         >
           {/* Glow halo */}
           <span
