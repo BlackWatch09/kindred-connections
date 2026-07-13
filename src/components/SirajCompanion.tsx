@@ -288,24 +288,24 @@ const SirajCompanion = () => {
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className="fixed -bottom-10 -left-10 md:-bottom-14 md:-left-14 z-[60] group focus:outline-none"
+          className="fixed -bottom-5 -left-5 md:-bottom-7 md:-left-7 z-[60] group focus:outline-none"
         >
           {/* Glow halo */}
           <span
             aria-hidden
-            className="absolute inset-10 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.5),transparent_70%)] blur-3xl animate-siraj-glow"
+            className="absolute inset-5 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.5),transparent_70%)] blur-3xl animate-siraj-glow"
           />
           {/* Avatar (no card) */}
           <img
             src={sirajAvatar.url}
             alt={tutorName}
             draggable={false}
-            className="relative w-72 h-72 md:w-96 md:h-96 object-contain select-none drop-shadow-[0_30px_45px_rgba(6,78,59,0.55)] animate-siraj-float transition-transform duration-500 ease-out group-hover:scale-105 group-hover:-translate-y-1 group-active:scale-95"
+            className="relative w-36 h-36 md:w-48 md:h-48 object-contain select-none drop-shadow-[0_20px_30px_rgba(6,78,59,0.5)] animate-siraj-float transition-transform duration-500 ease-out group-hover:scale-105 group-hover:-translate-y-1 group-active:scale-95"
           />
           {/* Online dot */}
           <span
             aria-hidden
-            className="absolute top-16 right-16 md:top-24 md:right-24 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
+            className="absolute top-8 right-8 md:top-12 md:right-12 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
           />
         </button>
       )}
