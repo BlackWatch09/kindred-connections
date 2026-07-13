@@ -13,9 +13,9 @@ interface Props {
 }
 
 const sizeClass = {
-  md: "sm:max-w-2xl",
-  lg: "sm:max-w-3xl",
-  xl: "sm:max-w-5xl",
+  md: "sm:max-w-xl",
+  lg: "sm:max-w-2xl",
+  xl: "sm:max-w-3xl",
 } as const;
 
 export default function ToolShell({
@@ -23,11 +23,12 @@ export default function ToolShell({
 }: Props) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[80] flex items-stretch sm:items-center justify-center">
+    <div className="fixed inset-0 z-[80] flex items-stretch sm:items-start justify-center sm:pt-20 sm:pb-6 sm:px-4">
       <div className="absolute inset-0 bg-primary/60 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`relative w-full ${sizeClass[size]} h-[100dvh] sm:h-auto sm:max-h-[92vh] bg-card border border-border shadow-2xl flex flex-col sm:rounded-lg overflow-hidden animate-in slide-in-from-bottom-4`}
+        className={`relative w-full ${sizeClass[size]} h-[100dvh] sm:h-auto sm:max-h-[calc(100vh-6rem)] bg-card border border-border shadow-2xl flex flex-col sm:rounded-lg overflow-hidden animate-in slide-in-from-bottom-4`}
       >
+
         <div className="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-border bg-primary text-primary-foreground">
           <div className="flex items-center gap-3 min-w-0">
             {icon && (
