@@ -187,11 +187,31 @@ const StoryScene = () => {
     const target = world.targetVocab;
     const ratio = Math.min(1, words / target);
     const finalStars = Math.max(1, Math.round(ratio * 5));
+    const userMsgs = messages.filter((m) => m.role === "user").length;
+    const accuracy = userMsgs ? Math.max(0, Math.round(((userMsgs - corrections.length) / userMsgs) * 100)) : 100;
     setStars(finalStars);
     setComplete(true);
     await supabase.from("story_sessions")
       .update({ ended_at: new Date().toISOString(), stars: finalStars, words_learned: words })
       .eq("id", sessionId);
+
+    // Persist corrections locally per user (last 100)
+    try {
+      const key = `story_corrections_${user.id}`;
+      const prev: Array<{ original: string; corrected: string; hint: string; at: number; worldId: string; worldName: string }> =
+        JSON.parse(localStorage.getItem(key) || "[]");
+      const enriched = corrections.map((c) => ({ ...c, worldId: world.id, worldName: world.nameAr }));
+      localStorage.setItem(key, JSON.stringify([...enriched, ...prev].slice(0, 100)));
+
+      // Persist per-session accuracy snapshot
+      const sKey = `story_sessions_local_${user.id}`;
+      const prevS: Array<{ id: string; worldId: string; worldName: string; stars: number; words: number; accuracy: number; at: number }> =
+        JSON.parse(localStorage.getItem(sKey) || "[]");
+      localStorage.setItem(sKey, JSON.stringify([
+        { id: sessionId, worldId: world.id, worldName: world.nameAr, stars: finalStars, words, accuracy, at: Date.now() },
+        ...prevS,
+      ].slice(0, 50)));
+    } catch { /* ignore */ }
   };
 
   if (!world) {
