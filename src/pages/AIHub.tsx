@@ -4,7 +4,8 @@ import {
   Sparkles, Mic, MessageCircle, BookOpen, Languages, PenLine,
   Wand2, Calendar, Layers, Compass, GraduationCap, Radio,
 } from "lucide-react";
-import { content } from "@/lib/siteContent";
+import { pickLocalized } from "@/lib/siteContent";
+import { useAiPersona } from "@/hooks/useAiPersona";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type Tool = {
@@ -17,19 +18,14 @@ type Tool = {
   badge?: string;
 };
 
-const useAiPersona = () => {
-  const [persona, setPersona] = useState(() => content.getAll().settings.aiPersona);
-  useEffect(() => {
-    const h = () => setPersona(content.getAll().settings.aiPersona);
-    window.addEventListener("lugha:content-updated", h);
-    return () => window.removeEventListener("lugha:content-updated", h);
-  }, []);
-  return persona;
-};
-
 const AIHub = () => {
   const { t, language } = useLanguage();
   const persona = useAiPersona();
+  const hubName = pickLocalized(persona.hubName, language);
+  const hubTagline = pickLocalized(persona.hubTagline, language);
+  const tutorName = pickLocalized(persona.tutorName, language);
+  const tutorTitle = pickLocalized(persona.tutorTitle, language);
+  const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
   const tools: Tool[] = [
     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${persona.tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
