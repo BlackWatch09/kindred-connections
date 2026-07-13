@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSearchParams, Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Login = () => {
