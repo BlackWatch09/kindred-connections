@@ -8,6 +8,10 @@ import { pickLocalized } from "@/lib/siteContent";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { openSiraj } from "@/components/SirajCompanion";
+import VoiceCoachDialog from "@/components/ai-tools/VoiceCoachDialog";
+import StoryGeneratorDialog from "@/components/ai-tools/StoryGeneratorDialog";
+import WritingAssistDialog from "@/components/ai-tools/WritingAssistDialog";
+import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog";
 
 type Tool = {
   key: string;
