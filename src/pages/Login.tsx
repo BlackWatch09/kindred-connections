@@ -4,7 +4,7 @@ import { useSearchParams, Link, useNavigate, Navigate } from "react-router-dom";
 import { Loader2, Mail, ShieldCheck, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/lugha-logo.png";
 
 const Login = () => {
   const { t } = useLanguage();
