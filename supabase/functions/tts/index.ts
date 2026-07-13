@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       return json({ error: "SERVICE_UNAVAILABLE", fallback: true }, 200);
     }
 
-    const { text, voice = "ar-XA-Chirp3-HD-Achernar", speed = 0.9 } = await req.json();
+    const { text, voice = "ar-XA-Chirp3-HD-Charon", speed = 0.88 } = await req.json();
     if (!text || typeof text !== "string") {
       return json({ error: "text required" }, 400);
     }
