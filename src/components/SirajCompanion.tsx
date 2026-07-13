@@ -288,21 +288,19 @@ const SirajCompanion = () => {
         <button
           onClick={() => setOpen(true)}
           aria-label={strings.open}
-          className={`fixed bottom-5 ${posSide} z-[60] group flex items-center gap-3 bg-primary text-primary-foreground pl-2 pr-4 py-2 border-2 border-accent shadow-2xl hover:shadow-accent/40 transition-all hover:-translate-y-0.5`}
+          title={tutorName}
+          className={`fixed bottom-5 ${posSide} z-[60] group transition-transform hover:-translate-y-1 hover:scale-105 drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]`}
         >
-          <span className="relative w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center overflow-hidden ring-2 ring-accent">
-            <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
-          </span>
-
-          <span className="flex flex-col items-start leading-tight">
-            <span className="text-[10px] uppercase tracking-[0.24em] text-accent font-semibold">
-              {strings.online}
-            </span>
-            <span className="font-display italic font-semibold text-sm">{tutorName}</span>
-          </span>
+          <img
+            src={sirajAvatar.url}
+            alt={tutorName}
+            className="w-24 h-24 md:w-28 md:h-28 object-contain select-none pointer-events-none"
+            draggable={false}
+          />
+          <span className="absolute bottom-2 right-2 w-3.5 h-3.5 bg-emerald-400 rounded-full ring-2 ring-background animate-pulse" />
         </button>
       )}
+
 
       {/* Chat panel */}
       {open && (
