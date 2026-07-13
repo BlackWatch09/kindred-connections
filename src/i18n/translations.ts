@@ -1445,7 +1445,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.reset": "Tümünü sıfırla",
     "admin.backup.resetDesc": "Tüm bölümleri fabrika varsayılanlarına döndür.",
     "admin.backup.resetConfirm": "Tüm içeriği varsayılanlara sıfırla? Geri alınamaz.",
-    "nav.aihub": "AI Atölye",
+    "nav.aihub": "Lugha Meclisi",
     "admin.nav.ai": "AI Kişiliği",
     "admin.nav.aiContent": "AI İçerik Araçları",
   },
