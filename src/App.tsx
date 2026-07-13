@@ -22,6 +22,7 @@ import StoryWorld from "./pages/StoryWorld";
 import StoryWorldScene from "./pages/StoryWorldScene";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
