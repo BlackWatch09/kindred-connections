@@ -1,31 +1,65 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/lugha-logo.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="relative z-10 bg-primary text-primary-foreground py-12 mt-20">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="AlifXpert" className="w-12 h-12 object-contain" />
-            <div>
-              <h3 className="font-display text-lg font-bold">AlifXpert</h3>
-              <p className="text-sm opacity-80">{t("footer.tagline")}</p>
+    <footer className="relative z-10 bg-primary text-primary-foreground mt-24">
+      <div className="border-b border-primary-foreground/10">
+        <div className="container mx-auto px-4 py-16 grid md:grid-cols-12 gap-10">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3 mb-5">
+              <img src={logo} alt="Lugha" className="w-12 h-12 object-contain invert-0" />
+              <div>
+                <h3 className="font-display text-2xl font-bold tracking-tight">Lugha</h3>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-primary-foreground/60">لُغة · Est. 2026</p>
+              </div>
             </div>
+            <p className="text-sm text-primary-foreground/70 max-w-sm leading-relaxed">
+              {t("footer.tagline")}
+            </p>
           </div>
-          <div className="flex gap-6 text-sm opacity-80">
-            <Link to="/courses" className="hover:opacity-100 transition-opacity">{t("nav.courses")}</Link>
-            <Link to="/learn" className="hover:opacity-100 transition-opacity">{t("nav.learn")}</Link>
-            
-            <Link to="/support" className="hover:opacity-100 transition-opacity">{t("nav.support")}</Link>
+
+          <div className="md:col-span-2">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">Study</p>
+            <ul className="space-y-2 text-sm text-primary-foreground/80">
+              <li><Link to="/courses" className="hover:text-accent transition-colors">{t("nav.courses")}</Link></li>
+              <li><Link to="/learn" className="hover:text-accent transition-colors">{t("nav.learn")}</Link></li>
+              <li><Link to="/placement-test" className="hover:text-accent transition-colors">Placement</Link></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-2">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">House</p>
+            <ul className="space-y-2 text-sm text-primary-foreground/80">
+              <li><Link to="/teachers" className="hover:text-accent transition-colors">{t("nav.teachers")}</Link></li>
+              <li><Link to="/support" className="hover:text-accent transition-colors">{t("nav.support")}</Link></li>
+              <li><Link to="/dashboard" className="hover:text-accent transition-colors">{t("nav.dashboard")}</Link></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">Correspondence</p>
+            <p className="text-sm text-primary-foreground/70 leading-relaxed">
+              A dispatch, once a fortnight. New lessons, master teachers, quiet stories.
+            </p>
+            <form className="mt-4 flex border border-primary-foreground/20">
+              <input
+                type="email"
+                placeholder="you@domain"
+                className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-primary-foreground/40 focus:outline-none"
+              />
+              <button className="px-4 bg-accent text-accent-foreground text-xs font-semibold uppercase tracking-wider">Join</button>
+            </form>
           </div>
         </div>
-        <div className="text-center text-sm opacity-60 mt-8">
-          © 2026 AlifXpert. {t("footer.rights")}
-        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between text-[11px] uppercase tracking-[0.2em] text-primary-foreground/50">
+        <span>© 2026 Lugha · {t("footer.rights")}</span>
+        <span className="mt-2 md:mt-0">Crafted with reverence for the Arabic word</span>
       </div>
     </footer>
   );

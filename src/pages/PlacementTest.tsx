@@ -141,9 +141,9 @@ const PlacementTest = () => {
   };
 
   const shareResult = () => {
-    const text = `I scored ${percentage}% on the AlifXpert Arabic Placement Test! My level: ${levelLabel}. 🎓`;
+    const text = `I scored ${percentage}% on the Lugha Arabic Placement Test! My level: ${levelLabel}. 🎓`;
     if (navigator.share) {
-      navigator.share({ title: "AlifXpert Placement Test", text });
+      navigator.share({ title: "Lugha Placement Test", text });
     } else {
       navigator.clipboard.writeText(text);
     }

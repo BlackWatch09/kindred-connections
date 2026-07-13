@@ -4,7 +4,7 @@ import { useSearchParams, Link, useNavigate, Navigate } from "react-router-dom";
 import { Loader2, Mail, ShieldCheck, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/lugha-logo.png";
 
 const Login = () => {
   const { t } = useLanguage();
@@ -124,7 +124,7 @@ const Login = () => {
         style={{ animation: "fade-in-up 0.5s ease-out" }}
       >
         <div className="text-center mb-8">
-          <img src={logo} alt="AlifXpert" className="w-16 h-16 mx-auto mb-4 object-contain" />
+          <img src={logo} alt="Lugha" className="w-16 h-16 mx-auto mb-4 object-contain" />
           <h1 className="font-display text-2xl font-bold text-foreground">
             {isSignup ? t("login.create") : t("login.title")}
           </h1>
