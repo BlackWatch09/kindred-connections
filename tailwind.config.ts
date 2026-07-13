@@ -18,6 +18,7 @@ export default {
         body: ['Inter Tight', 'system-ui', 'sans-serif'],
         arabic: ['Amiri', 'Noto Naskh Arabic', 'serif'],
         'arabic-display': ['Reem Kufi', 'Amiri', 'serif'],
+        'arabic-clear': ['Cairo', 'Tajawal', 'Noto Kufi Arabic', 'system-ui', 'sans-serif'],
       },
 
       colors: {
