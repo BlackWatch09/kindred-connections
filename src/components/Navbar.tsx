@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Globe, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAiPersona } from "@/hooks/useAiPersona";
+import { pickLocalized } from "@/lib/siteContent";
 import logo from "@/assets/lugha-logo.png";
 
 const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR" };
