@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Flame, Star, BookOpen, ArrowRight, Play, Sparkles, Wand2,
-  Trophy, Search, Compass, Calendar, MessageCircle, Target,
+  Trophy, Search, Compass, Calendar, MessageCircle, Target, Award,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { WORLDS as worlds } from "@/features/story-world/data/worlds";
+import { getPoints, type PointsLedger } from "@/lib/points";
+
 
 type StorySession = {
   id: string;
@@ -54,7 +56,9 @@ const Dashboard = () => {
   const [vocab, setVocab] = useState<Vocab[]>([]);
   const [corrections, setCorrections] = useState<LocalCorrection[]>([]);
   const [localSessions, setLocalSessions] = useState<LocalSession[]>([]);
+  const [points, setPointsLedger] = useState<PointsLedger>({ total: 0, log: [] });
   const [vocabQuery, setVocabQuery] = useState("");
+
 
   const displayName =
     profile?.full_name ||
@@ -91,10 +95,16 @@ const Dashboard = () => {
         setLocalSessions(
           JSON.parse(localStorage.getItem(`story_sessions_local_${user.id}`) || "[]"),
         );
+        setPointsLedger(getPoints(user.id));
       } catch { /* ignore */ }
       setLoading(false);
     })();
-    return () => { cancelled = true; };
+    const onPoints = () => setPointsLedger(getPoints(user.id));
+    window.addEventListener("siraj:points-changed", onPoints);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("siraj:points-changed", onPoints);
+    };
   }, [user]);
 
   const stats = useMemo(() => {
@@ -171,7 +181,8 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+          <StatTile icon={<Award className="w-4 h-4" />} value={points.total} label="نقاط سِراج" tone="accent" />
           <StatTile icon={<Trophy className="w-4 h-4" />} value={stats.completedCount} label="مشهد أنهيته" tone="accent" />
           <StatTile icon={<Star className="w-4 h-4" />} value={stats.totalStars} label="نجمة كسبتها" tone="amber" />
           <StatTile icon={<BookOpen className="w-4 h-4" />} value={stats.totalWords} label="كلمة تعلمتها" tone="primary" />
