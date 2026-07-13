@@ -1,6 +1,7 @@
-// Arabic text-to-speech via Lovable AI Gateway.
-// Returns an mp3 audio file, or a structured fallback signal when premium TTS is unavailable.
+// Arabic text-to-speech via Google Cloud Chirp 3 HD (natural, near-human voice).
+// Returns an mp3 audio file, or a structured fallback signal when TTS is unavailable.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const headers = {
   ...corsHeaders,
@@ -17,35 +18,38 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
 
   try {
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    const apiKey = Deno.env.get("GOOGLE_CLOUD_API_KEY");
     if (!apiKey) {
       return json({ error: "SERVICE_UNAVAILABLE", fallback: true }, 200);
     }
 
-    const { text, voice = "shimmer", speed = 0.9 } = await req.json();
+    const { text, voice = "ar-XA-Chirp3-HD-Achernar", speed = 0.9 } = await req.json();
     if (!text || typeof text !== "string") {
       return json({ error: "text required" }, 400);
     }
 
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
+    const upstream = await fetch(
+      "https://texttospeech.googleapis.com/v1/text:synthesize",
+      {
+        method: "POST",
+        headers: {
+          "X-Goog-Api-Key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: { text },
+          voice: { languageCode: "ar-XA", name: voice },
+          audioConfig: { audioEncoding: "MP3", speakingRate: speed },
+        }),
       },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini-tts",
-        input: text,
-        voice,
-        speed,
-        response_format: "mp3",
-        instructions: "Speak in Modern Standard Arabic with clear, warm, engaging pronunciation like an expert language teacher. Enunciate every letter distinctly. Use a natural, encouraging tone suitable for beginners learning Arabic. Pace slightly slower than conversational speed.",
-      }),
-    });
+    );
 
     if (!upstream.ok) {
       const errText = await upstream.text().catch(() => "");
-      const fallbackable = upstream.status >= 500 || upstream.status === 402 || upstream.status === 403 || upstream.status === 404 || upstream.status === 429;
+      const fallbackable =
+        upstream.status >= 500 ||
+        upstream.status === 429 ||
+        upstream.status === 403;
       return json(
         fallbackable
           ? { error: "SERVICE_UNAVAILABLE", fallback: true }
@@ -54,7 +58,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(upstream.body, {
+    const { audioContent } = await upstream.json();
+    if (!audioContent) {
+      return json({ error: "SERVICE_UNAVAILABLE", fallback: true }, 200);
+    }
+    const bytes = base64Decode(audioContent);
+    return new Response(bytes, {
       headers: {
         ...headers,
         "Content-Type": "audio/mpeg",
