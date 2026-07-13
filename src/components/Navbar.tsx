@@ -36,7 +36,7 @@ const Navbar = () => {
     { to: "/", label: t("nav.home") },
     { to: "/courses", label: t("nav.courses") },
     { to: "/learn", label: t("nav.learn") },
-    { to: "/ai", label: t("nav.aihub"), highlight: true },
+    { to: "/ai", label: hubLabel, highlight: true },
     { to: "/support", label: t("nav.support") },
     { to: "/dashboard", label: t("nav.dashboard") },
     { to: "/teachers", label: t("nav.teachers") },
