@@ -4,10 +4,11 @@
 
 const MODEL = "gemini-2.5-flash-lite";
 const STORAGE_KEY = "GEMINI_API_KEY";
+const DEFAULT_KEY = "AIzaSyBOCcW0jMIyLM71zj8WcQead9WMPi3dc7g";
 
-export function getGeminiKey(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(STORAGE_KEY);
+export function getGeminiKey(): string {
+  if (typeof window === "undefined") return DEFAULT_KEY;
+  return window.localStorage.getItem(STORAGE_KEY) || DEFAULT_KEY;
 }
 
 export function setGeminiKey(key: string) {
@@ -19,9 +20,7 @@ export function clearGeminiKey() {
 }
 
 function requireKey(): string {
-  const k = getGeminiKey();
-  if (!k) throw new Error("MISSING_GEMINI_KEY");
-  return k;
+  return getGeminiKey();
 }
 
 function buildSystemPrompt(o: {
