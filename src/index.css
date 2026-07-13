@@ -153,7 +153,7 @@
 
   /* Editorial magazine helpers */
   .eyebrow {
-    @apply text-[11px] uppercase tracking-[0.28em] font-medium text-accent;
+    @apply text-[13px] uppercase tracking-[0.24em] font-semibold text-accent;
   }
 
   .rule-gold {
