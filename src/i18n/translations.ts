@@ -957,7 +957,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.resetDesc": "أعد كلّ الأقسام إلى القيم الافتراضية.",
     "admin.backup.resetConfirm": "إعادة كلّ المحتوى للإعدادات الافتراضية؟ لا يمكن التراجع.",
     // المركز الذكي
-    "nav.aihub": "المِحراب",
+    "nav.aihub": "مجلس لُغة",
     "aihub.eyebrow": "المركز الذكي في لُغة",
     "aihub.section.eyebrow": "أدوات الذكاء الاصطناعي",
     "aihub.section.title": "كل رفاق الذكاء الاصطناعي في مكان واحد",
