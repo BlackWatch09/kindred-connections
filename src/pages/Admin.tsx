@@ -568,4 +568,84 @@ const Empty = ({ label }: { label: string }) => (
   <div className="text-center py-16 border border-dashed border-border text-muted-foreground text-sm">{label}</div>
 );
 
+// ==================== AI PERSONA ====================
+const AIPersonaPanel = ({ data, setData }: any) => {
+  const { t } = useLanguage();
+  const [p, setP] = useState(data.settings.aiPersona);
+  useEffect(() => setP(data.settings.aiPersona), [data.settings.aiPersona]);
+  const patch = (f: any) => setP({ ...p, ...f });
+  const save = () => {
+    const next = { ...data, settings: { ...data.settings, aiPersona: p } };
+    content.save(next); setData(next); toast.success(t("admin.toast.saved"));
+  };
+  return (
+    <SectionShell title={t("admin.ai.title")} desc={t("admin.ai.desc")}>
+      <div className="grid md:grid-cols-[1fr_320px] gap-6 max-w-5xl">
+        <div className="space-y-6">
+          <Card title={t("admin.ai.hubName")}>
+            <Field label={t("admin.ai.hubName")} value={p.hubName} onChange={(v) => patch({ hubName: v })} />
+            <Field label={t("admin.ai.hubTagline")} value={p.hubTagline} onChange={(v) => patch({ hubTagline: v })} textarea />
+          </Card>
+          <Card title={t("admin.ai.tutorName")}>
+            <Field label={t("admin.ai.tutorName")} value={p.tutorName} onChange={(v) => patch({ tutorName: v })} />
+            <Field label={t("admin.ai.tutorTitle")} value={p.tutorTitle} onChange={(v) => patch({ tutorTitle: v })} />
+            <Field label={t("admin.ai.tutorAccent")} value={p.tutorAccent} onChange={(v) => patch({ tutorAccent: v })} />
+            <Field label={t("admin.ai.tutorGreeting")} value={p.tutorGreeting} onChange={(v) => patch({ tutorGreeting: v })} textarea />
+          </Card>
+          <button onClick={save} className="bg-primary text-primary-foreground px-8 py-3 text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald transition-colors">
+            <Save className="w-4 h-4" /> {t("admin.ai.save")}
+          </button>
+        </div>
+        <div className="border border-accent/40 bg-primary text-primary-foreground p-6 h-fit sticky top-24">
+          <p className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold">— Live preview —</p>
+          <div className="mt-5 flex items-start gap-3">
+            <span className="w-12 h-12 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-xl shrink-0">
+              {p.tutorName.charAt(0)}
+            </span>
+            <div>
+              <p className="font-display text-2xl italic font-semibold">{p.tutorName}</p>
+              <p className="text-xs text-primary-foreground/70">{p.tutorTitle}</p>
+            </div>
+          </div>
+          <p className="mt-5 text-sm text-primary-foreground/85 leading-relaxed">"{p.tutorGreeting}"</p>
+          <div className="mt-6 pt-5 border-t border-primary-foreground/10">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-accent font-semibold">Hub</p>
+            <p className="font-display text-3xl italic font-semibold mt-1">{p.hubName}</p>
+            <p className="text-xs text-primary-foreground/70 mt-2">{p.hubTagline}</p>
+          </div>
+        </div>
+      </div>
+    </SectionShell>
+  );
+};
+
+// ==================== AI CONTENT STUDIO ====================
+const AIContentPanel = () => {
+  const { t } = useLanguage();
+  const tools = [
+    { icon: Wand2, key: "gen" },
+    { icon: Sparkles, key: "trans" },
+    { icon: TrendingUp, key: "stats" },
+  ];
+  return (
+    <SectionShell title={t("admin.aiContent.title")} desc={t("admin.aiContent.desc")}>
+      <div className="grid md:grid-cols-3 gap-4 max-w-5xl">
+        {tools.map(({ icon: Ic, key }) => (
+          <div key={key} className="border border-border bg-card p-6 hover:border-accent transition-colors group">
+            <Ic className="w-8 h-8 text-accent mb-3" />
+            <h4 className="font-display text-xl font-bold text-primary group-hover:text-accent">{t(`admin.aiContent.${key}`)}</h4>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{t(`admin.aiContent.${key}.desc`)}</p>
+            <button
+              onClick={() => toast.info(t("admin.aiContent.launch") + " — soon")}
+              className="mt-5 text-[10px] uppercase tracking-[0.24em] font-bold text-accent hover:underline"
+            >
+              {t("admin.aiContent.launch")} →
+            </button>
+          </div>
+        ))}
+      </div>
+    </SectionShell>
+  );
+};
+
 export default Admin;
