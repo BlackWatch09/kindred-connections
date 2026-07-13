@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
 import sirajAvatar from "@/assets/siraj-avatar.png.asset.json";
+import sirajChatAvatar from "@/assets/siraj-chat-avatar.png.asset.json";
 
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
