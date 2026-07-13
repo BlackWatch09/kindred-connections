@@ -8,6 +8,10 @@ import { pickLocalized } from "@/lib/siteContent";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { openSiraj } from "@/components/SirajCompanion";
+import VoiceCoachDialog from "@/components/ai-tools/VoiceCoachDialog";
+import StoryGeneratorDialog from "@/components/ai-tools/StoryGeneratorDialog";
+import WritingAssistDialog from "@/components/ai-tools/WritingAssistDialog";
+import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog";
 
 type Tool = {
   key: string;
@@ -28,11 +32,13 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
+  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing">(null);
+
   const tools: Tool[] = [
     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
     { key: "voice",     icon: Mic,           title: t("aihub.tools.voice"),  desc: t("aihub.tools.voice.desc"),  cta: t("aihub.cta.record") },
     { key: "placement", icon: GraduationCap, title: t("aihub.tools.placement"), desc: t("aihub.tools.placement.desc"), cta: t("aihub.cta.start"), href: "/placement-test" },
-    { key: "story",     icon: BookOpen,      title: t("aihub.tools.story"),  desc: t("aihub.tools.story.desc"),  cta: t("aihub.cta.create"), href: "/story" },
+    { key: "story",     icon: BookOpen,      title: t("aihub.tools.story"),  desc: t("aihub.tools.story.desc"),  cta: t("aihub.cta.create") },
     { key: "translate", icon: Languages,     title: t("aihub.tools.translate"), desc: t("aihub.tools.translate.desc"), cta: t("aihub.cta.open") },
     { key: "writing",   icon: PenLine,       title: t("aihub.tools.writing"), desc: t("aihub.tools.writing.desc"), cta: t("aihub.cta.write") },
     { key: "daily",     icon: Calendar,      title: t("aihub.tools.daily"),   desc: t("aihub.tools.daily.desc"),   cta: t("aihub.cta.today") },
@@ -103,9 +109,16 @@ const AIHub = () => {
               </div>
             );
             if (href) return <Link key={key} to={href}>{CardBody}</Link>;
-            if (key === "tutor") {
+            const handler =
+              key === "tutor" ? openSiraj :
+              key === "voice" ? () => setOpenTool("voice") :
+              key === "story" ? () => setOpenTool("story") :
+              key === "translate" ? () => setOpenTool("translate") :
+              key === "writing" ? () => setOpenTool("writing") :
+              undefined;
+            if (handler) {
               return (
-                <button key={key} type="button" onClick={openSiraj} className="text-start">
+                <button key={key} type="button" onClick={handler} className="text-start">
                   {CardBody}
                 </button>
               );
@@ -122,6 +135,11 @@ const AIHub = () => {
           </div>
         </div>
       </section>
+
+      <VoiceCoachDialog open={openTool === "voice"} onClose={() => setOpenTool(null)} />
+      <StoryGeneratorDialog open={openTool === "story"} onClose={() => setOpenTool(null)} />
+      <ContextTranslateDialog open={openTool === "translate"} onClose={() => setOpenTool(null)} />
+      <WritingAssistDialog open={openTool === "writing"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
