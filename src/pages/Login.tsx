@@ -43,7 +43,8 @@ const Login = () => {
       if (isSignup) {
         const { error } = await signUp(email, password, name);
         if (error) throw error;
-        setSignupSuccessEmail(email);
+        toast.success(t("login.accountCreated") || "تم إنشاء حسابك بنجاح 🎉");
+        navigate("/dashboard");
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
