@@ -164,9 +164,9 @@ const StoryScene = () => {
       try {
         const res = await checkGrammar(text, world.level);
         if (res.has_error && res.hint) {
-          setHint({ text: res.hint, corrected: res.corrected });
+          setHint({ text: res.hint, corrected: res.corrected, original: text });
           if (hintTimeoutRef.current) window.clearTimeout(hintTimeoutRef.current);
-          hintTimeoutRef.current = window.setTimeout(() => setHint(null), 6000);
+          hintTimeoutRef.current = window.setTimeout(() => setHint(null), 9000);
         }
         // Save new words
         for (const w of res.new_words ?? []) {
