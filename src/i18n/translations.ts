@@ -1452,6 +1452,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.aihub": "Lugha Meclisi",
     "admin.nav.ai": "AI Kişiliği",
     "admin.nav.aiContent": "AI İçerik Araçları",
+    "admin.ai.editLang": "Düzenleme dili",
+    "admin.ai.livePreview": "Canlı önizleme",
   },
 
 };
