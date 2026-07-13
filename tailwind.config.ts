@@ -14,10 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
-        arabic: ['Noto Sans Arabic', 'sans-serif'],
+        display: ['Space Grotesk', 'sans-serif'],
+        body: ['DM Sans', 'sans-serif'],
+        arabic: ['Noto Naskh Arabic', 'serif'],
       },
+
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -53,12 +54,15 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         gold: "hsl(var(--gold))",
-        "gold-glow": "hsl(var(--gold-glow))",
-        sand: "hsl(var(--sand))",
-        "sand-dark": "hsl(var(--sand-dark))",
-        desert: "hsl(var(--desert))",
-        navy: "hsl(var(--navy))",
-        "navy-light": "hsl(var(--navy-light))",
+        "gold-soft": "hsl(var(--gold-soft))",
+        emerald: {
+          DEFAULT: "hsl(var(--emerald))",
+          deep: "hsl(var(--emerald-deep))",
+          glow: "hsl(var(--emerald-glow))",
+        },
+        ivory: "hsl(var(--ivory))",
+        ink: "hsl(var(--ink))",
+
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
