@@ -60,7 +60,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between text-[11px] uppercase tracking-[0.2em] text-primary-foreground/50">
+      <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between text-xs uppercase tracking-[0.18em] text-primary-foreground/60">
         <span>© 2026 Lugha · {t("footer.rights")}</span>
         <span className="mt-2 md:mt-0">{t("footer.crafted")}</span>
 
