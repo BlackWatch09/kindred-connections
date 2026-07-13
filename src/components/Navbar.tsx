@@ -176,14 +176,23 @@ const Navbar = () => {
               </button>
             ))}
           </div>
-          <div className="flex gap-2 mt-3">
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2 text-sm border border-border rounded-lg text-foreground">
-              {t("nav.login")}
-            </Link>
-            <Link to="/login?mode=signup" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2 text-sm gradient-gold rounded-lg text-accent-foreground font-semibold">
-              {t("nav.signup")}
-            </Link>
-          </div>
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-lg border border-destructive text-destructive text-sm font-medium"
+            >
+              <LogOut className="w-4 h-4" /> {t("nav.logout") || "Log out"}
+            </button>
+          ) : (
+            <div className="flex gap-2 mt-3">
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2 text-sm border border-border rounded-lg text-foreground">
+                {t("nav.login")}
+              </Link>
+              <Link to="/login?mode=signup" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2 text-sm gradient-gold rounded-lg text-accent-foreground font-semibold">
+                {t("nav.signup")}
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </nav>
