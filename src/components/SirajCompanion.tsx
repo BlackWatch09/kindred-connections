@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
 import sirajAvatar from "@/assets/siraj-avatar.png.asset.json";
+import sirajChatAvatar from "@/assets/siraj-chat-avatar.png.asset.json";
 
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
@@ -322,7 +323,7 @@ const SirajCompanion = () => {
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center gap-3 border-b border-accent/40">
             <span className="w-12 h-12 rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent shrink-0">
-              <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
+              <img src={sirajChatAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
             </span>
             <div className="flex-1 min-w-0">
               <p className="font-display italic font-semibold text-lg leading-tight truncate">{tutorName}</p>
@@ -352,7 +353,7 @@ const SirajCompanion = () => {
             {messages.length === 0 && (
               <div className="text-center py-6">
                 <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent mb-3">
-                  <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
+                  <img src={sirajChatAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
                 </div>
                 <p className="text-sm text-foreground leading-relaxed max-w-[280px] mx-auto">
                   {strings.starter}
@@ -373,11 +374,11 @@ const SirajCompanion = () => {
             )}
 
             {messages.map((m, i) => (
-              <Bubble key={i} msg={m} tutorInitial={initial} />
+              <Bubble key={i} msg={m} tutorAvatar={sirajChatAvatar.url} tutorName={tutorName} />
             ))}
 
             {streamingText && (
-              <Bubble msg={{ role: "assistant", content: streamingText }} tutorInitial={initial} streaming />
+              <Bubble msg={{ role: "assistant", content: streamingText }} tutorAvatar={sirajChatAvatar.url} tutorName={tutorName} streaming />
             )}
 
             {busy && !streamingText && (
@@ -433,17 +434,29 @@ const SirajCompanion = () => {
   );
 };
 
-const Bubble = ({ msg, tutorInitial, streaming }: { msg: ChatMsg; tutorInitial: string; streaming?: boolean }) => {
+const Bubble = ({
+  msg,
+  tutorAvatar,
+  tutorName,
+  streaming,
+}: {
+  msg: ChatMsg;
+  tutorAvatar: string;
+  tutorName: string;
+  streaming?: boolean;
+}) => {
   const isUser = msg.role === "user";
   return (
     <div className={`flex gap-2 ${isUser ? "flex-row-reverse" : ""}`}>
-      <span
-        className={`shrink-0 w-8 h-8 flex items-center justify-center text-xs font-bold ${
-          isUser ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground font-display italic"
-        }`}
-      >
-        {isUser ? "أنا" : tutorInitial}
-      </span>
+      {isUser ? (
+        <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-primary text-primary-foreground">
+          أنا
+        </span>
+      ) : (
+        <span className="shrink-0 w-8 h-8 rounded-full overflow-hidden ring-1 ring-accent bg-accent/10">
+          <img src={tutorAvatar} alt={tutorName} className="w-full h-full object-cover" />
+        </span>
+      )}
       <div
         className={`max-w-[78%] px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
