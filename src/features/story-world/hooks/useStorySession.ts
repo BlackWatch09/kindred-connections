@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import type { LearnedWord, SceneSeed, StoryMessage } from "../types";
 
+export interface Correction {
+  original: string;
+  corrected: string;
+  hint: string;
+  at: number;
+}
+
 interface StoryState {
   sessionId: string | null;
   worldId: string | null;
@@ -9,6 +16,7 @@ interface StoryState {
   isStreaming: boolean;
   currentHint: { text: string; corrected?: string; original?: string } | null;
   learnedThisSession: LearnedWord[];
+  corrections: Correction[];
   sceneSeed: SceneSeed | null;
   priorScenarios: string[];
   unknownWords: string[];
@@ -27,6 +35,7 @@ interface StoryState {
   setStreaming: (v: boolean) => void;
   setHint: (h: StoryState["currentHint"]) => void;
   addLearned: (w: LearnedWord) => void;
+  addCorrection: (c: Omit<Correction, "at">) => void;
 }
 
 export const useStorySession = create<StoryState>((set, get) => ({
@@ -37,6 +46,7 @@ export const useStorySession = create<StoryState>((set, get) => ({
   isStreaming: false,
   currentHint: null,
   learnedThisSession: [],
+  corrections: [],
   sceneSeed: null,
   priorScenarios: [],
   unknownWords: [],
@@ -53,6 +63,7 @@ export const useStorySession = create<StoryState>((set, get) => ({
       isStreaming: false,
       currentHint: null,
       learnedThisSession: [],
+      corrections: [],
     }),
   reset: () =>
     set({
@@ -63,6 +74,7 @@ export const useStorySession = create<StoryState>((set, get) => ({
       isStreaming: false,
       currentHint: null,
       learnedThisSession: [],
+      corrections: [],
       sceneSeed: null,
     }),
   addMessage: (m) => set({ messages: [...get().messages, m] }),
@@ -85,4 +97,11 @@ export const useStorySession = create<StoryState>((set, get) => ({
     if (get().learnedThisSession.some((x) => x.word === w.word)) return;
     set({ learnedThisSession: [...get().learnedThisSession, w] });
   },
+  addCorrection: (c) => {
+    const list = get().corrections;
+    // Dedupe: same original+corrected pair
+    if (list.some((x) => x.original === c.original && x.corrected === c.corrected)) return;
+    set({ corrections: [...list, { ...c, at: Date.now() }] });
+  },
 }));
+

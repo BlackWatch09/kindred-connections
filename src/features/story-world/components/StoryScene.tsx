@@ -32,9 +32,9 @@ const StoryScene = () => {
   const world = worldId ? getWorld(worldId) : null;
 
   const {
-    sessionId, messages, streamingText, isStreaming, currentHint, learnedThisSession,
+    sessionId, messages, streamingText, isStreaming, currentHint, learnedThisSession, corrections,
     sceneSeed, priorScenarios, unknownWords,
-    init, addMessage, appendStream, finalizeStream, setStreaming, setHint, addLearned, reset,
+    init, addMessage, appendStream, finalizeStream, setStreaming, setHint, addLearned, addCorrection, reset,
   } = useStorySession();
 
   const [input, setInput] = useState("");
@@ -165,6 +165,7 @@ const StoryScene = () => {
         const res = await checkGrammar(text, world.level);
         if (res.has_error && res.hint) {
           setHint({ text: res.hint, corrected: res.corrected, original: text });
+          addCorrection({ original: text, corrected: res.corrected || text, hint: res.hint });
           if (hintTimeoutRef.current) window.clearTimeout(hintTimeoutRef.current);
           hintTimeoutRef.current = window.setTimeout(() => setHint(null), 9000);
         }
@@ -178,7 +179,7 @@ const StoryScene = () => {
         }
       } catch (e) { console.error(e); }
     }, 800);
-  }, [world, user, sessionId, addLearned, setHint]);
+  }, [world, user, sessionId, addLearned, addCorrection, setHint]);
 
   const finish = async () => {
     if (!sessionId || !user || !world) return;
@@ -205,6 +206,8 @@ const StoryScene = () => {
     return (
       <SceneComplete
         words={learnedThisSession}
+        corrections={corrections}
+        messagesCount={messages.filter((m) => m.role === "user").length}
         stars={stars}
         worldName={world.nameAr}
         onRestart={() => navigate("/story")}
