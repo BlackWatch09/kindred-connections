@@ -374,11 +374,11 @@ const SirajCompanion = () => {
             )}
 
             {messages.map((m, i) => (
-              <Bubble key={i} msg={m} tutorInitial={initial} />
+              <Bubble key={i} msg={m} tutorAvatar={sirajChatAvatar.url} tutorName={tutorName} />
             ))}
 
             {streamingText && (
-              <Bubble msg={{ role: "assistant", content: streamingText }} tutorInitial={initial} streaming />
+              <Bubble msg={{ role: "assistant", content: streamingText }} tutorAvatar={sirajChatAvatar.url} tutorName={tutorName} streaming />
             )}
 
             {busy && !streamingText && (
