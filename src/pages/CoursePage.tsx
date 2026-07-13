@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import AlphabetLearning from "@/components/AlphabetLearning";
 import GreetingsLearning from "@/components/GreetingsLearning";
 import NumbersLearning from "@/components/NumbersLearning";
+import GenericLesson from "@/components/GenericLesson";
+import { LESSONS, getLessonBySlug, LESSON_LABELS_BY_LEVEL } from "@/data/courseLessons";
 
 const slugify = (name: string) =>
   name
@@ -29,68 +31,19 @@ const markLessonComplete = (lesson: string) => {
   }
 };
 
-// All lessons mapped by slug for lookup
-const allLessons = [
-  // Beginner
+// Build slug->label map from labels in courseLessons + the 3 rich lessons
+const richLessons = [
   "Arabic Alphabet (أ ب ت)",
   "Basic Greetings",
   "Numbers 1-20",
-  "Simple Sentences",
-  "Common Nouns",
-  "Colors & Shapes",
-  "Family Vocabulary",
-  "Days & Months",
-  "Food & Drink",
-  "Basic Verbs",
-  "Pronouns",
-  "Review & Test",
-  // Intermediate
-  "Verb Conjugation",
-  "Past Tense",
-  "Present Tense",
-  "Future Tense",
-  "Adjective Agreement",
-  "Comparatives",
-  "Prepositions",
-  "Directions",
-  "Shopping Dialogues",
-  "Travel Vocabulary",
-  "Formal vs Informal",
-  "Reading Practice",
-  "Writing Practice",
-  "Conversation Skills",
-  "Cultural Context",
-  "Media Arabic",
-  "News Vocabulary",
-  "Review & Test",
-  // Advanced
-  "Classical Arabic Intro",
-  "Poetry & Literature",
-  "Advanced Grammar",
-  "Rhetorical Devices",
-  "Dialect Overview",
-  "Egyptian Arabic",
-  "Levantine Arabic",
-  "Gulf Arabic",
-  "Business Arabic",
-  "Legal Arabic",
-  "Academic Writing",
-  "Debate & Discussion",
-  "Translation Skills",
-  "Interpreting",
-  "Creative Writing",
-  "Research Arabic",
-  "Presentation Skills",
-  "Advanced Conversation",
-  "Idiomatic Expressions",
-  "Proverbs & Wisdom",
-  "Modern Literature",
-  "Journalism Arabic",
-  "Revision",
-  "Final Examination",
 ];
-
-const lessonBySlug = new Map(allLessons.map((l) => [slugify(l), l]));
+const allLabels = [
+  ...richLessons,
+  ...LESSON_LABELS_BY_LEVEL.beginner,
+  ...LESSON_LABELS_BY_LEVEL.intermediate,
+  ...LESSON_LABELS_BY_LEVEL.advanced,
+];
+const lessonBySlug = new Map(allLabels.map((l) => [slugify(l), l]));
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -98,16 +51,15 @@ const CoursePage = () => {
   const { t } = useLanguage();
 
   const lessonName = slug ? lessonBySlug.get(slug) : undefined;
+  const dataLesson = slug ? getLessonBySlug(slug) : undefined;
 
   const handleComplete = () => {
-    if (lessonName) {
-      markLessonComplete(lessonName);
-    }
+    if (lessonName) markLessonComplete(lessonName);
     navigate("/courses");
   };
 
   const renderContent = () => {
-    if (!lessonName) {
+    if (!lessonName && !dataLesson) {
       return (
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold text-foreground mb-2">Lesson not found</h2>
@@ -116,28 +68,33 @@ const CoursePage = () => {
       );
     }
 
-    if (lessonName === "Arabic Alphabet (أ ب ت)") {
-      return <AlphabetLearning onClose={handleComplete} />;
+    if (lessonName === "Arabic Alphabet (أ ب ت)") return <AlphabetLearning onClose={handleComplete} />;
+    if (lessonName === "Basic Greetings") return <GreetingsLearning onClose={handleComplete} />;
+    if (lessonName === "Numbers 1-20") return <NumbersLearning onClose={handleComplete} />;
+
+    if (dataLesson) {
+      return (
+        <div>
+          <div className="text-center mb-8">
+            <h1 className="font-arabic text-3xl md:text-4xl font-bold text-foreground mb-1">
+              {dataLesson.titleAr}
+            </h1>
+            <p className="text-sm text-muted-foreground">{dataLesson.title}</p>
+          </div>
+          <GenericLesson lesson={dataLesson} onComplete={handleComplete} />
+        </div>
+      );
     }
 
-    if (lessonName === "Basic Greetings") {
-      return <GreetingsLearning onClose={handleComplete} />;
-    }
-
-    if (lessonName === "Numbers 1-20") {
-      return <NumbersLearning onClose={handleComplete} />;
-    }
-
-    // Placeholder for lessons without interactive content yet
     return (
       <div className="text-center py-20 space-y-4">
         <h2 className="font-display text-3xl font-bold text-foreground">{lessonName}</h2>
         <p className="text-muted-foreground max-w-md mx-auto">
-          {t("courses.coming_soon") || "This lesson is coming soon. Check back later!"}
+          {t("courses.coming_soon") || "This lesson is coming soon."}
         </p>
         <button
           onClick={handleComplete}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg gradient-gold text-accent-foreground font-semibold hover:opacity-90"
         >
           {t("courses.mark_complete") || "Mark as Complete"}
         </button>
