@@ -1,0 +1,10 @@
+project_id = "zekkojrgknpvmxskyqno"
+
+[functions.story-chat]
+verify_jwt = false
+
+[functions.grammar-check]
+verify_jwt = false
+
+[functions.voice-transcribe]
+verify_jwt = false

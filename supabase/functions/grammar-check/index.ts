@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 إذا كانت الجملة سليمة أعد has_error=false وhint فارغة.
 new_words = كلمات عربية جديرة بالحفظ من جملة الطالب (0-3 كلمات).`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
