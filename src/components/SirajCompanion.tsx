@@ -4,6 +4,8 @@ import { MessageCircle, X, Send, Sparkles, Trash2, Loader2 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
+import sirajAvatar from "@/assets/siraj-avatar.png.asset.json";
+
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -288,10 +290,11 @@ const SirajCompanion = () => {
           aria-label={strings.open}
           className={`fixed bottom-5 ${posSide} z-[60] group flex items-center gap-3 bg-primary text-primary-foreground pl-2 pr-4 py-2 border-2 border-accent shadow-2xl hover:shadow-accent/40 transition-all hover:-translate-y-0.5`}
         >
-          <span className="relative w-10 h-10 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-lg">
-            {initial}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
+          <span className="relative w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center overflow-hidden ring-2 ring-accent">
+            <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
+            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
           </span>
+
           <span className="flex flex-col items-start leading-tight">
             <span className="text-[10px] uppercase tracking-[0.24em] text-accent font-semibold">
               {strings.online}
@@ -308,8 +311,8 @@ const SirajCompanion = () => {
         >
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center gap-3 border-b border-accent/40">
-            <span className="w-11 h-11 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-xl shrink-0">
-              {initial}
+            <span className="w-12 h-12 rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent shrink-0">
+              <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
             </span>
             <div className="flex-1 min-w-0">
               <p className="font-display italic font-semibold text-lg leading-tight truncate">{tutorName}</p>
@@ -338,8 +341,8 @@ const SirajCompanion = () => {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-background/40">
             {messages.length === 0 && (
               <div className="text-center py-6">
-                <div className="w-16 h-16 mx-auto bg-primary text-primary-foreground flex items-center justify-center font-display italic font-bold text-3xl mb-3">
-                  {initial}
+                <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent mb-3">
+                  <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
                 </div>
                 <p className="text-sm text-foreground leading-relaxed max-w-[280px] mx-auto">
                   {strings.starter}
