@@ -299,7 +299,7 @@ const StoryScene = () => {
                 {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 -rotate-180" />}
               </button>
             </form>
-            <WhisperHints hint={currentHint} />
+            <WhisperHints hint={currentHint} onClose={() => setHint(null)} />
           </div>
         </div>
       </div>
