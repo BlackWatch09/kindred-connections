@@ -84,6 +84,7 @@ const App = () => (
                   }
                 />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Chrome>
