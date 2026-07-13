@@ -87,11 +87,11 @@ const Index = () => {
           {pillars.map((p, i) => (
             <div key={p.k} className="p-6 md:p-8 group hover:bg-secondary/50 transition-colors" style={{ animation: `fade-in-up 0.6s ease-out ${i * 0.1}s both` }}>
               <div className="flex items-baseline justify-between mb-4">
-                <span className="serif-numeral text-4xl font-bold text-accent">{p.k}</span>
+                <span className="serif-numeral text-5xl font-bold text-accent">{p.k}</span>
                 <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-y-1 group-hover:translate-x-1 transition-all" />
               </div>
-              <h3 className="font-display text-xl font-bold text-primary mb-2">{p.t}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{p.d}</p>
+              <h3 className="font-display text-2xl font-bold text-primary mb-3">{p.t}</h3>
+              <p className="text-base text-muted-foreground leading-relaxed">{p.d}</p>
             </div>
           ))}
         </div>
