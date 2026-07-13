@@ -32,6 +32,7 @@ const Navbar = () => {
     { to: "/", label: t("nav.home") },
     { to: "/courses", label: t("nav.courses") },
     { to: "/learn", label: t("nav.learn") },
+    { to: "/ai", label: t("nav.aihub"), highlight: true },
     { to: "/support", label: t("nav.support") },
     { to: "/dashboard", label: t("nav.dashboard") },
     { to: "/teachers", label: t("nav.teachers") },
@@ -57,10 +58,11 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`text-[15px] font-medium tracking-wide transition-colors hover:text-primary relative ${
-                isActive(link.to) ? "text-primary" : "text-muted-foreground"
+              className={`text-[15px] font-medium tracking-wide transition-colors hover:text-primary relative flex items-center gap-1.5 ${
+                isActive(link.to) ? "text-primary" : link.highlight ? "text-accent" : "text-muted-foreground"
               }`}
             >
+              {link.highlight && <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />}
               {link.label}
               {isActive(link.to) && (
                 <span className="absolute -bottom-1.5 left-0 right-0 h-px bg-accent" />

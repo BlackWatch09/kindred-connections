@@ -14,6 +14,14 @@ export type SiteSettings = {
   socialInstagram: string;
   maintenanceMode: boolean;
   announcementBar: string;
+  aiPersona: {
+    hubName: string;      // e.g. "المِحراب"
+    hubTagline: string;   // short tagline shown under hub title
+    tutorName: string;    // e.g. "سِراج"
+    tutorTitle: string;   // e.g. "رفيقك في تعلّم العربية"
+    tutorAccent: string;  // e.g. "أردني"
+    tutorGreeting: string;// opening line
+  };
 };
 export type Announcement = { id: string; message: string; type: "info" | "warning" | "success"; createdAt: string };
 
@@ -55,6 +63,14 @@ const DEFAULTS: Store = {
     socialInstagram: "@lugha.school",
     maintenanceMode: false,
     announcementBar: "",
+    aiPersona: {
+      hubName: "المِحراب",
+      hubTagline: "مركز لُغة الذكي — كل أدوات الذكاء الاصطناعي في مكان واحد.",
+      tutorName: "سِراج",
+      tutorTitle: "رفيقك الذكي في تعلّم العربية",
+      tutorAccent: "أردني",
+      tutorGreeting: "أهلاً وسهلاً! أنا سِراج، جاهز نحكي عربي سوا.",
+    },
   },
   announcements: [],
 };
@@ -64,7 +80,16 @@ function read(): Store {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULTS);
     const parsed = JSON.parse(raw);
-    return { ...structuredClone(DEFAULTS), ...parsed };
+    const base = structuredClone(DEFAULTS);
+    return {
+      ...base,
+      ...parsed,
+      settings: {
+        ...base.settings,
+        ...(parsed.settings ?? {}),
+        aiPersona: { ...base.settings.aiPersona, ...(parsed.settings?.aiPersona ?? {}) },
+      },
+    };
   } catch {
     return structuredClone(DEFAULTS);
   }

@@ -23,6 +23,7 @@ import StoryWorldScene from "./pages/StoryWorldScene";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import Admin from "./pages/Admin";
+import AIHub from "./pages/AIHub";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => (
                   }
                 />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="/ai" element={<AIHub />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
