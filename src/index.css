@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -55,9 +55,10 @@
     --sidebar-border: 45 20% 85%;
     --sidebar-ring: 158 78% 25%;
 
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-display: 'Fraunces', 'Georgia', serif;
+    --font-body: 'Inter Tight', system-ui, sans-serif;
+    --font-arabic: 'Amiri', 'Noto Naskh Arabic', serif;
+    --font-arabic-display: 'Reem Kufi', 'Amiri', serif;
 
     --gradient-emerald: linear-gradient(135deg, hsl(var(--emerald-deep)), hsl(var(--emerald)));
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-soft)));
@@ -104,16 +105,24 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    font-feature-settings: "ss01", "cv11";
+    font-feature-settings: "ss01", "cv11", "ss02";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    font-optical-sizing: auto;
+    font-variation-settings: "opsz" 96, "SOFT" 50;
   }
 
-  [dir="rtl"], [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 {
-    font-family: var(--font-arabic);
+  [dir="rtl"] body { font-family: var(--font-arabic); }
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+  [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+    font-family: var(--font-arabic-display);
+    letter-spacing: 0;
   }
 }
 

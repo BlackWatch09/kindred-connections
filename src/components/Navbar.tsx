@@ -46,8 +46,8 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Lugha" className="w-9 h-9 object-contain" />
           <div className="leading-none">
-            <span className="font-display text-xl font-bold text-primary tracking-tight">Lugha</span>
-            <span className="block text-[9px] uppercase tracking-[0.32em] text-muted-foreground mt-0.5">لُغة</span>
+            <span className="font-display text-[26px] font-semibold text-primary tracking-tight italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}>Lugha</span>
+            <span className="block font-arabic text-[10px] tracking-[0.32em] text-muted-foreground mt-1">لُغة</span>
           </div>
         </Link>
 
