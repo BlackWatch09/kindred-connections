@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Languages, Loader2 } from "lucide-react";
 import ToolShell from "./ToolShell";
-import { callFn } from "@/lib/aiFn";
-
-interface Result {
-  focus: string; translation: string; contextual_meaning: string;
-  root: string; part_of_speech: string;
-  examples: { ar: string; translation: string }[]; notes: string;
-}
+import { contextTranslate, type TranslateResult as Result } from "@/lib/aiFn";
 
 export default function ContextTranslateDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [sentence, setSentence] = useState("ذَهَبَ الفارِسُ إلى المَعْرَكَة بِقَلْبٍ شُجاع.");
@@ -20,7 +14,7 @@ export default function ContextTranslateDialog({ open, onClose }: { open: boolea
   const analyze = async () => {
     if (!sentence.trim()) return;
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await callFn<Result>("context-translate", { sentence, word, target_lang: lang })); }
+    try { setResult(await contextTranslate(sentence, word, lang)); }
     catch (e: any) { setError(e.message || "تعذّر التحليل."); }
     finally { setLoading(false); }
   };

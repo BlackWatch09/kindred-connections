@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { PenLine, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import ToolShell from "./ToolShell";
-import { callFn } from "@/lib/aiFn";
-
-interface Issue { original: string; correction: string; type: string; explanation: string; }
-interface Result { corrected: string; summary: string; issues: Issue[]; }
+import { analyzeWriting, type WritingResult as Result } from "@/lib/aiFn";
 
 export default function WritingAssistDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [text, setText] = useState("");
@@ -16,7 +13,7 @@ export default function WritingAssistDialog({ open, onClose }: { open: boolean; 
   const analyze = async () => {
     if (!text.trim()) return;
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await callFn<Result>("writing-analyze", { text, level })); }
+    try { setResult(await analyzeWriting(text, level)); }
     catch (e: any) { setError(e.message || "تعذّر التحليل."); }
     finally { setLoading(false); }
   };

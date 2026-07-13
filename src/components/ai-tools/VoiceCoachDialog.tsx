@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2, Play, Sparkles } from "lucide-react";
 import ToolShell from "./ToolShell";
-import { callFn } from "@/lib/aiFn";
+import { pronunciationCoach, type PronResult as Result } from "@/lib/aiFn";
 
 const SUGGESTIONS = [
   "السَّلامُ عَلَيْكُم",
@@ -11,8 +11,6 @@ const SUGGESTIONS = [
   "ذَهَبَ الطِّفْلُ إِلى الحَديقَة",
 ];
 
-interface Letter { char: string; ok: boolean; note?: string; correct_hint?: string; }
-interface Result { transcription: string; target: string; overall_score: number; feedback: string; letters: Letter[]; }
 
 export default function VoiceCoachDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [target, setTarget] = useState(SUGGESTIONS[0]);
@@ -59,11 +57,7 @@ export default function VoiceCoachDialog({ open, onClose }: { open: boolean; onC
     setLoading(true); setError(null);
     try {
       const base64 = await blobToBase64(blob);
-      const data = await callFn<Result>("pronunciation-coach", {
-        audio_base64: base64,
-        mime_type: mimeRef.current,
-        target,
-      });
+      const data = await pronunciationCoach(base64, mimeRef.current, target);
       setResult(data);
     } catch (e: any) {
       setError(e.message || "تعذّر التحليل، حاول مرة أخرى.");

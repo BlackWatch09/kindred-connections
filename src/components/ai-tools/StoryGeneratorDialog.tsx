@@ -2,10 +2,10 @@ import { useState } from "react";
 import { BookOpen, Loader2, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import ToolShell from "./ToolShell";
-import { callFn } from "@/lib/aiFn";
+import { generateStory, type StoryResult as Story } from "@/lib/aiFn";
 
 type Level = "beginner" | "intermediate" | "advanced";
-interface Story { title: string; story: string; vocab: { word: string; meaning: string }[]; questions: string[]; }
+
 
 const LEVELS: { id: Level; label: string }[] = [
   { id: "beginner", label: "مبتدئ" },
@@ -26,7 +26,7 @@ export default function StoryGeneratorDialog({ open, onClose }: { open: boolean;
   const generate = async () => {
     setLoading(true); setError(null); setStory(null);
     try {
-      const data = await callFn<Story>("story-generate", { level, interests, length });
+      const data = await generateStory(level, interests, length);
       setStory(data);
     } catch (e: any) { setError(e.message || "تعذّر توليد القصة."); }
     finally { setLoading(false); }
