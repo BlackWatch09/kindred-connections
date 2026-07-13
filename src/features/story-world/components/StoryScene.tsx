@@ -7,7 +7,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useStorySession } from "../hooks/useStorySession";
 import { getWorld } from "../data/worlds";
 import { generateSceneSeed } from "../lib/sceneSeed";
-import { streamStoryChat, checkGrammar } from "../lib/streamChat";
+import { streamStoryChat, checkGrammar, getGeminiKey, setGeminiKey } from "../lib/streamChat";
+
+function ensureGeminiKey(): boolean {
+  if (getGeminiKey()) return true;
+  const k = window.prompt(
+    "أدخل مفتاح Gemini API المجاني لتفعيل المحادثة\n(احصل عليه مجاناً من: https://aistudio.google.com/apikey)",
+    "",
+  );
+  if (k && k.trim()) { setGeminiKey(k.trim()); return true; }
+  return false;
+}
 import DialogueStream from "./DialogueStream";
 import WhisperHints from "./WhisperHints";
 import VocabularyBar from "./VocabularyBar";
@@ -119,11 +129,16 @@ const StoryScene = () => {
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : "";
-      toast.error(
-        message.includes("not found") || message.includes("404")
-          ? "الميزة غير منشورة بعد — أعد نشر الدوال الخلفية ثم جرّب مرة ثانية"
-          : "انقطع الاتصال — تعذر الوصول لخدمة المحادثة الآن",
-      );
+      if (message === "MISSING_GEMINI_KEY") {
+        if (ensureGeminiKey()) {
+          setStreaming(false);
+          toast.info("تم حفظ المفتاح، جرّب الإرسال مرة ثانية");
+        } else {
+          toast.error("تحتاج مفتاح Gemini لتفعيل المحادثة");
+        }
+      } else {
+        toast.error("انقطع الاتصال — تحقق من مفتاح Gemini أو الاتصال بالإنترنت");
+      }
       setStreaming(false);
     }
   }, [world, user, sceneSeed, priorScenarios, unknownWords, appendStream, finalizeStream, setStreaming]);
