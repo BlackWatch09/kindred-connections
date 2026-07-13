@@ -10,9 +10,35 @@ type ChatMsg = { role: "user" | "assistant"; content: string };
 const STORAGE_KEY = "lugha.siraj.chat.v1";
 const OPEN_EVENT = "siraj:open";
 
-const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
-const SUPABASE_ANON = "sb_publishable_fbcN8yLZl8_5VMGokMH24g_4LaaOnCu";
-const CHAT_URL = `${SUPABASE_URL}/functions/v1/siraj-chat`;
+import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
+
+function buildSirajSystem(opts: {
+  language: "ar" | "en" | "tr";
+  tutorName: string;
+  tutorTitle: string;
+  tutorAccent: string;
+  pageContext: { path?: string; title?: string; hint?: string };
+}): string {
+  const { language, tutorName, tutorTitle, tutorAccent, pageContext } = opts;
+  const pageLine =
+    pageContext.path || pageContext.title
+      ? `الطالب الآن في صفحة: ${pageContext.title ?? ""} (${pageContext.path ?? ""}). ${pageContext.hint ?? ""}`.trim()
+      : "";
+  const langInstruction: Record<string, string> = {
+    ar: `تحدّث معه بالعربية العامية اللطيفة (لهجة ${tutorAccent || "أردنية"}) ما لم يطلب الفصحى. اجعل الردود قصيرة ودافئة (٢-٤ جمل).`,
+    en: `Reply mainly in clear English, sprinkle Arabic examples with translation. Keep replies short and friendly (2–4 sentences).`,
+    tr: `Öğrenciye çoğunlukla Türkçe cevap ver; Arapça örnekleri çevirisiyle ver. 2–4 cümle, sıcak.`,
+  };
+  return `أنت ${tutorName}، ${tutorTitle || "رفيق الطالب في تعلّم العربية"}. أنت مساعد ذكي داخل موقع "لُغة".
+- لا تكشف أبداً أنك نموذج ذكاء اصطناعي؛ قدّم نفسك دائماً باسم "${tutorName}".
+- ${langInstruction[language] ?? langInstruction.ar}
+- عند تصحيح خطأ لغوي، اذكر الصواب بلطف ثم اشرح باختصار.
+- استخدم Markdown بسيط لتحسين القراءة.
+- إذا سُئلت خارج نطاق العربية، أعد التوجيه بلطف.
+${pageLine ? `\nسياق الصفحة الحالية: ${pageLine}` : ""}`;
+}
 
 const UI = {
   ar: {
@@ -151,31 +177,45 @@ const SirajCompanion = () => {
     abortRef.current = controller;
 
     try {
-      const res = await fetch(CHAT_URL, {
+      const apiKey = getGeminiKey();
+      if (!apiKey) {
+        setError(strings.error);
+        setBusy(false);
+        return;
+      }
+
+      const systemInstruction = buildSirajSystem({
+        language,
+        tutorName,
+        tutorTitle,
+        tutorAccent: pickLocalized(persona.tutorAccent, language, ""),
+        pageContext,
+      });
+
+      const contents = nextMessages.slice(-12).map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+      const res = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-          apikey: SUPABASE_ANON,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: nextMessages,
-          language,
-          persona: {
-            tutorName,
-            tutorTitle,
-            tutorAccent: pickLocalized(persona.tutorAccent, language, ""),
-            tutorGreeting: pickLocalized(persona.tutorGreeting, language, ""),
-          },
-          pageContext,
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents,
+          generationConfig: { temperature: 0.85, maxOutputTokens: 512 },
         }),
         signal: controller.signal,
       });
 
       if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error("[Siraj] Gemini error", res.status, errText);
         if (res.status === 429) setError(strings.rateLimit);
-        else if (res.status === 402) setError(strings.credits);
-        else setError(strings.error);
+        else if (res.status === 402 || res.status === 403) setError(strings.credits);
+        else setError(`${strings.error} (${res.status})`);
         setBusy(false);
         return;
       }
@@ -196,17 +236,21 @@ const SirajCompanion = () => {
           const t = line.trim();
           if (!t.startsWith("data:")) continue;
           const payload = t.slice(5).trim();
-          if (!payload) continue;
+          if (!payload || payload === "[DONE]") continue;
           try {
             const parsed = JSON.parse(payload);
-            if (parsed.delta) {
-              assembled += parsed.delta;
+            const delta =
+              parsed?.candidates?.[0]?.content?.parts
+                ?.map((p: { text?: string }) => p.text ?? "")
+                .join("") ?? "";
+            if (delta) {
+              assembled += delta;
               setStreamingText(assembled);
             }
-            if (parsed.done) break;
           } catch { /* skip */ }
         }
       }
+
 
       if (assembled) {
         setMessages((prev) => [...prev, { role: "assistant", content: assembled }]);
