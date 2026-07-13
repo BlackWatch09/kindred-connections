@@ -28,7 +28,7 @@ const AIHub = () => {
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
   const tools: Tool[] = [
-    { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${persona.tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
+    { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
     { key: "voice",     icon: Mic,           title: t("aihub.tools.voice"),  desc: t("aihub.tools.voice.desc"),  cta: t("aihub.cta.record") },
     { key: "placement", icon: GraduationCap, title: t("aihub.tools.placement"), desc: t("aihub.tools.placement.desc"), cta: t("aihub.cta.start"), href: "/placement-test" },
     { key: "story",     icon: BookOpen,      title: t("aihub.tools.story"),  desc: t("aihub.tools.story.desc"),  cta: t("aihub.cta.create"), href: "/story" },
