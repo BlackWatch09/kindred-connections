@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import Admin from "./pages/Admin";
 import AIHub from "./pages/AIHub";
+import SirajCompanion from "@/components/SirajCompanion";
 
 const queryClient = new QueryClient();
 
