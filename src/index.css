@@ -55,9 +55,10 @@
     --sidebar-border: 45 20% 85%;
     --sidebar-ring: 158 78% 25%;
 
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-display: 'Fraunces', 'Georgia', serif;
+    --font-body: 'Inter Tight', system-ui, sans-serif;
+    --font-arabic: 'Amiri', 'Noto Naskh Arabic', serif;
+    --font-arabic-display: 'Reem Kufi', 'Amiri', serif;
 
     --gradient-emerald: linear-gradient(135deg, hsl(var(--emerald-deep)), hsl(var(--emerald)));
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-soft)));
