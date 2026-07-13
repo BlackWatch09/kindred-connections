@@ -301,7 +301,7 @@ const SirajCompanion = () => {
             src={sirajAvatar.url}
             alt={tutorName}
             draggable={false}
-            className="relative w-40 h-40 md:w-48 md:h-48 object-contain select-none drop-shadow-[0_18px_28px_rgba(6,78,59,0.45)] animate-siraj-float transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-active:scale-95"
+            className="relative w-64 h-64 md:w-80 md:h-80 object-contain select-none drop-shadow-[0_25px_40px_rgba(6,78,59,0.5)] animate-siraj-float transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-active:scale-95"
           />
           {/* Online dot */}
           <span
