@@ -289,17 +289,28 @@ const SirajCompanion = () => {
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className={`fixed bottom-5 ${posSide} z-[60] group transition-transform hover:-translate-y-1 hover:scale-105 drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]`}
+          className={`fixed bottom-6 ${posSide} z-[60] group focus:outline-none`}
         >
+          {/* Glow halo */}
+          <span
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.55),transparent_65%)] blur-2xl animate-siraj-glow"
+          />
+          {/* Avatar (no card) */}
           <img
             src={sirajAvatar.url}
             alt={tutorName}
-            className="w-24 h-24 md:w-28 md:h-28 object-contain select-none pointer-events-none"
             draggable={false}
+            className="relative w-40 h-40 md:w-48 md:h-48 object-contain select-none drop-shadow-[0_18px_28px_rgba(6,78,59,0.45)] animate-siraj-float transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-active:scale-95"
           />
-          <span className="absolute bottom-2 right-2 w-3.5 h-3.5 bg-emerald-400 rounded-full ring-2 ring-background animate-pulse" />
+          {/* Online dot */}
+          <span
+            aria-hidden
+            className="absolute bottom-6 right-6 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
+          />
         </button>
       )}
+
 
 
       {/* Chat panel */}

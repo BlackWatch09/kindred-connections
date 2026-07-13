@@ -97,13 +97,24 @@ export default {
           from: { opacity: "0", transform: "translateX(-30px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
+        "siraj-float": {
+          "0%, 100%": { transform: "translateY(0) rotate(-1.5deg)" },
+          "50%": { transform: "translateY(-10px) rotate(1.5deg)" },
+        },
+        "siraj-glow": {
+          "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.15)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "slide-in-left": "slide-in-left 0.5s ease-out forwards",
+        "siraj-float": "siraj-float 5s ease-in-out infinite",
+        "siraj-glow": "siraj-glow 3.5s ease-in-out infinite",
       },
+
     },
   },
   plugins: [require("tailwindcss-animate")],
