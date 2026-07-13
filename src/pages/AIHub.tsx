@@ -54,18 +54,18 @@ const AIHub = () => {
               <Sparkles className="w-4 h-4" /> {t("aihub.eyebrow")}
             </p>
             <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05]">
-              <span className="italic">{persona.hubName}</span>
+              <span className="italic">{hubName}</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 leading-relaxed max-w-2xl">
-              {persona.hubTagline}
+              {hubTagline}
             </p>
             <div className="mt-8 inline-flex items-center gap-3 border border-accent/40 bg-accent/10 px-4 py-3">
               <span className="w-9 h-9 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-lg">
-                {persona.tutorName.charAt(0)}
+                {tutorName.charAt(0)}
               </span>
               <div className={isAr ? "text-right" : "text-left"}>
-                <p className="text-sm font-semibold text-accent">{persona.tutorName} · {persona.tutorTitle}</p>
-                <p className="text-xs text-primary-foreground/70">{persona.tutorGreeting}</p>
+                <p className="text-sm font-semibold text-accent">{tutorName} · {tutorTitle}</p>
+                <p className="text-xs text-primary-foreground/70">{tutorGreeting}</p>
               </div>
             </div>
           </div>
