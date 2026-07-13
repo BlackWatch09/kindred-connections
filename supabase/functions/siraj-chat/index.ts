@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Gemini 2.5 Flash — fast, cheap, multilingual, great for chat + light tutoring.
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = "google/gemini-2.5-flash-lite";
 
 type Msg = { role: "user" | "assistant" | "system"; content: string };
 
