@@ -14,3 +14,15 @@ verify_jwt = false
 
 [functions.siraj-chat]
 verify_jwt = false
+
+[functions.pronunciation-coach]
+verify_jwt = false
+
+[functions.story-generate]
+verify_jwt = false
+
+[functions.writing-analyze]
+verify_jwt = false
+
+[functions.context-translate]
+verify_jwt = false
