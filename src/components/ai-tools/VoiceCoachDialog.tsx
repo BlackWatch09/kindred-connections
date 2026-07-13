@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2, Play, Sparkles } from "lucide-react";
 import ToolShell from "./ToolShell";
-import { callFn } from "@/lib/aiFn";
+import { pronunciationCoach, type PronResult as Result } from "@/lib/aiFn";
 
 const SUGGESTIONS = [
   "السَّلامُ عَلَيْكُم",
