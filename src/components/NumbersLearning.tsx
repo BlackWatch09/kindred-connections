@@ -13,15 +13,7 @@ interface QuizQuestion {
   imageCount?: number;
 }
 
-const speakArabic = (text: string) => {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ar-SA";
-    u.rate = 0.8;
-    window.speechSynthesis.speak(u);
-  }
-};
+import { speakArabic } from "@/lib/tts";
 
 const EMOJI_MAP: Record<number, string> = {
   1: "🍎", 2: "⭐", 3: "📚", 4: "🌸", 5: "✋",
