@@ -44,8 +44,8 @@ const Footer = () => {
           </div>
 
           <div className="md:col-span-3">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">{t("footer.correspondence")}</p>
-            <p className="text-sm text-primary-foreground/70 leading-relaxed">
+            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.correspondence")}</p>
+            <p className="text-[15px] text-primary-foreground/75 leading-relaxed">
               {t("footer.corrDesc")}
             </p>
             <form className="mt-4 flex border border-primary-foreground/20">
@@ -54,7 +54,7 @@ const Footer = () => {
                 placeholder={t("footer.emailPh")}
                 className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-primary-foreground/40 focus:outline-none"
               />
-              <button className="px-4 bg-accent text-accent-foreground text-xs font-semibold uppercase tracking-wider">{t("footer.join")}</button>
+              <button className="px-4 bg-accent text-accent-foreground text-sm font-semibold uppercase tracking-wider">{t("footer.join")}</button>
             </form>
           </div>
         </div>
