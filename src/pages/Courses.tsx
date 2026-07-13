@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Lock, BookOpen, CheckCircle2, MessagesSquare, ArrowLeft } from "lucide-react";
+import { BookOpen, CheckCircle2, MessagesSquare, ArrowLeft, Sparkles } from "lucide-react";
 import { slugify } from "@/pages/CoursePage";
 
 const courses = [
   {
-    level: "beginner",
+    level: "beginner" as const,
     lessons: [
       "Arabic Alphabet (أ ب ت)",
       "Basic Greetings",
@@ -21,11 +21,10 @@ const courses = [
       "Pronouns",
       "Review & Test",
     ],
-    unlocked: true,
     gradient: "from-emerald-500 to-emerald-600",
   },
   {
-    level: "intermediate",
+    level: "intermediate" as const,
     lessons: [
       "Verb Conjugation",
       "Past Tense",
@@ -46,11 +45,10 @@ const courses = [
       "News Vocabulary",
       "Review & Test",
     ],
-    unlocked: false,
     gradient: "from-blue-500 to-blue-600",
   },
   {
-    level: "advanced",
+    level: "advanced" as const,
     lessons: [
       "Classical Arabic Intro",
       "Poetry & Literature",
@@ -77,7 +75,6 @@ const courses = [
       "Revision",
       "Final Examination",
     ],
-    unlocked: false,
     gradient: "from-purple-500 to-purple-600",
   },
 ];
@@ -99,19 +96,26 @@ const Courses = () => {
 
   useEffect(() => {
     setCompletedLessons(getCompletedLessons());
+    // Re-read on focus so return from lesson updates progress instantly
+    const onFocus = () => setCompletedLessons(getCompletedLessons());
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  const handleLessonClick = (lesson: string, unlocked: boolean) => {
-    if (!unlocked) return;
-    navigate(`/course/${slugify(lesson)}`);
-  };
+  const overall = useMemo(() => {
+    const total = courses.reduce((s, c) => s + c.lessons.length, 0);
+    const done = courses.reduce(
+      (s, c) => s + c.lessons.filter((l) => completedLessons.includes(l)).length,
+      0
+    );
+    return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+  }, [completedLessons]);
 
-  const handleStartCourse = (course: typeof courses[0]) => {
-    if (!course.unlocked) return;
+  const handleLessonClick = (lesson: string) => navigate(`/course/${slugify(lesson)}`);
+
+  const handleStartCourse = (course: (typeof courses)[number]) => {
     const nextLesson = course.lessons.find((l) => !completedLessons.includes(l));
-    if (nextLesson) {
-      navigate(`/course/${slugify(nextLesson)}`);
-    }
+    navigate(`/course/${slugify(nextLesson || course.lessons[0])}`);
   };
 
   return (
@@ -120,7 +124,23 @@ const Courses = () => {
         <h1 className="font-display text-4xl font-bold text-center text-foreground mb-2">
           {t("courses.title")}
         </h1>
-        <p className="text-center text-muted-foreground mb-8">{t("courses.subtitle")}</p>
+        <p className="text-center text-muted-foreground mb-6">{t("courses.subtitle")}</p>
+
+        {/* Overall progress */}
+        <div className="max-w-md mx-auto mb-8 bg-card border border-border rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-2 font-arabic text-sm">
+            <span className="text-muted-foreground">التقدّم الإجمالي</span>
+            <span className="font-semibold text-foreground">
+              {overall.done} / {overall.total} ({overall.pct}٪)
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full gradient-gold transition-all"
+              style={{ width: `${overall.pct}%` }}
+            />
+          </div>
+        </div>
 
         {/* Living Story World highlight */}
         <button
@@ -152,11 +172,10 @@ const Courses = () => {
         </button>
 
         <div className="space-y-10">
-
-
           {courses.map((course, ci) => {
-            const allDone =
-              course.unlocked && course.lessons.every((l) => completedLessons.includes(l));
+            const doneCount = course.lessons.filter((l) => completedLessons.includes(l)).length;
+            const pct = Math.round((doneCount / course.lessons.length) * 100);
+            const allDone = doneCount === course.lessons.length;
             return (
               <div
                 key={ci}
@@ -164,48 +183,42 @@ const Courses = () => {
                 style={{ animation: `fade-in-up 0.6s ease-out ${ci * 0.15}s both` }}
               >
                 <div
-                  className={`p-6 bg-gradient-to-r ${course.gradient} text-white flex items-center justify-between`}
+                  className={`p-6 bg-gradient-to-r ${course.gradient} text-white`}
                 >
-                  <div>
-                    <h2 className="font-display text-2xl font-bold">
-                      {t(`courses.${course.level}`)}
-                    </h2>
-                    <p className="text-sm opacity-90 mt-1">
-                      {t(`courses.${course.level}.desc`)}
-                    </p>
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <h2 className="font-display text-2xl font-bold">
+                        {t(`courses.${course.level}`)}
+                      </h2>
+                      <p className="text-sm opacity-90 mt-1">
+                        {t(`courses.${course.level}.desc`)}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium opacity-90">
+                      {doneCount} / {course.lessons.length} {t("courses.lessons")}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium opacity-80">
-                    {course.lessons.length} {t("courses.lessons")}
-                  </span>
+                  <div className="mt-4 h-1.5 rounded-full bg-white/25 overflow-hidden">
+                    <div
+                      className="h-full bg-white/90 transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
                 <div className="p-6">
-                  {!course.unlocked && (
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4 bg-secondary rounded-lg p-3">
-                      <Lock className="w-4 h-4" />
-                      {t("courses.locked")}
-                    </div>
-                  )}
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {course.lessons.map((lesson, li) => {
                       const isDone = completedLessons.includes(lesson);
                       return (
                         <div
                           key={li}
-                          onClick={() => handleLessonClick(lesson, course.unlocked)}
-                          className={`flex items-center gap-2 p-3 rounded-lg border text-sm ${
-                            course.unlocked
-                              ? "border-border hover:bg-secondary cursor-pointer transition-colors"
-                              : "border-border/50 opacity-50"
-                          }`}
+                          onClick={() => handleLessonClick(lesson)}
+                          className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-secondary cursor-pointer transition-colors text-sm"
                         >
-                          {course.unlocked ? (
-                            isDone ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                            ) : (
-                              <BookOpen className="w-4 h-4 text-accent flex-shrink-0" />
-                            )
+                          {isDone ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                           ) : (
-                            <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            <BookOpen className="w-4 h-4 text-accent flex-shrink-0" />
                           )}
                           <span
                             className={`flex-1 ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}
@@ -217,20 +230,20 @@ const Courses = () => {
                     })}
                   </div>
 
-                  {course.unlocked &&
-                    (allDone ? (
-                      <div className="mt-6 flex items-center gap-2 text-emerald-600 font-semibold">
-                        <CheckCircle2 className="w-5 h-5" />
-                        {t("courses.completed") || "Level Completed! 🎉"}
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleStartCourse(course)}
-                        className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-lg gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity"
-                      >
-                        {t("courses.start")}
-                      </button>
-                    ))}
+                  {allDone ? (
+                    <div className="mt-6 flex items-center gap-2 text-emerald-600 font-semibold">
+                      <CheckCircle2 className="w-5 h-5" />
+                      {t("courses.completed") || "Level Completed! 🎉"}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleStartCourse(course)}
+                      className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-lg gradient-gold text-accent-foreground font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {doneCount > 0 ? "متابعة" : t("courses.start")}
+                    </button>
+                  )}
                 </div>
               </div>
             );
