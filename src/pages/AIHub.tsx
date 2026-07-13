@@ -4,7 +4,8 @@ import {
   Sparkles, Mic, MessageCircle, BookOpen, Languages, PenLine,
   Wand2, Calendar, Layers, Compass, GraduationCap, Radio,
 } from "lucide-react";
-import { content } from "@/lib/siteContent";
+import { pickLocalized } from "@/lib/siteContent";
+import { useAiPersona } from "@/hooks/useAiPersona";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type Tool = {
@@ -17,22 +18,17 @@ type Tool = {
   badge?: string;
 };
 
-const useAiPersona = () => {
-  const [persona, setPersona] = useState(() => content.getAll().settings.aiPersona);
-  useEffect(() => {
-    const h = () => setPersona(content.getAll().settings.aiPersona);
-    window.addEventListener("lugha:content-updated", h);
-    return () => window.removeEventListener("lugha:content-updated", h);
-  }, []);
-  return persona;
-};
-
 const AIHub = () => {
   const { t, language } = useLanguage();
   const persona = useAiPersona();
+  const hubName = pickLocalized(persona.hubName, language);
+  const hubTagline = pickLocalized(persona.hubTagline, language);
+  const tutorName = pickLocalized(persona.tutorName, language);
+  const tutorTitle = pickLocalized(persona.tutorTitle, language);
+  const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
   const tools: Tool[] = [
-    { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${persona.tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
+    { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
     { key: "voice",     icon: Mic,           title: t("aihub.tools.voice"),  desc: t("aihub.tools.voice.desc"),  cta: t("aihub.cta.record") },
     { key: "placement", icon: GraduationCap, title: t("aihub.tools.placement"), desc: t("aihub.tools.placement.desc"), cta: t("aihub.cta.start"), href: "/placement-test" },
     { key: "story",     icon: BookOpen,      title: t("aihub.tools.story"),  desc: t("aihub.tools.story.desc"),  cta: t("aihub.cta.create"), href: "/story" },
@@ -58,18 +54,18 @@ const AIHub = () => {
               <Sparkles className="w-4 h-4" /> {t("aihub.eyebrow")}
             </p>
             <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05]">
-              <span className="italic">{persona.hubName}</span>
+              <span className="italic">{hubName}</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 leading-relaxed max-w-2xl">
-              {persona.hubTagline}
+              {hubTagline}
             </p>
             <div className="mt-8 inline-flex items-center gap-3 border border-accent/40 bg-accent/10 px-4 py-3">
               <span className="w-9 h-9 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-lg">
-                {persona.tutorName.charAt(0)}
+                {tutorName.charAt(0)}
               </span>
               <div className={isAr ? "text-right" : "text-left"}>
-                <p className="text-sm font-semibold text-accent">{persona.tutorName} · {persona.tutorTitle}</p>
-                <p className="text-xs text-primary-foreground/70">{persona.tutorGreeting}</p>
+                <p className="text-sm font-semibold text-accent">{tutorName} · {tutorTitle}</p>
+                <p className="text-xs text-primary-foreground/70">{tutorGreeting}</p>
               </div>
             </div>
           </div>

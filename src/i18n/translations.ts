@@ -451,7 +451,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.resetDesc": "Return every section to factory defaults.",
     "admin.backup.resetConfirm": "Reset all content to defaults? This cannot be undone.",
     // AI Hub nav + page
-    "nav.aihub": "AI Atelier",
+    "nav.aihub": "Lugha Council",
     "aihub.eyebrow": "The intelligent center of Lugha",
     "aihub.section.eyebrow": "AI Toolkit",
     "aihub.section.title": "Every AI companion, in one place",
@@ -497,6 +497,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.ai.tutorAccent": "Accent / dialect",
     "admin.ai.tutorGreeting": "Opening greeting",
     "admin.ai.save": "Save AI persona",
+    "admin.ai.editLang": "Editing language",
+    "admin.ai.livePreview": "Live preview",
     // Admin: AI content tools
     "admin.nav.aiContent": "AI Content Tools",
     "admin.aiContent.title": "AI Content Studio",
@@ -957,7 +959,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.resetDesc": "أعد كلّ الأقسام إلى القيم الافتراضية.",
     "admin.backup.resetConfirm": "إعادة كلّ المحتوى للإعدادات الافتراضية؟ لا يمكن التراجع.",
     // المركز الذكي
-    "nav.aihub": "المِحراب",
+    "nav.aihub": "مجلس لُغة",
     "aihub.eyebrow": "المركز الذكي في لُغة",
     "aihub.section.eyebrow": "أدوات الذكاء الاصطناعي",
     "aihub.section.title": "كل رفاق الذكاء الاصطناعي في مكان واحد",
@@ -1003,6 +1005,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.ai.tutorAccent": "اللهجة",
     "admin.ai.tutorGreeting": "جملة التحية الافتتاحية",
     "admin.ai.save": "احفظ الشخصية",
+    "admin.ai.editLang": "لغة التحرير",
+    "admin.ai.livePreview": "معاينة حيّة",
     // لوحة التحكم: أدوات المحتوى الذكية
     "admin.nav.aiContent": "أدوات المحتوى الذكية",
     "admin.aiContent.title": "استوديو المحتوى الذكي",
@@ -1445,9 +1449,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.reset": "Tümünü sıfırla",
     "admin.backup.resetDesc": "Tüm bölümleri fabrika varsayılanlarına döndür.",
     "admin.backup.resetConfirm": "Tüm içeriği varsayılanlara sıfırla? Geri alınamaz.",
-    "nav.aihub": "AI Atölye",
+    "nav.aihub": "Lugha Meclisi",
     "admin.nav.ai": "AI Kişiliği",
     "admin.nav.aiContent": "AI İçerik Araçları",
+    "admin.ai.editLang": "Düzenleme dili",
+    "admin.ai.livePreview": "Canlı önizleme",
   },
 
 };

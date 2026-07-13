@@ -1,27 +1,44 @@
 // Site content store: localStorage-backed, JSON export/import for full control.
+import type { Language } from "@/contexts/LanguageContext";
+
+export type Localized = { en: string; ar: string; tr: string };
+
+export const pickLocalized = (
+  value: Localized | string | undefined | null,
+  lang: Language,
+  fallback = ""
+): string => {
+  if (!value) return fallback;
+  if (typeof value === "string") return value || fallback;
+  return value[lang] || value.ar || value.en || value.tr || fallback;
+};
+
 export type Teacher = { id: string; name: string; title: string; city: string; bio: string; avatar?: string };
 export type Course = { id: string; slug: string; title: string; level: string; lessons: number; description: string; published: boolean };
 export type FAQItem = { id: string; question: string; answer: string; category?: string };
+
+export type AiPersona = {
+  hubName: Localized;
+  hubTagline: Localized;
+  tutorName: Localized;
+  tutorTitle: Localized;
+  tutorAccent: Localized;
+  tutorGreeting: Localized;
+};
+
 export type SiteSettings = {
   siteName: string;
   tagline: string;
   heroTitle: string;
   heroDescription: string;
-  primaryColor: string; // hsl string like "158 78% 17%"
+  primaryColor: string;
   accentColor: string;
   contactEmail: string;
   socialTwitter: string;
   socialInstagram: string;
   maintenanceMode: boolean;
   announcementBar: string;
-  aiPersona: {
-    hubName: string;      // e.g. "المِحراب"
-    hubTagline: string;   // short tagline shown under hub title
-    tutorName: string;    // e.g. "سِراج"
-    tutorTitle: string;   // e.g. "رفيقك في تعلّم العربية"
-    tutorAccent: string;  // e.g. "أردني"
-    tutorGreeting: string;// opening line
-  };
+  aiPersona: AiPersona;
 };
 export type Announcement = { id: string; message: string; type: "info" | "warning" | "success"; createdAt: string };
 
@@ -34,6 +51,39 @@ type Store = {
 };
 
 const KEY = "lugha_admin_content_v1";
+
+const DEFAULT_PERSONA: AiPersona = {
+  hubName: {
+    ar: "مجلس لُغة",
+    en: "Lugha Council",
+    tr: "Lugha Meclisi",
+  },
+  hubTagline: {
+    ar: "مركز لُغة الذكي — كل أدوات الذكاء الاصطناعي في مكان واحد.",
+    en: "Lugha's intelligent center — every AI companion, in one place.",
+    tr: "Lugha'nın akıllı merkezi — tüm yapay zeka araçları tek yerde.",
+  },
+  tutorName: {
+    ar: "سِراج",
+    en: "Siraj",
+    tr: "Siraj",
+  },
+  tutorTitle: {
+    ar: "رفيقك الذكي في تعلّم العربية",
+    en: "Your smart companion for learning Arabic",
+    tr: "Arapça öğrenmede akıllı yol arkadaşın",
+  },
+  tutorAccent: {
+    ar: "أردني",
+    en: "Jordanian",
+    tr: "Ürdün lehçesi",
+  },
+  tutorGreeting: {
+    ar: "أهلاً وسهلاً! أنا سِراج، جاهز نحكي عربي سوا.",
+    en: "Hello! I'm Siraj — ready to speak Arabic together.",
+    tr: "Merhaba! Ben Siraj — birlikte Arapça konuşmaya hazırım.",
+  },
+};
 
 const DEFAULTS: Store = {
   teachers: [
@@ -63,16 +113,40 @@ const DEFAULTS: Store = {
     socialInstagram: "@lugha.school",
     maintenanceMode: false,
     announcementBar: "",
-    aiPersona: {
-      hubName: "المِحراب",
-      hubTagline: "مركز لُغة الذكي — كل أدوات الذكاء الاصطناعي في مكان واحد.",
-      tutorName: "سِراج",
-      tutorTitle: "رفيقك الذكي في تعلّم العربية",
-      tutorAccent: "أردني",
-      tutorGreeting: "أهلاً وسهلاً! أنا سِراج، جاهز نحكي عربي سوا.",
-    },
+    aiPersona: DEFAULT_PERSONA,
   },
   announcements: [],
+};
+
+const normalizeLocalized = (
+  value: unknown,
+  fallback: Localized
+): Localized => {
+  if (typeof value === "string") {
+    // migrate legacy single-string value into all three languages
+    return { ar: value, en: value, tr: value };
+  }
+  if (value && typeof value === "object") {
+    const v = value as Partial<Localized>;
+    return {
+      ar: v.ar ?? fallback.ar,
+      en: v.en ?? fallback.en,
+      tr: v.tr ?? fallback.tr,
+    };
+  }
+  return { ...fallback };
+};
+
+const normalizePersona = (raw: any): AiPersona => {
+  const src = raw ?? {};
+  return {
+    hubName: normalizeLocalized(src.hubName, DEFAULT_PERSONA.hubName),
+    hubTagline: normalizeLocalized(src.hubTagline, DEFAULT_PERSONA.hubTagline),
+    tutorName: normalizeLocalized(src.tutorName, DEFAULT_PERSONA.tutorName),
+    tutorTitle: normalizeLocalized(src.tutorTitle, DEFAULT_PERSONA.tutorTitle),
+    tutorAccent: normalizeLocalized(src.tutorAccent, DEFAULT_PERSONA.tutorAccent),
+    tutorGreeting: normalizeLocalized(src.tutorGreeting, DEFAULT_PERSONA.tutorGreeting),
+  };
 };
 
 function read(): Store {
@@ -87,7 +161,7 @@ function read(): Store {
       settings: {
         ...base.settings,
         ...(parsed.settings ?? {}),
-        aiPersona: { ...base.settings.aiPersona, ...(parsed.settings?.aiPersona ?? {}) },
+        aiPersona: normalizePersona(parsed.settings?.aiPersona),
       },
     };
   } catch {
@@ -106,7 +180,20 @@ export const content = {
   reset() { localStorage.removeItem(KEY); window.dispatchEvent(new CustomEvent("lugha:content-updated")); },
   export(): string { return JSON.stringify(read(), null, 2); },
   import(json: string): boolean {
-    try { const p = JSON.parse(json); write({ ...DEFAULTS, ...p }); return true; } catch { return false; }
+    try {
+      const p = JSON.parse(json);
+      const merged: Store = {
+        ...DEFAULTS,
+        ...p,
+        settings: {
+          ...DEFAULTS.settings,
+          ...(p.settings ?? {}),
+          aiPersona: normalizePersona(p.settings?.aiPersona),
+        },
+      };
+      write(merged);
+      return true;
+    } catch { return false; }
   },
   uid() { return "id_" + Math.random().toString(36).slice(2, 10); },
 };

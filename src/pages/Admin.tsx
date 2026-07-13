@@ -10,8 +10,8 @@ import {
   ensureDefaultPassword, verifyPassword, changePassword,
   startSession, isAuthed, endSession,
 } from "@/lib/adminAuth";
-import { content, type Teacher, type Course, type FAQItem, type Announcement } from "@/lib/siteContent";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { content, pickLocalized, type Teacher, type Course, type FAQItem, type Announcement, type AiPersona, type Localized } from "@/lib/siteContent";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import logo from "@/assets/lugha-logo.png";
 
 type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aicontent" | "settings" | "security" | "backup";
@@ -569,49 +569,122 @@ const Empty = ({ label }: { label: string }) => (
 );
 
 // ==================== AI PERSONA ====================
+const LANG_TABS: { key: Language; label: string }[] = [
+  { key: "ar", label: "العربية" },
+  { key: "en", label: "English" },
+  { key: "tr", label: "Türkçe" },
+];
+
 const AIPersonaPanel = ({ data, setData }: any) => {
-  const { t } = useLanguage();
-  const [p, setP] = useState(data.settings.aiPersona);
+  const { t, language } = useLanguage();
+  const [p, setP] = useState<AiPersona>(data.settings.aiPersona);
+  const [editLang, setEditLang] = useState<Language>(language);
+  const [previewLang, setPreviewLang] = useState<Language>(language);
   useEffect(() => setP(data.settings.aiPersona), [data.settings.aiPersona]);
-  const patch = (f: any) => setP({ ...p, ...f });
+
+  const patchLoc = (field: keyof AiPersona, lang: Language, value: string) => {
+    setP({ ...p, [field]: { ...p[field], [lang]: value } as Localized });
+  };
   const save = () => {
     const next = { ...data, settings: { ...data.settings, aiPersona: p } };
     content.save(next); setData(next); toast.success(t("admin.toast.saved"));
   };
+
+  const previewHub = pickLocalized(p.hubName, previewLang);
+  const previewHubTag = pickLocalized(p.hubTagline, previewLang);
+  const previewTutorName = pickLocalized(p.tutorName, previewLang);
+  const previewTutorTitle = pickLocalized(p.tutorTitle, previewLang);
+  const previewTutorGreet = pickLocalized(p.tutorGreeting, previewLang);
+
+  const fields: { key: keyof AiPersona; label: string; textarea?: boolean }[] = [
+    { key: "hubName", label: t("admin.ai.hubName") },
+    { key: "hubTagline", label: t("admin.ai.hubTagline"), textarea: true },
+    { key: "tutorName", label: t("admin.ai.tutorName") },
+    { key: "tutorTitle", label: t("admin.ai.tutorTitle") },
+    { key: "tutorAccent", label: t("admin.ai.tutorAccent") },
+    { key: "tutorGreeting", label: t("admin.ai.tutorGreeting"), textarea: true },
+  ];
+
   return (
     <SectionShell title={t("admin.ai.title")} desc={t("admin.ai.desc")}>
       <div className="grid md:grid-cols-[1fr_320px] gap-6 max-w-5xl">
         <div className="space-y-6">
-          <Card title={t("admin.ai.hubName")}>
-            <Field label={t("admin.ai.hubName")} value={p.hubName} onChange={(v) => patch({ hubName: v })} />
-            <Field label={t("admin.ai.hubTagline")} value={p.hubTagline} onChange={(v) => patch({ hubTagline: v })} textarea />
-          </Card>
-          <Card title={t("admin.ai.tutorName")}>
-            <Field label={t("admin.ai.tutorName")} value={p.tutorName} onChange={(v) => patch({ tutorName: v })} />
-            <Field label={t("admin.ai.tutorTitle")} value={p.tutorTitle} onChange={(v) => patch({ tutorTitle: v })} />
-            <Field label={t("admin.ai.tutorAccent")} value={p.tutorAccent} onChange={(v) => patch({ tutorAccent: v })} />
-            <Field label={t("admin.ai.tutorGreeting")} value={p.tutorGreeting} onChange={(v) => patch({ tutorGreeting: v })} textarea />
-          </Card>
+          <div className="flex items-center gap-2 border-b border-border pb-2">
+            <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground font-semibold mr-2">
+              {t("admin.ai.editLang")}:
+            </span>
+            {LANG_TABS.map((l) => (
+              <button
+                key={l.key}
+                onClick={() => setEditLang(l.key)}
+                className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors ${
+                  editLang === l.key
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-muted-foreground hover:border-accent"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
+          {fields.map(({ key, label, textarea }) => (
+            <Card key={key} title={label}>
+              <Field
+                label={LANG_TABS.find((l) => l.key === editLang)!.label}
+                value={p[key][editLang]}
+                onChange={(v) => patchLoc(key, editLang, v)}
+                textarea={textarea}
+              />
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {LANG_TABS.filter((l) => l.key !== editLang).map((l) => (
+                  <div key={l.key} className="text-[11px] text-muted-foreground border-l-2 border-border pl-2">
+                    <span className="uppercase tracking-widest text-accent font-semibold">{l.label}:</span>{" "}
+                    <span className="text-foreground">{p[key][l.key] || <em className="text-muted-foreground">—</em>}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+
           <button onClick={save} className="bg-primary text-primary-foreground px-8 py-3 text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald transition-colors">
             <Save className="w-4 h-4" /> {t("admin.ai.save")}
           </button>
         </div>
+
         <div className="border border-accent/40 bg-primary text-primary-foreground p-6 h-fit sticky top-24">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold">— Live preview —</p>
-          <div className="mt-5 flex items-start gap-3">
+          <p className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold">— {t("admin.ai.livePreview")} —</p>
+          <div className="flex gap-1 mt-3">
+            {LANG_TABS.map((l) => (
+              <button
+                key={l.key}
+                onClick={() => setPreviewLang(l.key)}
+                className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                  previewLang === l.key
+                    ? "bg-accent text-accent-foreground"
+                    : "border border-primary-foreground/20 text-primary-foreground/60 hover:border-accent"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-5 flex items-start gap-3" dir={previewLang === "ar" ? "rtl" : "ltr"}>
             <span className="w-12 h-12 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-xl shrink-0">
-              {p.tutorName.charAt(0)}
+              {previewTutorName.charAt(0) || "?"}
             </span>
             <div>
-              <p className="font-display text-2xl italic font-semibold">{p.tutorName}</p>
-              <p className="text-xs text-primary-foreground/70">{p.tutorTitle}</p>
+              <p className="font-display text-2xl italic font-semibold">{previewTutorName}</p>
+              <p className="text-xs text-primary-foreground/70">{previewTutorTitle}</p>
             </div>
           </div>
-          <p className="mt-5 text-sm text-primary-foreground/85 leading-relaxed">"{p.tutorGreeting}"</p>
-          <div className="mt-6 pt-5 border-t border-primary-foreground/10">
+          <p className="mt-5 text-sm text-primary-foreground/85 leading-relaxed" dir={previewLang === "ar" ? "rtl" : "ltr"}>
+            "{previewTutorGreet}"
+          </p>
+          <div className="mt-6 pt-5 border-t border-primary-foreground/10" dir={previewLang === "ar" ? "rtl" : "ltr"}>
             <p className="text-[10px] uppercase tracking-[0.24em] text-accent font-semibold">Hub</p>
-            <p className="font-display text-3xl italic font-semibold mt-1">{p.hubName}</p>
-            <p className="text-xs text-primary-foreground/70 mt-2">{p.hubTagline}</p>
+            <p className="font-display text-3xl italic font-semibold mt-1">{previewHub}</p>
+            <p className="text-xs text-primary-foreground/70 mt-2">{previewHubTag}</p>
           </div>
         </div>
       </div>

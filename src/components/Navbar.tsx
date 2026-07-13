@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Globe, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAiPersona } from "@/hooks/useAiPersona";
+import { pickLocalized } from "@/lib/siteContent";
 import logo from "@/assets/lugha-logo.png";
 
 const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR" };
@@ -10,6 +12,8 @@ const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR
 const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, profile, signOut } = useAuth();
+  const persona = useAiPersona();
+  const hubLabel = pickLocalized(persona.hubName, language, t("nav.aihub"));
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -32,7 +36,7 @@ const Navbar = () => {
     { to: "/", label: t("nav.home") },
     { to: "/courses", label: t("nav.courses") },
     { to: "/learn", label: t("nav.learn") },
-    { to: "/ai", label: t("nav.aihub"), highlight: true },
+    { to: "/ai", label: hubLabel, highlight: true },
     { to: "/support", label: t("nav.support") },
     { to: "/dashboard", label: t("nav.dashboard") },
     { to: "/teachers", label: t("nav.teachers") },
