@@ -21,6 +21,7 @@ import CoursePage from "./pages/CoursePage";
 import StoryWorld from "./pages/StoryWorld";
 import StoryWorldScene from "./pages/StoryWorldScene";
 import NotFound from "./pages/NotFound";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/faq" element={<FAQ />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Chrome>
