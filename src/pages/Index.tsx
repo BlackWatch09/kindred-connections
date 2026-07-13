@@ -46,16 +46,16 @@ const Index = () => {
 
             <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-5 max-w-md">
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.lessons")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">200+</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.lessons")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">200+</dd>
               </div>
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.teachers")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">18</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.teachers")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">18</dd>
               </div>
               <div>
-                <dt className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("home.stats.cities")}</dt>
-                <dd className="serif-numeral text-2xl font-bold text-primary mt-1">07</dd>
+                <dt className="text-xs md:text-sm uppercase tracking-[0.18em] text-muted-foreground font-medium">{t("home.stats.cities")}</dt>
+                <dd className="serif-numeral text-3xl md:text-4xl font-bold text-primary mt-1">07</dd>
               </div>
             </dl>
           </div>
@@ -87,11 +87,11 @@ const Index = () => {
           {pillars.map((p, i) => (
             <div key={p.k} className="p-6 md:p-8 group hover:bg-secondary/50 transition-colors" style={{ animation: `fade-in-up 0.6s ease-out ${i * 0.1}s both` }}>
               <div className="flex items-baseline justify-between mb-4">
-                <span className="serif-numeral text-4xl font-bold text-accent">{p.k}</span>
+                <span className="serif-numeral text-5xl font-bold text-accent">{p.k}</span>
                 <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-y-1 group-hover:translate-x-1 transition-all" />
               </div>
-              <h3 className="font-display text-xl font-bold text-primary mb-2">{p.t}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{p.d}</p>
+              <h3 className="font-display text-2xl font-bold text-primary mb-3">{p.t}</h3>
+              <p className="text-base text-muted-foreground leading-relaxed">{p.d}</p>
             </div>
           ))}
         </div>
@@ -125,7 +125,7 @@ const Index = () => {
             <span className="eyebrow">{t("home.dispatches.eyebrow")}</span>
             <h2 className="font-display text-2xl md:text-3xl font-bold text-primary mt-2">{t("home.dispatches.title")}</h2>
           </div>
-          <Link to="/courses" className="text-xs uppercase tracking-[0.18em] text-primary hover:text-accent border-b border-primary hover:border-accent pb-0.5 font-semibold">
+          <Link to="/courses" className="text-sm uppercase tracking-[0.16em] text-primary hover:text-accent border-b border-primary hover:border-accent pb-0.5 font-semibold">
             {t("home.dispatches.all")}
           </Link>
         </div>
@@ -133,15 +133,15 @@ const Index = () => {
         <div className="grid md:grid-cols-3 gap-x-8 gap-y-10">
           {dispatches.map((d, i) => (
             <Link key={d.no} to={d.href} className="group block" style={{ animation: `fade-in-up 0.6s ease-out ${i * 0.1}s both` }}>
-              <div className="flex items-baseline justify-between mb-2 text-xs uppercase tracking-[0.22em]">
+              <div className="flex items-baseline justify-between mb-2 text-sm uppercase tracking-[0.18em]">
                 <span className="text-accent font-semibold">{d.no}</span>
-                <span className="text-muted-foreground">{d.kind}</span>
+                <span className="text-muted-foreground font-medium">{d.kind}</span>
               </div>
               <div className="h-px w-full bg-primary mb-4" />
-              <h3 className="font-display text-xl md:text-2xl font-bold text-primary leading-[1.15] group-hover:text-accent transition-colors">
+              <h3 className="font-display text-2xl md:text-[26px] font-bold text-primary leading-[1.15] group-hover:text-accent transition-colors">
                 {d.title}
               </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed">{d.lead}</p>
+              <p className="text-base text-foreground/75 mt-3 leading-relaxed">{d.lead}</p>
             </Link>
           ))}
         </div>
