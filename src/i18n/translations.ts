@@ -56,6 +56,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "login.or": "or continue with",
     "login.google": "Google",
     "login.facebook": "Facebook",
+    "login.comingsoon": "Coming Soon",
+    "login.socialnote": "Social sign-in is on its way — sign up with email for now.",
     "login.noaccount": "Don't have an account?",
     "login.hasaccount": "Already have an account?",
     "login.name": "Full Name",
