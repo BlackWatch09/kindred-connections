@@ -1,16 +1,32 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { Globe, Menu, X } from "lucide-react";
+import { Globe, Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.png";
 
 const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR" };
 
 const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const location = useLocation();
+  const displayName =
+    profile?.full_name ||
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "";
+  const initial = displayName.charAt(0).toUpperCase() || "U";
+  const handleSignOut = async () => {
+    await signOut();
+    setUserOpen(false);
+    setMobileOpen(false);
+    navigate("/");
+  };
 
   const links = [
     { to: "/", label: t("nav.home") },
