@@ -34,8 +34,8 @@ const Footer = () => {
 
 
           <div className="md:col-span-2">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-accent mb-4">{t("footer.house")}</p>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
+            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.house")}</p>
+            <ul className="space-y-2 text-[15px] text-primary-foreground/85">
               <li><Link to="/teachers" className="hover:text-accent transition-colors">{t("nav.teachers")}</Link></li>
               <li><Link to="/support" className="hover:text-accent transition-colors">{t("nav.support")}</Link></li>
               <li><Link to="/faq" className="hover:text-accent transition-colors">{t("nav.faq")}</Link></li>
