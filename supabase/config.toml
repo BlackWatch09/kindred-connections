@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.tts]
 verify_jwt = false
+
+[functions.siraj-chat]
+verify_jwt = false

@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import Admin from "./pages/Admin";
 import AIHub from "./pages/AIHub";
+import SirajCompanion from "@/components/SirajCompanion";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const Chrome = ({ children }: { children: React.ReactNode }) => {
         {children}
       </main>
       {!immersive && <Footer />}
+      <SirajCompanion />
     </>
   );
 };
