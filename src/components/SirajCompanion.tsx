@@ -353,7 +353,7 @@ const SirajCompanion = () => {
             {messages.length === 0 && (
               <div className="text-center py-6">
                 <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent mb-3">
-                  <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
+                  <img src={sirajChatAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
                 </div>
                 <p className="text-sm text-foreground leading-relaxed max-w-[280px] mx-auto">
                   {strings.starter}
