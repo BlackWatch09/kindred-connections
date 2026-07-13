@@ -14,7 +14,7 @@ const Footer = () => {
               <img src={logo} alt="Lugha" className="w-12 h-12 object-contain invert-0" />
               <div>
                 <h3 className="font-display text-2xl font-bold tracking-tight">Lugha</h3>
-                <p className="text-xs uppercase tracking-[0.28em] text-primary-foreground/60">لُغة · {t("footer.est")}</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-primary-foreground/70">لُغة · {t("footer.est")}</p>
               </div>
             </div>
             <p className="text-base text-primary-foreground/75 max-w-sm leading-relaxed">
@@ -23,7 +23,7 @@ const Footer = () => {
           </div>
 
           <div className="md:col-span-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.study")}</p>
+            <p className="text-sm uppercase tracking-[0.22em] text-accent mb-4 font-semibold">{t("footer.study")}</p>
             <ul className="space-y-2 text-[15px] text-primary-foreground/85">
               <li><Link to="/courses" className="hover:text-accent transition-colors">{t("nav.courses")}</Link></li>
               <li><Link to="/learn" className="hover:text-accent transition-colors">{t("nav.learn")}</Link></li>
@@ -34,7 +34,7 @@ const Footer = () => {
 
 
           <div className="md:col-span-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.house")}</p>
+            <p className="text-sm uppercase tracking-[0.22em] text-accent mb-4 font-semibold">{t("footer.house")}</p>
             <ul className="space-y-2 text-[15px] text-primary-foreground/85">
               <li><Link to="/teachers" className="hover:text-accent transition-colors">{t("nav.teachers")}</Link></li>
               <li><Link to="/support" className="hover:text-accent transition-colors">{t("nav.support")}</Link></li>
@@ -44,7 +44,7 @@ const Footer = () => {
           </div>
 
           <div className="md:col-span-3">
-            <p className="text-xs uppercase tracking-[0.24em] text-accent mb-4 font-semibold">{t("footer.correspondence")}</p>
+            <p className="text-sm uppercase tracking-[0.22em] text-accent mb-4 font-semibold">{t("footer.correspondence")}</p>
             <p className="text-[15px] text-primary-foreground/75 leading-relaxed">
               {t("footer.corrDesc")}
             </p>
@@ -60,7 +60,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between text-xs uppercase tracking-[0.18em] text-primary-foreground/60">
+      <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between text-sm uppercase tracking-[0.16em] text-primary-foreground/70">
         <span>© 2026 Lugha · {t("footer.rights")}</span>
         <span className="mt-2 md:mt-0">{t("footer.crafted")}</span>
 

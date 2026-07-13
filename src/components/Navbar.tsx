@@ -47,7 +47,7 @@ const Navbar = () => {
           <img src={logo} alt="Lugha" className="w-10 h-10 object-contain" />
           <div className="leading-none">
             <span className="font-display text-[28px] font-semibold text-primary tracking-tight italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}>Lugha</span>
-            <span className="block font-arabic text-[13px] tracking-[0.28em] text-muted-foreground mt-1">لُغة</span>
+            <span className="block font-arabic text-[15px] tracking-[0.24em] text-muted-foreground mt-1">لُغة</span>
           </div>
         </Link>
 
