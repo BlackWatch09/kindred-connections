@@ -57,11 +57,7 @@ export default function VoiceCoachDialog({ open, onClose }: { open: boolean; onC
     setLoading(true); setError(null);
     try {
       const base64 = await blobToBase64(blob);
-      const data = await callFn<Result>("pronunciation-coach", {
-        audio_base64: base64,
-        mime_type: mimeRef.current,
-        target,
-      });
+      const data = await pronunciationCoach(base64, mimeRef.current, target);
       setResult(data);
     } catch (e: any) {
       setError(e.message || "تعذّر التحليل، حاول مرة أخرى.");
