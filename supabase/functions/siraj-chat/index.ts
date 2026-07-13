@@ -1,5 +1,6 @@
 // Siraj — floating AI Arabic tutor. Streams replies via Lovable AI Gateway (Gemini).
 // Public function (no JWT required) — safe because it only calls the AI gateway.
+// v2
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
