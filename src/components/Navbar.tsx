@@ -12,6 +12,8 @@ const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR
 const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, profile, signOut } = useAuth();
+  const persona = useAiPersona();
+  const hubLabel = pickLocalized(persona.hubName, language, t("nav.aihub"));
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
