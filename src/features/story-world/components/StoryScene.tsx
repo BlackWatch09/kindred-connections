@@ -32,9 +32,9 @@ const StoryScene = () => {
   const world = worldId ? getWorld(worldId) : null;
 
   const {
-    sessionId, messages, streamingText, isStreaming, currentHint, learnedThisSession,
+    sessionId, messages, streamingText, isStreaming, currentHint, learnedThisSession, corrections,
     sceneSeed, priorScenarios, unknownWords,
-    init, addMessage, appendStream, finalizeStream, setStreaming, setHint, addLearned, reset,
+    init, addMessage, appendStream, finalizeStream, setStreaming, setHint, addLearned, addCorrection, reset,
   } = useStorySession();
 
   const [input, setInput] = useState("");
