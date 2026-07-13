@@ -451,7 +451,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.resetDesc": "Return every section to factory defaults.",
     "admin.backup.resetConfirm": "Reset all content to defaults? This cannot be undone.",
     // AI Hub nav + page
-    "nav.aihub": "AI Atelier",
+    "nav.aihub": "Lugha Council",
     "aihub.eyebrow": "The intelligent center of Lugha",
     "aihub.section.eyebrow": "AI Toolkit",
     "aihub.section.title": "Every AI companion, in one place",
