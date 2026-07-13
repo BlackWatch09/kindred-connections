@@ -434,17 +434,29 @@ const SirajCompanion = () => {
   );
 };
 
-const Bubble = ({ msg, tutorInitial, streaming }: { msg: ChatMsg; tutorInitial: string; streaming?: boolean }) => {
+const Bubble = ({
+  msg,
+  tutorAvatar,
+  tutorName,
+  streaming,
+}: {
+  msg: ChatMsg;
+  tutorAvatar: string;
+  tutorName: string;
+  streaming?: boolean;
+}) => {
   const isUser = msg.role === "user";
   return (
     <div className={`flex gap-2 ${isUser ? "flex-row-reverse" : ""}`}>
-      <span
-        className={`shrink-0 w-8 h-8 flex items-center justify-center text-xs font-bold ${
-          isUser ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground font-display italic"
-        }`}
-      >
-        {isUser ? "أنا" : tutorInitial}
-      </span>
+      {isUser ? (
+        <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-primary text-primary-foreground">
+          أنا
+        </span>
+      ) : (
+        <span className="shrink-0 w-8 h-8 rounded-full overflow-hidden ring-1 ring-accent bg-accent/10">
+          <img src={tutorAvatar} alt={tutorName} className="w-full h-full object-cover" />
+        </span>
+      )}
       <div
         className={`max-w-[78%] px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
