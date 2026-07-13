@@ -109,9 +109,16 @@ const AIHub = () => {
               </div>
             );
             if (href) return <Link key={key} to={href}>{CardBody}</Link>;
-            if (key === "tutor") {
+            const handler =
+              key === "tutor" ? openSiraj :
+              key === "voice" ? () => setOpenTool("voice") :
+              key === "story" ? () => setOpenTool("story") :
+              key === "translate" ? () => setOpenTool("translate") :
+              key === "writing" ? () => setOpenTool("writing") :
+              undefined;
+            if (handler) {
               return (
-                <button key={key} type="button" onClick={openSiraj} className="text-start">
+                <button key={key} type="button" onClick={handler} className="text-start">
                   {CardBody}
                 </button>
               );
@@ -128,6 +135,11 @@ const AIHub = () => {
           </div>
         </div>
       </section>
+
+      <VoiceCoachDialog open={openTool === "voice"} onClose={() => setOpenTool(null)} />
+      <StoryGeneratorDialog open={openTool === "story"} onClose={() => setOpenTool(null)} />
+      <ContextTranslateDialog open={openTool === "translate"} onClose={() => setOpenTool(null)} />
+      <WritingAssistDialog open={openTool === "writing"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
