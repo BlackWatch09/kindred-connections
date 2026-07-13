@@ -1,21 +1,12 @@
 import { useMemo, useState } from "react";
 import { Volume2, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Trophy, RotateCcw } from "lucide-react";
 import type { Lesson, LessonItem } from "@/data/courseLessons";
+import { speakArabic } from "@/lib/tts";
 
 interface Props {
   lesson: Lesson;
   onComplete: () => void;
 }
-
-const speakArabic = (text: string) => {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ar-SA";
-    u.rate = 0.8;
-    window.speechSynthesis.speak(u);
-  }
-};
 
 interface QuizQ {
   item: LessonItem;

@@ -44,15 +44,7 @@ const generateQuiz = (group: ArabicLetter[]): QuizQuestion[] => {
   return questions;
 };
 
-const speakArabic = (text: string) => {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ar-SA";
-    u.rate = 0.8;
-    window.speechSynthesis.speak(u);
-  }
-};
+import { speakArabic } from "@/lib/tts";
 
 interface AlphabetLearningProps {
   onClose?: () => void;
