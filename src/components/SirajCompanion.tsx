@@ -290,10 +290,11 @@ const SirajCompanion = () => {
           aria-label={strings.open}
           className={`fixed bottom-5 ${posSide} z-[60] group flex items-center gap-3 bg-primary text-primary-foreground pl-2 pr-4 py-2 border-2 border-accent shadow-2xl hover:shadow-accent/40 transition-all hover:-translate-y-0.5`}
         >
-          <span className="relative w-10 h-10 bg-accent text-accent-foreground flex items-center justify-center font-display italic font-bold text-lg">
-            {initial}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
+          <span className="relative w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center overflow-hidden ring-2 ring-accent">
+            <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
+            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
           </span>
+
           <span className="flex flex-col items-start leading-tight">
             <span className="text-[10px] uppercase tracking-[0.24em] text-accent font-semibold">
               {strings.online}
