@@ -181,7 +181,8 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+          <StatTile icon={<Award className="w-4 h-4" />} value={points.total} label="نقاط سِراج" tone="accent" />
           <StatTile icon={<Trophy className="w-4 h-4" />} value={stats.completedCount} label="مشهد أنهيته" tone="accent" />
           <StatTile icon={<Star className="w-4 h-4" />} value={stats.totalStars} label="نجمة كسبتها" tone="amber" />
           <StatTile icon={<BookOpen className="w-4 h-4" />} value={stats.totalWords} label="كلمة تعلمتها" tone="primary" />
