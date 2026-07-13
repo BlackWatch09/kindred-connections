@@ -14,6 +14,14 @@ export type SiteSettings = {
   socialInstagram: string;
   maintenanceMode: boolean;
   announcementBar: string;
+  aiPersona: {
+    hubName: string;      // e.g. "المِحراب"
+    hubTagline: string;   // short tagline shown under hub title
+    tutorName: string;    // e.g. "سِراج"
+    tutorTitle: string;   // e.g. "رفيقك في تعلّم العربية"
+    tutorAccent: string;  // e.g. "أردني"
+    tutorGreeting: string;// opening line
+  };
 };
 export type Announcement = { id: string; message: string; type: "info" | "warning" | "success"; createdAt: string };
 
