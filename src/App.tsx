@@ -20,6 +20,8 @@ import Dashboard from "./pages/Dashboard";
 import Teachers from "./pages/Teachers";
 import PlacementTest from "./pages/PlacementTest";
 import CoursePage from "./pages/CoursePage";
+import StoryWorld from "./pages/StoryWorld";
+import StoryWorldScene from "./pages/StoryWorldScene";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +56,22 @@ const App = () => (
                 <Route path="/teachers" element={<Teachers />} />
                 <Route path="/placement-test" element={<PlacementTest />} />
                 <Route path="/course/:slug" element={<CoursePage />} />
+                <Route
+                  path="/story"
+                  element={
+                    <ProtectedRoute>
+                      <StoryWorld />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/story/:worldId"
+                  element={
+                    <ProtectedRoute>
+                      <StoryWorldScene />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
