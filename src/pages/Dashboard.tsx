@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import { worlds } from "@/features/story-world/data/worlds";
+import { WORLDS as worlds } from "@/features/story-world/data/worlds";
 
 type StorySession = {
   id: string;
