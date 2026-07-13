@@ -72,7 +72,7 @@ const Login = () => {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 pt-4">
           {[
             {
               key: "google",
@@ -87,29 +87,39 @@ const Login = () => {
               ),
             },
           ].map(({ key, icon }) => (
-            <button
-              key={key}
-              type="button"
-              disabled
-              title={t("login.socialnote")}
-              className="group relative overflow-hidden flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border/60 bg-secondary/30 text-sm font-medium text-muted-foreground cursor-not-allowed transition-all"
-            >
-              {/* Shimmer sweep */}
-              <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-accent/10 to-transparent" />
-              {/* Corner "Coming Soon" ribbon */}
-              <span className="pointer-events-none absolute top-1 end-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-[9px] font-semibold text-accent uppercase tracking-wider">
-                <Sparkles className="w-2.5 h-2.5" />
+            <div key={key} className="relative group">
+              {/* Bold floating "Coming Soon" badge */}
+              <span className="pointer-events-none absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 px-2.5 py-0.5 rounded-full gradient-gold text-accent-foreground text-[10px] font-bold uppercase tracking-wide shadow-lg shadow-accent/40 whitespace-nowrap">
+                <Sparkles className="w-3 h-3" />
                 {t("login.comingsoon")}
               </span>
-              <span className="opacity-50">{icon}</span>
-              <span className="opacity-60">{t(`login.${key}`)}</span>
-            </button>
+
+              <button
+                type="button"
+                disabled
+                aria-label={t("login.socialnote")}
+                className="relative overflow-hidden w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed border-accent/40 bg-secondary/40 text-sm font-medium text-muted-foreground cursor-not-allowed transition-all hover:border-accent/70 hover:bg-secondary/60"
+              >
+                <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-accent/15 to-transparent" />
+                <span className="opacity-60">{icon}</span>
+                <span className="opacity-70">{t(`login.${key}`)}</span>
+              </button>
+
+              {/* Beautiful custom tooltip */}
+              <div
+                role="tooltip"
+                className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-3 z-30 w-max max-w-[220px] px-3 py-2 rounded-lg bg-foreground text-background text-xs font-medium shadow-xl opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+              >
+                <span
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-foreground"
+                  aria-hidden="true"
+                />
+                {t("login.socialnote")}
+              </div>
+            </div>
           ))}
         </div>
 
-        <p className="text-center text-[11px] text-muted-foreground/70 mt-3 italic">
-          {t("login.socialnote")}
-        </p>
 
 
         <p className="text-center text-sm text-muted-foreground mt-6">
