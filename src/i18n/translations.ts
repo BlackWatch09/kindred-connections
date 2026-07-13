@@ -497,6 +497,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.ai.tutorAccent": "Accent / dialect",
     "admin.ai.tutorGreeting": "Opening greeting",
     "admin.ai.save": "Save AI persona",
+    "admin.ai.editLang": "Editing language",
+    "admin.ai.livePreview": "Live preview",
     // Admin: AI content tools
     "admin.nav.aiContent": "AI Content Tools",
     "admin.aiContent.title": "AI Content Studio",
