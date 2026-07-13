@@ -35,22 +35,14 @@ const Navbar = () => {
     { to: "/support", label: t("nav.support") },
     { to: "/dashboard", label: t("nav.dashboard") },
     { to: "/teachers", label: t("nav.teachers") },
+    { to: "/faq", label: t("nav.faq") },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
-      {/* Top hairline meta bar */}
-      <div className="hidden md:block border-b border-border/60">
-        <div className="container mx-auto px-4 flex items-center justify-between h-8 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          <span>Est. 2026 · Volume I</span>
-          <span className="text-accent">لُغة — The Craft of Arabic</span>
-          <span>Andalusia → Anywhere</span>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 flex items-center justify-between h-16">
+      <div className="container mx-auto px-4 flex items-center justify-between h-14">
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Lugha" className="w-9 h-9 object-contain" />
           <div className="leading-none">
