@@ -341,8 +341,8 @@ const SirajCompanion = () => {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-background/40">
             {messages.length === 0 && (
               <div className="text-center py-6">
-                <div className="w-16 h-16 mx-auto bg-primary text-primary-foreground flex items-center justify-center font-display italic font-bold text-3xl mb-3">
-                  {initial}
+                <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-accent/10 ring-2 ring-accent mb-3">
+                  <img src={sirajAvatar.url} alt={tutorName} className="w-full h-full object-cover" />
                 </div>
                 <p className="text-sm text-foreground leading-relaxed max-w-[280px] mx-auto">
                   {strings.starter}
