@@ -6,12 +6,17 @@ import {
   Gamepad2, Headphones, PenTool, BookMarked, Globe, ToggleLeft
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
+  const { user, profile } = useAuth();
 
-  // Placeholder user data
-  const userName = "Ahmed";
+  const userName =
+    profile?.full_name ||
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "Student";
   const currentLevel = t("courses.beginner");
 
   const statCards = [
