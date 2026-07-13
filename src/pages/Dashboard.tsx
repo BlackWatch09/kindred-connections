@@ -95,10 +95,16 @@ const Dashboard = () => {
         setLocalSessions(
           JSON.parse(localStorage.getItem(`story_sessions_local_${user.id}`) || "[]"),
         );
+        setPointsLedger(getPoints(user.id));
       } catch { /* ignore */ }
       setLoading(false);
     })();
-    return () => { cancelled = true; };
+    const onPoints = () => setPointsLedger(getPoints(user.id));
+    window.addEventListener("siraj:points-changed", onPoints);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("siraj:points-changed", onPoints);
+    };
   }, [user]);
 
   const stats = useMemo(() => {
