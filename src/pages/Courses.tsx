@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Lock, BookOpen, CheckCircle2 } from "lucide-react";
+import { Lock, BookOpen, CheckCircle2, MessagesSquare, ArrowLeft } from "lucide-react";
 import { slugify } from "@/pages/CoursePage";
 
 const courses = [
@@ -120,9 +120,37 @@ const Courses = () => {
         <h1 className="font-display text-4xl font-bold text-center text-foreground mb-2">
           {t("courses.title")}
         </h1>
-        <p className="text-center text-muted-foreground mb-12">{t("courses.subtitle")}</p>
+        <p className="text-center text-muted-foreground mb-8">{t("courses.subtitle")}</p>
 
-        <div className="space-y-10">
+        {/* Living Story World highlight */}
+        <button
+          onClick={() => navigate("/story")}
+          className="group relative w-full mb-10 overflow-hidden rounded-3xl border border-accent/30 text-right"
+          style={{ animation: "fade-in-up 0.6s ease-out both" }}
+        >
+          <div className="relative p-6 md:p-8 bg-gradient-to-l from-primary via-primary to-accent/40 text-primary-foreground">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-accent/30 backdrop-blur flex items-center justify-center flex-shrink-0">
+                  <MessagesSquare className="w-6 h-6 text-accent" />
+                </div>
+                <div>
+                  <div className="inline-block px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold mb-1.5 tracking-wider">
+                    جديد
+                  </div>
+                  <h3 className="font-arabic text-xl md:text-2xl font-bold mb-1">عالم السرد الحي</h3>
+                  <p className="font-arabic text-sm text-primary-foreground/80 max-w-xl">
+                    ادخل عوالم أردنية أصيلة وتحدث مع شخصياتها بالكتابة أو الصوت — كل حوار فريد لا يتكرر.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-arabic bg-accent text-accent-foreground px-4 py-2 rounded-full group-hover:translate-x-[-4px] transition-transform">
+                ابدأ الآن <ArrowLeft className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+        </button>
+
           {courses.map((course, ci) => {
             const allDone =
               course.unlocked && course.lessons.every((l) => completedLessons.includes(l));
