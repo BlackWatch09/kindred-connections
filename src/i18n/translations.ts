@@ -293,6 +293,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "login.or": "أو تابع مع",
     "login.google": "جوجل",
     "login.facebook": "فيسبوك",
+    "login.comingsoon": "قريباً",
+    "login.socialnote": "تسجيل الدخول عبر المنصات قادم قريباً — استخدم البريد الإلكتروني حالياً.",
     "login.noaccount": "ليس لديك حساب؟",
     "login.hasaccount": "لديك حساب بالفعل؟",
     "login.name": "الاسم الكامل",
