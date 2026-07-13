@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
       return json({ error: "SERVICE_UNAVAILABLE", fallback: true }, 200);
     }
 
-    const { text, voice = "alloy", speed = 0.9 } = await req.json();
+    const { text, voice = "shimmer", speed = 0.9 } = await req.json();
     if (!text || typeof text !== "string") {
       return json({ error: "text required" }, 400);
     }
@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
         voice,
         speed,
         response_format: "mp3",
-        instructions: "Speak clearly in Modern Standard Arabic with a gentle, teacher-like tone suitable for language learners.",
+        instructions: "Speak in Modern Standard Arabic with clear, warm, engaging pronunciation like an expert language teacher. Enunciate every letter distinctly. Use a natural, encouraging tone suitable for beginners learning Arabic. Pace slightly slower than conversational speed.",
       }),
     });
 
