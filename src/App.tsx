@@ -41,6 +41,7 @@ const Chrome = ({ children }: { children: React.ReactNode }) => {
         {children}
       </main>
       {!immersive && <Footer />}
+      <SirajCompanion />
     </>
   );
 };
