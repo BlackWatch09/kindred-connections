@@ -177,31 +177,45 @@ const SirajCompanion = () => {
     abortRef.current = controller;
 
     try {
-      const res = await fetch(CHAT_URL, {
+      const apiKey = getGeminiKey();
+      if (!apiKey) {
+        setError(strings.error);
+        setBusy(false);
+        return;
+      }
+
+      const systemInstruction = buildSirajSystem({
+        language,
+        tutorName,
+        tutorTitle,
+        tutorAccent: pickLocalized(persona.tutorAccent, language, ""),
+        pageContext,
+      });
+
+      const contents = nextMessages.slice(-12).map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+      const res = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-          apikey: SUPABASE_ANON,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: nextMessages,
-          language,
-          persona: {
-            tutorName,
-            tutorTitle,
-            tutorAccent: pickLocalized(persona.tutorAccent, language, ""),
-            tutorGreeting: pickLocalized(persona.tutorGreeting, language, ""),
-          },
-          pageContext,
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents,
+          generationConfig: { temperature: 0.85, maxOutputTokens: 512 },
         }),
         signal: controller.signal,
       });
 
       if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error("[Siraj] Gemini error", res.status, errText);
         if (res.status === 429) setError(strings.rateLimit);
-        else if (res.status === 402) setError(strings.credits);
-        else setError(strings.error);
+        else if (res.status === 402 || res.status === 403) setError(strings.credits);
+        else setError(`${strings.error} (${res.status})`);
         setBusy(false);
         return;
       }
@@ -222,17 +236,21 @@ const SirajCompanion = () => {
           const t = line.trim();
           if (!t.startsWith("data:")) continue;
           const payload = t.slice(5).trim();
-          if (!payload) continue;
+          if (!payload || payload === "[DONE]") continue;
           try {
             const parsed = JSON.parse(payload);
-            if (parsed.delta) {
-              assembled += parsed.delta;
+            const delta =
+              parsed?.candidates?.[0]?.content?.parts
+                ?.map((p: { text?: string }) => p.text ?? "")
+                .join("") ?? "";
+            if (delta) {
+              assembled += delta;
               setStreamingText(assembled);
             }
-            if (parsed.done) break;
           } catch { /* skip */ }
         }
       }
+
 
       if (assembled) {
         setMessages((prev) => [...prev, { role: "assistant", content: assembled }]);
