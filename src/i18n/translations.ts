@@ -1005,6 +1005,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.ai.tutorAccent": "اللهجة",
     "admin.ai.tutorGreeting": "جملة التحية الافتتاحية",
     "admin.ai.save": "احفظ الشخصية",
+    "admin.ai.editLang": "لغة التحرير",
+    "admin.ai.livePreview": "معاينة حيّة",
     // لوحة التحكم: أدوات المحتوى الذكية
     "admin.nav.aiContent": "أدوات المحتوى الذكية",
     "admin.aiContent.title": "استوديو المحتوى الذكي",
