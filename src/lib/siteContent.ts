@@ -63,6 +63,14 @@ const DEFAULTS: Store = {
     socialInstagram: "@lugha.school",
     maintenanceMode: false,
     announcementBar: "",
+    aiPersona: {
+      hubName: "المِحراب",
+      hubTagline: "مركز لُغة الذكي — كل أدوات الذكاء الاصطناعي في مكان واحد.",
+      tutorName: "سِراج",
+      tutorTitle: "رفيقك الذكي في تعلّم العربية",
+      tutorAccent: "أردني",
+      tutorGreeting: "أهلاً وسهلاً! أنا سِراج، جاهز نحكي عربي سوا.",
+    },
   },
   announcements: [],
 };
