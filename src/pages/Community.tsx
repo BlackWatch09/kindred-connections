@@ -143,6 +143,13 @@ const Community = () => {
           </aside>
         </div>
       </div>
+      {showPicker && user && (
+        <FactionPicker
+          dismissible={!!faction}
+          onClose={() => setShowPicker(false)}
+          onChosen={(f) => { setFaction(f); setShowPicker(false); }}
+        />
+      )}
     </div>
   );
 };
