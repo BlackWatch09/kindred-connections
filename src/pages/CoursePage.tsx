@@ -5,7 +5,7 @@ import AlphabetLearning from "@/components/AlphabetLearning";
 import GreetingsLearning from "@/components/GreetingsLearning";
 import NumbersLearning from "@/components/NumbersLearning";
 import GenericLesson from "@/components/GenericLesson";
-import { LESSONS, getLessonBySlug, LESSON_LABELS_BY_LEVEL } from "@/data/courseLessons";
+import { LESSONS, getLessonBySlug, LESSON_LABELS_BY_LEVEL, getLessonLabel } from "@/data/courseLessons";
 
 const slugify = (name: string) =>
   name
@@ -48,7 +48,7 @@ const lessonBySlug = new Map(allLabels.map((l) => [slugify(l), l]));
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const lessonName = slug ? lessonBySlug.get(slug) : undefined;
   const dataLesson = slug ? getLessonBySlug(slug) : undefined;
@@ -88,7 +88,9 @@ const CoursePage = () => {
 
     return (
       <div className="text-center py-20 space-y-4">
-        <h2 className="font-display text-3xl font-bold text-foreground">{lessonName}</h2>
+        <h2 className={`font-display text-3xl font-bold text-foreground ${language === "ar" ? "font-arabic" : ""}`}>
+          {lessonName ? getLessonLabel(lessonName, language) : ""}
+        </h2>
         <p className="text-muted-foreground max-w-md mx-auto">
           {t("courses.coming_soon") || "This lesson is coming soon."}
         </p>
