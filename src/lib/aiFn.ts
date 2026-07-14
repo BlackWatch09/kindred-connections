@@ -327,3 +327,95 @@ export async function generateFlashcards(
     : [];
   return { title: r?.title || topic || "بطاقات مفردات", cards };
 }
+
+// ---------- Voice Interview ----------
+export interface InterviewPlan {
+  title: string;
+  intro: string;      // spoken by AI to greet the candidate
+  questions: string[]; // 4-5 spoken questions in Arabic (with tashkeel)
+}
+export async function generateInterviewPlan(level: string, topic: string): Promise<InterviewPlan> {
+  const prompt = `أنت مُحاور لغة عربية ودود اسمك "سِراج". صمّم مقابلة صوتية قصيرة لطالب مستواه (${level}) حول الموضوع: "${topic || "التعارف والحياة اليومية"}".
+اجعل الأسئلة مفتوحة، تشجّع الطالب على التحدث بجمل كاملة، متدرّجة من السهل إلى الأصعب.
+
+أعد JSON فقط:
+{
+  "title": "عنوان قصير للمقابلة",
+  "intro": "ترحيب قصير مشكّل بالكامل يُقرأ صوتياً (سطر إلى سطرين)",
+  "questions": ["سؤال 1 مشكّل", "سؤال 2 مشكّل", "سؤال 3 مشكّل", "سؤال 4 مشكّل"]
+}
+- 4 أسئلة بالضبط.
+- شكّل جميع الكلمات العربية بالحركات الكاملة (تشكيل كامل) لأنها ستُقرأ صوتياً.
+- استخدم فصحى مبسّطة وواضحة.`;
+  const r = await generateJson<InterviewPlan>([{ text: prompt }], MODEL, 0.6);
+  const questions = Array.isArray(r?.questions)
+    ? r.questions.map(String).filter(Boolean).slice(0, 5)
+    : [];
+  return {
+    title: r?.title || "مقابلة صوتية",
+    intro: r?.intro || "أَهْلاً بِكَ فِي الْمُقابَلَةِ الصَّوْتِيَّة. سَنَبْدَأُ بِسُؤالٍ بَسِيط.",
+    questions: questions.length ? questions : [
+      "عَرِّفْ بِنَفْسِكَ مِنْ فَضْلِكَ.",
+      "ما هِوايَتُكَ الْمُفَضَّلَة؟ وَلِماذا؟",
+      "صِفْ لِي يَوْمَكَ الْمُعْتاد.",
+      "ما هُوَ هَدَفُكَ مِنْ تَعَلُّمِ اللُّغَةِ الْعَرَبِيَّة؟",
+    ],
+  };
+}
+
+export interface InterviewTurn { question: string; answer: string; }
+export interface InterviewFeedback {
+  overall_score: number;         // 0-100
+  fluency: number;
+  pronunciation: number;
+  vocabulary: number;
+  grammar: number;
+  strengths: string[];
+  improvements: string[];
+  suggested_phrases: { ar: string; note: string }[];
+  summary: string;
+}
+export async function scoreInterview(level: string, topic: string, turns: InterviewTurn[]): Promise<InterviewFeedback> {
+  const transcript = turns
+    .map((t, i) => `س${i + 1}: ${t.question}\nج${i + 1}: ${t.answer || "(لم يجب)"}`)
+    .join("\n\n");
+  const prompt = `أنت مُقيّم لغة عربية خبير. قيّم أداء الطالب في المقابلة التالية.
+المستوى: ${level}
+الموضوع: ${topic || "عام"}
+
+نص المقابلة (كُتب من تفريغ صوتي):
+"""
+${transcript}
+"""
+
+أعد JSON فقط:
+{
+  "overall_score": 0-100,
+  "fluency": 0-100,
+  "pronunciation": 0-100,
+  "vocabulary": 0-100,
+  "grammar": 0-100,
+  "strengths": ["نقطة قوة 1","..."],
+  "improvements": ["اقتراح تحسين 1","..."],
+  "suggested_phrases": [{"ar":"جملة مشكّلة بديلة أفضل","note":"لماذا هي أفضل"}],
+  "summary": "ملخّص ودود من سطرين بالعربية"
+}
+- 2-4 عناصر في strengths و improvements و suggested_phrases.
+- شكّل الجمل العربية في suggested_phrases بالكامل.
+- كن واقعياً: إن كانت الإجابات فارغة اجعل الدرجات منخفضة.`;
+  const r = await generateJson<InterviewFeedback>([{ text: prompt }], MODEL, 0.3);
+  const clamp = (n: any) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)));
+  return {
+    overall_score: clamp(r?.overall_score),
+    fluency: clamp(r?.fluency),
+    pronunciation: clamp(r?.pronunciation),
+    vocabulary: clamp(r?.vocabulary),
+    grammar: clamp(r?.grammar),
+    strengths: Array.isArray(r?.strengths) ? r.strengths.map(String) : [],
+    improvements: Array.isArray(r?.improvements) ? r.improvements.map(String) : [],
+    suggested_phrases: Array.isArray(r?.suggested_phrases)
+      ? (r.suggested_phrases as any[]).map((p) => ({ ar: String(p?.ar || ""), note: String(p?.note || "") })).filter((p) => p.ar)
+      : [],
+    summary: r?.summary || "",
+  };
+}

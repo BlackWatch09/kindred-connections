@@ -14,6 +14,7 @@ import WritingAssistDialog from "@/components/ai-tools/WritingAssistDialog";
 import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog";
 import DailyChallengeDialog from "@/components/ai-tools/DailyChallengeDialog";
 import FlashcardsDialog from "@/components/ai-tools/FlashcardsDialog";
+import VoiceInterviewDialog from "@/components/ai-tools/VoiceInterviewDialog";
 
 type Tool = {
   key: string;
@@ -34,7 +35,7 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
-  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash">(null);
+  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview">(null);
 
   const tools: Tool[] = [
     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
@@ -119,6 +120,7 @@ const AIHub = () => {
               key === "writing" ? () => setOpenTool("writing") :
               key === "daily" ? () => setOpenTool("daily") :
               key === "flash" ? () => setOpenTool("flash") :
+              key === "interview" ? () => setOpenTool("interview") :
               undefined;
             if (handler) {
               return (
@@ -146,6 +148,7 @@ const AIHub = () => {
       <WritingAssistDialog open={openTool === "writing"} onClose={() => setOpenTool(null)} />
       <DailyChallengeDialog open={openTool === "daily"} onClose={() => setOpenTool(null)} />
       <FlashcardsDialog open={openTool === "flash"} onClose={() => setOpenTool(null)} />
+      <VoiceInterviewDialog open={openTool === "interview"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
