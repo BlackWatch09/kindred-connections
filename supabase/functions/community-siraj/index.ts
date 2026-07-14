@@ -1,7 +1,6 @@
 // community-siraj — Insert an AI reply from "Siraj" as a comment when
-// a user @mentions him in a community post. Uses service role to bypass
-// the RLS policy that forbids clients from inserting is_ai=true rows.
-// deploy-tag: v5
+// a user @mentions him in a community post.
+// deploy-tag: v6
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -12,6 +11,13 @@ const corsHeaders = {
 };
 
 const MODEL = "google/gemini-2.5-flash";
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -90,10 +96,3 @@ Deno.serve(async (req) => {
     return json({ error: String((e as Error).message || e) }, 500);
   }
 });
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
-}
