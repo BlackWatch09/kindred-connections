@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   ScanLine, Upload, Camera, Copy, Check, Download, RotateCcw, FileText, Sparkles, Loader2,
+  Printer, Usb, ArrowLeft, Wifi, MonitorSmartphone, AlertTriangle, Info,
 } from "lucide-react";
 import ToolShell from "./ToolShell";
 import { scanImageText, type ScanResult } from "@/lib/aiFn";
@@ -12,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-type Stage = "idle" | "preview" | "scanning" | "done" | "error";
+type Stage = "idle" | "device" | "preview" | "scanning" | "done" | "error";
 
 const fileToBase64 = (file: File): Promise<{ base64: string; mime: string; dataUrl: string }> =>
   new Promise((resolve, reject) => {
