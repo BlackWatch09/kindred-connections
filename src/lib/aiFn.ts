@@ -242,10 +242,18 @@ export interface DailyChallenge {
   tasks: DailyTask[];
 }
 export async function generateDailyChallenge(level: string, seed: string): Promise<DailyChallenge> {
-  const { data, error } = await supabase.functions.invoke("ai-json", {
-    body: { task: "daily-challenge", input: { level, seed } },
-  });
-  if (error) throw new Error(error.message || "فشل توليد التحدّي");
+  let data: any; let error: any;
+  try {
+    const res = await withTimeout(
+      supabase.functions.invoke("ai-json", { body: { task: "daily-challenge", input: { level, seed } } }),
+      REQUEST_TIMEOUT_MS,
+      "توليد التحدّي",
+    );
+    data = res.data; error = res.error;
+  } catch (e) {
+    throw new AppError(friendlyError(e), "NETWORK", e);
+  }
+  if (error) throw new AppError(friendlyError(error), "FUNCTION", error);
   const r: any = data || {};
   // Server returns a simplified shape; adapt to the DailyChallenge structure used by the UI.
   const tasks: DailyTask[] = Array.isArray(r?.tasks)
