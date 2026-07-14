@@ -118,6 +118,7 @@ const AIHub = () => {
               key === "translate" ? () => setOpenTool("translate") :
               key === "writing" ? () => setOpenTool("writing") :
               key === "daily" ? () => setOpenTool("daily") :
+              key === "flash" ? () => setOpenTool("flash") :
               undefined;
             if (handler) {
               return (
@@ -144,6 +145,7 @@ const AIHub = () => {
       <ContextTranslateDialog open={openTool === "translate"} onClose={() => setOpenTool(null)} />
       <WritingAssistDialog open={openTool === "writing"} onClose={() => setOpenTool(null)} />
       <DailyChallengeDialog open={openTool === "daily"} onClose={() => setOpenTool(null)} />
+      <FlashcardsDialog open={openTool === "flash"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
