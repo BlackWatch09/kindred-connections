@@ -253,6 +253,7 @@ const AIHub = () => {
       <DailyChallengeDialog open={openTool === "daily"} onClose={() => setOpenTool(null)} />
       <FlashcardsDialog open={openTool === "flash"} onClose={() => setOpenTool(null)} />
       <VoiceInterviewDialog open={openTool === "interview"} onClose={() => setOpenTool(null)} />
+      <SmartScannerDialog open={openTool === "scanner"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
