@@ -116,6 +116,7 @@ const AIHub = () => {
               key === "story" ? () => setOpenTool("story") :
               key === "translate" ? () => setOpenTool("translate") :
               key === "writing" ? () => setOpenTool("writing") :
+              key === "daily" ? () => setOpenTool("daily") :
               undefined;
             if (handler) {
               return (
@@ -141,6 +142,7 @@ const AIHub = () => {
       <StoryGeneratorDialog open={openTool === "story"} onClose={() => setOpenTool(null)} />
       <ContextTranslateDialog open={openTool === "translate"} onClose={() => setOpenTool(null)} />
       <WritingAssistDialog open={openTool === "writing"} onClose={() => setOpenTool(null)} />
+      <DailyChallengeDialog open={openTool === "daily"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
