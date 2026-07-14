@@ -70,18 +70,30 @@ const Community = () => {
               انشر، علّق، تحالف، وتعلّم مع سراج والطلاب.
             </p>
           </div>
-          {myFaction && (
-            <div className={`border ${myFaction.borderClass} bg-card px-4 py-3 flex items-center gap-3`}>
+          {myFaction ? (
+            <button
+              onClick={() => setShowPicker(true)}
+              className={`border ${myFaction.borderClass} bg-card px-4 py-3 flex items-center gap-3 hover:bg-background transition-colors group`}
+              title="تغيير التحالف"
+            >
               <div className={`w-10 h-10 grid place-items-center text-primary-foreground text-lg ${myFaction.colorClass}`}>
                 {myFaction.emblem}
               </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">تحالفك</div>
+              <div className="text-right">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">تحالفك · اضغط للتغيير</div>
                 <div className={`font-arabic text-sm font-bold ${myFaction.textClass}`}>{myFaction.name}</div>
                 <div className="text-[11px] text-muted-foreground font-arabic">{myFaction.motto}</div>
               </div>
-            </div>
-          )}
+            </button>
+          ) : factionLoaded && user ? (
+            <button
+              onClick={() => setShowPicker(true)}
+              className="flex items-center gap-2 border border-accent/60 bg-accent/10 text-accent px-4 py-3 hover:bg-accent/20 transition-colors"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="font-arabic text-sm font-semibold">اختر تحالفك للبدء</span>
+            </button>
+          ) : null}
         </div>
 
         {/* Challenge banner */}
