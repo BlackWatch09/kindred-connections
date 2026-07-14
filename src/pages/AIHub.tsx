@@ -14,6 +14,7 @@ import WritingAssistDialog from "@/components/ai-tools/WritingAssistDialog";
 import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog";
 import DailyChallengeDialog from "@/components/ai-tools/DailyChallengeDialog";
 import FlashcardsDialog from "@/components/ai-tools/FlashcardsDialog";
+import VoiceInterviewDialog from "@/components/ai-tools/VoiceInterviewDialog";
 
 type Tool = {
   key: string;
