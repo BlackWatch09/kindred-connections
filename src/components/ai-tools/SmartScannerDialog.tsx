@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   ScanLine, Upload, Camera, Copy, Check, Download, RotateCcw, FileText, Sparkles, Loader2,
+  Printer, Usb, ArrowLeft, Wifi, MonitorSmartphone, AlertTriangle, Info,
 } from "lucide-react";
 import ToolShell from "./ToolShell";
 import { scanImageText, type ScanResult } from "@/lib/aiFn";
@@ -12,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-type Stage = "idle" | "preview" | "scanning" | "done" | "error";
+type Stage = "idle" | "device" | "preview" | "scanning" | "done" | "error";
 
 const fileToBase64 = (file: File): Promise<{ base64: string; mime: string; dataUrl: string }> =>
   new Promise((resolve, reject) => {
@@ -33,8 +34,11 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [editedText, setEditedText] = useState<string>("");
+  const [detectedDevice, setDetectedDevice] = useState<string>("");
+  const [probing, setProbing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
+  const scanFileRef = useRef<HTMLInputElement>(null);
 
   const handleReset = () => {
     setStage("idle");
@@ -43,6 +47,31 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
     setErrorMsg("");
     setEditedText("");
     setCopied(false);
+  };
+
+  // WebUSB probe for still-image class devices (USB class 6 = Still Imaging / PTP)
+  const probeUsbScanner = async () => {
+    const nav: any = navigator;
+    if (!nav?.usb?.requestDevice) {
+      toast.error("متصفحك لا يدعم WebUSB — جرّب Chrome أو Edge على الحاسوب");
+      return;
+    }
+    try {
+      setProbing(true);
+      const device: any = await nav.usb.requestDevice({
+        // Class 6 = Image (scanners/cameras). Include class 7 (Printer, for MFPs) as a fallback.
+        filters: [{ classCode: 6 }, { classCode: 7 }, {}],
+      });
+      const name = [device?.manufacturerName, device?.productName].filter(Boolean).join(" ") || "جهاز غير مُعرَّف";
+      setDetectedDevice(name);
+      toast.success(`تم التعرّف على: ${name}`);
+    } catch (err: any) {
+      if (err?.name !== "NotFoundError") {
+        toast.error("تعذّر الوصول إلى الجهاز");
+      }
+    } finally {
+      setProbing(false);
+    }
   };
 
   const handleFile = async (file: File | undefined) => {
@@ -110,25 +139,36 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
       {/* IDLE — upload options */}
       {stage === "idle" && (
         <div className="space-y-6">
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <button
               onClick={() => fileRef.current?.click()}
-              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-8 text-center transition-all overflow-hidden"
+              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-6 text-center transition-all overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Upload className="w-10 h-10 mx-auto mb-3 text-accent" />
-              <p className="font-display text-lg font-bold text-primary">ارفع صورة</p>
-              <p className="text-xs text-muted-foreground mt-1">JPG / PNG / WEBP · حتى 8MB</p>
+              <Upload className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">ارفع صورة</p>
+              <p className="text-[11px] text-muted-foreground mt-1">JPG / PNG / WEBP · حتى 8MB</p>
             </button>
 
             <button
               onClick={() => camRef.current?.click()}
-              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-8 text-center transition-all overflow-hidden"
+              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-6 text-center transition-all overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Camera className="w-10 h-10 mx-auto mb-3 text-accent" />
-              <p className="font-display text-lg font-bold text-primary">صوّر بالكاميرا</p>
-              <p className="text-xs text-muted-foreground mt-1">يعمل على الجوال والحاسوب</p>
+              <Camera className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">صوّر بالكاميرا</p>
+              <p className="text-[11px] text-muted-foreground mt-1">يعمل على الجوال والحاسوب</p>
+            </button>
+
+            <button
+              onClick={() => setStage("device")}
+              className="group relative border-2 border-dashed border-accent/50 hover:border-accent bg-gradient-to-br from-accent/5 to-transparent p-6 text-center transition-all overflow-hidden"
+            >
+              <span className="absolute top-2 left-2 text-[9px] uppercase tracking-[0.24em] bg-accent text-accent-foreground px-1.5 py-0.5 font-bold">جديد</span>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/10 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Printer className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">جهاز Scanner</p>
+              <p className="text-[11px] text-muted-foreground mt-1">USB أو شبكة · احترافي</p>
             </button>
           </div>
 
@@ -147,6 +187,13 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
             className="hidden"
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
+          <input
+            ref={scanFileRef}
+            type="file"
+            accept="image/*,application/pdf"
+            className="hidden"
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
 
           <div className="border border-border bg-secondary/30 p-5 space-y-2">
             <p className="eyebrow flex items-center gap-2">
@@ -161,6 +208,126 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
           </div>
         </div>
       )}
+
+      {/* DEVICE — connect to a physical scanner */}
+      {stage === "device" && (
+        <div className="space-y-5">
+          <button
+            onClick={() => setStage("idle")}
+            className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> عودة إلى الخيارات
+          </button>
+
+          {/* Hero */}
+          <div className="relative overflow-hidden border border-accent/40 bg-gradient-to-br from-primary via-primary to-accent/30 text-primary-foreground p-6 md:p-7">
+            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
+            <div className="relative flex items-start gap-4">
+              <div className="w-14 h-14 bg-accent text-accent-foreground flex items-center justify-center shrink-0">
+                <Printer className="w-7 h-7" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.32em] text-accent font-bold mb-1">اتصال احترافي</p>
+                <h4 className="font-display text-xl md:text-2xl font-bold leading-tight">اسحب الورقة مباشرة من جهاز Scanner</h4>
+                <p className="mt-2 text-sm text-primary-foreground/80 leading-relaxed">
+                  اربط ماسحك الضوئي أو طابعتك متعددة الوظائف (USB أو شبكة)، وسِراج سيلتقط الصورة الممسوحة ويستخرج نصّها فوراً.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Step cards */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Step 1: detect */}
+            <div className="border border-border bg-card p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center font-display font-bold">١</span>
+                <div>
+                  <p className="font-display font-bold text-primary">تعرَّف على الجهاز</p>
+                  <p className="text-[11px] text-muted-foreground">WebUSB — تجريبي</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                سنطلب من المتصفح إذناً لعرض قائمة الأجهزة المتصلة عبر USB. اختر ماسحك الضوئي من النافذة المنبثقة.
+              </p>
+              <button
+                onClick={probeUsbScanner}
+                disabled={probing}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-semibold disabled:opacity-60"
+              >
+                {probing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Usb className="w-4 h-4" />}
+                {probing ? "جارٍ البحث…" : "ابحث عن جهاز USB"}
+              </button>
+              {detectedDevice && (
+                <div className="border-r-2 border-emerald-500 bg-emerald-500/5 p-2.5 text-xs text-foreground">
+                  <span className="text-emerald-600 font-bold">✓ متصل: </span>{detectedDevice}
+                </div>
+              )}
+            </div>
+
+            {/* Step 2: scan */}
+            <div className="border border-accent bg-gradient-to-br from-accent/5 to-transparent p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 bg-accent text-accent-foreground flex items-center justify-center font-display font-bold">٢</span>
+                <div>
+                  <p className="font-display font-bold text-primary">ابدأ عملية المسح</p>
+                  <p className="text-[11px] text-muted-foreground">من تطبيق النظام</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                اضغط الزر لفتح مربّع الحوار، ثم اختر ماسحك (على Windows: <span className="font-semibold">من الماسح الضوئي</span>، على Mac: <span className="font-semibold">Image Capture</span>).
+              </p>
+              <button
+                onClick={() => scanFileRef.current?.click()}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent text-accent-foreground hover:opacity-90 transition-opacity text-sm font-bold"
+              >
+                <ScanLine className="w-4 h-4" /> ابدأ المسح الآن
+              </button>
+              <p className="text-[10px] text-muted-foreground text-center">
+                سيتم استقبال الصورة الممسوحة تلقائياً وتحليلها
+              </p>
+            </div>
+          </div>
+
+          {/* Compatibility & guidance */}
+          <div className="border border-dashed border-border bg-secondary/30 p-5 space-y-3">
+            <p className="eyebrow flex items-center gap-2">
+              <Info className="w-3.5 h-3.5 text-accent" /> — كيف يعمل الاتصال —
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3 text-xs">
+              <div className="flex items-start gap-2">
+                <Usb className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-foreground">USB مباشر</p>
+                  <p className="text-muted-foreground mt-0.5">Chrome/Edge على الحاسوب — WebUSB</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Wifi className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-foreground">طابعة شبكية</p>
+                  <p className="text-muted-foreground mt-0.5">امسح إلى مجلد ثم اختر الملف</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <MonitorSmartphone className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-foreground">تطبيق النظام</p>
+                  <p className="text-muted-foreground mt-0.5">Windows Scan · Mac Image Capture</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 text-[11px] text-muted-foreground border-t border-border pt-3">
+              <AlertTriangle className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+              <p>
+                لأسباب أمنية، لا يستطيع المتصفح تشغيل برامج تعريف TWAIN/SANE مباشرة. سِراج يستخدم WebUSB لاكتشاف الجهاز ومربّع حوار النظام لتنفيذ المسح، وهي الطريقة القياسية المدعومة في متصفحات Chromium.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
       {/* SCANNING — laser effect */}
       {stage === "scanning" && (
