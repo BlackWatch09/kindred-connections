@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 
 export type FactionId = "fasaha" | "hikma" | "balagha";
 
