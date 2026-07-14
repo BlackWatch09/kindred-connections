@@ -1,61 +1,22 @@
-// Gemini integration — calls Google Generative Language API directly from the
-// browser, using an API key the user pastes once and we store in localStorage.
-// This avoids needing any deployed Edge Function or server proxy.
+// Gemini integration — routed through the `gemini-proxy` Supabase Edge Function
+// so the API key stays server-side (env: GEMINI_API_KEY). Zero user setup.
 
 const MODEL = "gemini-2.5-flash-lite";
-const GEMINI_BASE = "https://generativelanguage.googleapis.com";
-const KEY_STORAGE = "lugha.gemini.key.v1";
-const KEY_EVENT = "lugha:gemini-key-changed";
+const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
+const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
-export function getGeminiKey(): string {
-  if (typeof window === "undefined") return "";
-  try { return window.localStorage.getItem(KEY_STORAGE) || ""; } catch { return ""; }
-}
-export function setGeminiKey(key: string) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(KEY_STORAGE, key.trim());
-    window.dispatchEvent(new CustomEvent(KEY_EVENT));
-  } catch { /* ignore */ }
-}
-export function clearGeminiKey() {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(KEY_STORAGE);
-    window.dispatchEvent(new CustomEvent(KEY_EVENT));
-  } catch { /* ignore */ }
-}
-export function hasGeminiKey(): boolean { return !!getGeminiKey(); }
-export function onGeminiKeyChange(cb: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => cb();
-  window.addEventListener(KEY_EVENT, handler);
-  window.addEventListener("storage", handler);
-  return () => {
-    window.removeEventListener(KEY_EVENT, handler);
-    window.removeEventListener("storage", handler);
-  };
-}
-
-function requireKey(): string {
-  const k = getGeminiKey();
-  if (!k) {
-    // Fire an event so the app can open the key-entry dialog.
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("lugha:gemini-key-missing"));
-    }
-    throw new Error("لم يتم إعداد مفتاح الذكاء الاصطناعي بعد. الرجاء إضافته من الإعدادات.");
-  }
-  return k;
-}
-
-/** Build a direct Google Gemini endpoint URL with the user's key. */
+/** Build the proxied Gemini endpoint URL. Extra query params optional (e.g. `alt=sse`). */
 export function geminiEndpoint(model: string, method: string, extraQuery?: string): string {
-  const key = requireKey();
-  const params = new URLSearchParams(extraQuery || "");
-  params.set("key", key);
-  return `${GEMINI_BASE}/v1beta/models/${model}:${method}?${params.toString()}`;
+  const q = extraQuery ? `?${extraQuery}` : "";
+  return `${PROXY_BASE}/v1beta/models/${model}:${method}${q}`;
 }
+
+// Legacy no-op exports (older components may still import these).
+export function getGeminiKey(): string { return "server"; }
+export function setGeminiKey(_key: string) { /* no-op */ }
+export function clearGeminiKey() { /* no-op */ }
+export function hasGeminiKey(): boolean { return true; }
+export function onGeminiKeyChange(_cb: () => void): () => void { return () => {}; }
 
 function buildSystemPrompt(o: {
   worldId: string;
@@ -113,13 +74,8 @@ export async function streamStoryChat(
   } = body as any;
 
   const systemInstruction = buildSystemPrompt({
-    worldId,
-    characterName,
-    characterPersona,
-    level,
-    sceneSeed,
-    priorScenarios,
-    unknownWords,
+    worldId, characterName, characterPersona, level, sceneSeed,
+    priorScenarios, unknownWords,
   });
 
   const contents = (history as { role: string; content: string }[])
@@ -139,7 +95,6 @@ export async function streamStoryChat(
   }
 
   const url = geminiEndpoint(MODEL, "streamGenerateContent", "alt=sse");
-
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -174,10 +129,7 @@ export async function streamStoryChat(
         const text = parsed?.candidates?.[0]?.content?.parts
           ?.map((p: { text?: string }) => p.text ?? "")
           .join("") ?? "";
-        if (text) {
-          full += text;
-          onDelta(text);
-        }
+        if (text) { full += text; onDelta(text); }
       } catch { /* skip */ }
     }
   }
@@ -215,9 +167,7 @@ new_words = كلمات عربية جديرة بالحفظ من جملة الطا
   const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
   try {
     return JSON.parse(raw) as {
-      has_error: boolean;
-      hint: string;
-      corrected: string;
+      has_error: boolean; hint: string; corrected: string;
       new_words: { word: string; meaning: string }[];
     };
   } catch {
