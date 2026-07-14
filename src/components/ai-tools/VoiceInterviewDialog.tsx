@@ -112,7 +112,7 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
       setPhase("interview");
       await speakThenListen(`${p.intro} ${p.questions[0]}`);
     } catch (e: any) {
-      setError(e.message || "تعذّر بدء المقابلة.");
+      setError(friendlyError(e));
       setPhase("error");
     }
   };
@@ -267,12 +267,12 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
           }
           setPhase("done");
         } catch (e: any) {
-          setError(e.message || "تعذّر تقييم المقابلة.");
+          setError(friendlyError(e));
           setPhase("error");
         }
       }
     } catch (e: any) {
-      setError(e.message || "تعذّر تفريغ الصوت.");
+      setError(friendlyError(e));
       setTranscribing(false);
     }
   };
