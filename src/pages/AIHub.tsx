@@ -72,7 +72,7 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
-  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview">(null);
+  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview" | "scanner">(null);
 
   const toolsMap: Record<ToolKey, Tool> = {
     tutor:     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
@@ -84,6 +84,7 @@ const AIHub = () => {
     daily:     { key: "daily",     icon: Calendar,      title: t("aihub.tools.daily"),   desc: t("aihub.tools.daily.desc"),   cta: t("aihub.cta.today") },
     flash:     { key: "flash",     icon: Layers,        title: t("aihub.tools.flash"),   desc: t("aihub.tools.flash.desc"),   cta: t("aihub.cta.review") },
     interview: { key: "interview", icon: Radio,         title: t("aihub.tools.interview"), desc: t("aihub.tools.interview.desc"), cta: t("aihub.cta.begin") },
+    scanner:   { key: "scanner",   icon: ScanLine,      title: isAr ? "الماسح الضوئي الذكي" : "Smart AI Scanner", desc: isAr ? "صوّر أي ورقة واستخرج نصّها بدقّة عالية — قابل للتحرير والنسخ والتحميل." : "Snap any page and extract its text with high accuracy — editable, copyable, downloadable.", cta: isAr ? "ابدأ المسح" : "Start scan", badge: isAr ? "جديد" : "New" },
   };
 
   const isAr = language === "ar";
