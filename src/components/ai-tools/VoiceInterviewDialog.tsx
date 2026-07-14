@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Radio, Mic, Square, Loader2, Play, Volume2, RotateCcw, Trophy, Sparkles } from "lucide-react";
+import { Radio, Mic, Square, Loader2, Play, Volume2, RotateCcw, Trophy, Sparkles, Zap } from "lucide-react";
 import ToolShell from "./ToolShell";
 import { generateInterviewPlan, scoreInterview, type InterviewPlan, type InterviewFeedback, type InterviewTurn } from "@/lib/aiFn";
 import { transcribeAudio } from "@/features/story-world/lib/streamChat";
@@ -23,17 +23,25 @@ const TOPICS = [
   "الهوايات والفنون",
 ];
 
+// Silence detection thresholds
+const SILENCE_RMS = 0.012;      // below this = "silence"
+const SILENCE_HOLD_MS = 1600;   // stop after this much continuous silence
+const MIN_SPEECH_MS = 600;      // require at least this much detected speech before allowing auto-stop
+const MAX_ANSWER_MS = 60_000;   // hard cap
+
 export default function VoiceInterviewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("setup");
   const [level, setLevel] = useState("intermediate");
   const [topic, setTopic] = useState(TOPICS[0]);
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
-  const [step, setStep] = useState(0); // question index
+  const [step, setStep] = useState(0);
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [handsFree, setHandsFree] = useState(true);
+  const [micLevel, setMicLevel] = useState(0);
   const [feedback, setFeedback] = useState<InterviewFeedback | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,67 +49,124 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
   const chunksRef = useRef<Blob[]>([]);
   const mimeRef = useRef<string>("audio/webm");
   const streamRef = useRef<MediaStream | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const silenceStartRef = useRef<number | null>(null);
+  const speechDetectedAtRef = useRef<number | null>(null);
+  const recordStartRef = useRef<number>(0);
   const awardedRef = useRef(false);
+  const cancelledRef = useRef(false);
 
-  // stop audio when closing
+  // stop everything when closing
   useEffect(() => {
     if (!open) {
-      stopSpeaking();
-      setSpeaking(false);
-      recorderRef.current?.stop?.();
-      streamRef.current?.getTracks().forEach((t) => t.stop());
+      cleanupAll();
     }
+    return () => {
+      if (!open) return;
+    };
   }, [open]);
 
-  const reset = () => {
+  useEffect(() => () => cleanupAll(), []);
+
+  const cleanupAll = () => {
+    cancelledRef.current = true;
     stopSpeaking();
+    setSpeaking(false);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    try { recorderRef.current?.stop?.(); } catch { /* ignore */ }
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
+    analyserRef.current = null;
+  };
+
+  const reset = () => {
+    cleanupAll();
+    cancelledRef.current = false;
     setPhase("setup");
     setPlan(null);
     setStep(0);
     setTurns([]);
     setFeedback(null);
     setError(null);
+    setRecording(false);
+    setTranscribing(false);
     awardedRef.current = false;
   };
 
   const startInterview = async () => {
+    cancelledRef.current = false;
     setPhase("loading");
     setError(null);
     try {
       const p = await generateInterviewPlan(level, topic);
+      if (cancelledRef.current) return;
       setPlan(p);
       setStep(0);
       setTurns([]);
       setPhase("interview");
-      // greet + ask first question
-      await speak(`${p.intro} ${p.questions[0]}`);
+      await speakThenListen(`${p.intro} ${p.questions[0]}`);
     } catch (e: any) {
       setError(e.message || "تعذّر بدء المقابلة.");
       setPhase("error");
     }
   };
 
-  const speak = async (text: string) => {
+  const speakThenListen = async (text: string) => {
     setSpeaking(true);
     try {
       await speakArabic(text);
     } finally {
-      // speakArabic resolves when playback starts; give it a moment
-      setTimeout(() => setSpeaking(false), 300);
+      setSpeaking(false);
+    }
+    if (cancelledRef.current) return;
+    if (handsFree) {
+      // tiny pause so playback tail doesn't get captured
+      await new Promise((r) => setTimeout(r, 250));
+      if (!cancelledRef.current) startRecording();
     }
   };
 
   const replayQuestion = async () => {
     if (!plan) return;
-    await speak(plan.questions[step]);
+    stopSpeaking();
+    if (recording) stopRecording(); // avoid mic capturing the replay
+    setSpeaking(true);
+    try {
+      await speakArabic(plan.questions[step]);
+    } finally {
+      setSpeaking(false);
+    }
+    if (cancelledRef.current) return;
+    if (handsFree) {
+      await new Promise((r) => setTimeout(r, 250));
+      if (!cancelledRef.current) startRecording();
+    }
   };
 
   const startRecording = async () => {
+    if (recording || transcribing) return;
     setError(null);
     try {
-      stopSpeaking();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
       streamRef.current = stream;
+
+      // VAD analyser
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AC();
+      audioCtxRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
       const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
         : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
       mimeRef.current = mime || "audio/webm";
@@ -109,20 +174,68 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
       chunksRef.current = [];
       rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
       rec.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mimeRef.current });
-        handleAnswer(blob);
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        audioCtxRef.current?.close().catch(() => {});
+        audioCtxRef.current = null;
+        analyserRef.current = null;
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+        setMicLevel(0);
+        if (!cancelledRef.current) handleAnswer(blob);
       };
       rec.start();
       recorderRef.current = rec;
+      recordStartRef.current = performance.now();
+      silenceStartRef.current = null;
+      speechDetectedAtRef.current = null;
       setRecording(true);
+      monitorSilence();
     } catch {
       setError("لم أتمكن من الوصول إلى المايكروفون. الرجاء منح الإذن.");
     }
   };
 
+  const monitorSilence = () => {
+    const analyser = analyserRef.current;
+    if (!analyser) return;
+    const buf = new Float32Array(analyser.fftSize);
+    const tick = () => {
+      if (!analyserRef.current) return;
+      analyser.getFloatTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      const rms = Math.sqrt(sum / buf.length);
+      setMicLevel(Math.min(1, rms * 12));
+
+      const now = performance.now();
+      const elapsed = now - recordStartRef.current;
+
+      if (rms > SILENCE_RMS) {
+        silenceStartRef.current = null;
+        if (!speechDetectedAtRef.current) speechDetectedAtRef.current = now;
+      } else if (speechDetectedAtRef.current) {
+        if (silenceStartRef.current === null) silenceStartRef.current = now;
+        const silentFor = now - silenceStartRef.current;
+        const spokeFor = now - speechDetectedAtRef.current;
+        if (handsFree && spokeFor >= MIN_SPEECH_MS && silentFor >= SILENCE_HOLD_MS) {
+          stopRecording();
+          return;
+        }
+      }
+
+      if (elapsed >= MAX_ANSWER_MS) {
+        stopRecording();
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  };
+
   const stopRecording = () => {
-    recorderRef.current?.stop();
+    try { recorderRef.current?.stop(); } catch { /* ignore */ }
     setRecording(false);
   };
 
@@ -138,9 +251,10 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
       const nextStep = step + 1;
       if (nextStep < plan.questions.length) {
         setStep(nextStep);
-        await speak(plan.questions[nextStep]);
+        setTranscribing(false);
+        await speakThenListen(plan.questions[nextStep]);
       } else {
-        // finished — score
+        setTranscribing(false);
         setPhase("scoring");
         try {
           const fb = await scoreInterview(level, topic, newTurns);
@@ -158,18 +272,19 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
       }
     } catch (e: any) {
       setError(e.message || "تعذّر تفريغ الصوت.");
-    } finally {
       setTranscribing(false);
     }
   };
 
+  const closeAll = () => { cleanupAll(); reset(); onClose(); };
+
   return (
     <ToolShell
       open={open}
-      onClose={() => { reset(); onClose(); }}
+      onClose={closeAll}
       icon={<Radio className="w-5 h-5" />}
       title="المقابلة الصوتية"
-      subtitle="مقابلة قصيرة يقودها سِراج بصوت واضح لتقييم طلاقتك"
+      subtitle="حوار صوتي مع سِراج — يتحدث ثم يستمع لك تلقائياً"
       size="xl"
     >
       <div className="space-y-6" dir="rtl">
@@ -211,9 +326,20 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
               />
             </div>
 
-            <div className="border border-dashed border-border bg-secondary/20 p-4 text-sm text-muted-foreground leading-relaxed">
-              🎙️ ستستمع لأربعة أسئلة صوتية. بعد كل سؤال اضغط زر التسجيل وأجب بصوتك، ثم أوقف التسجيل لينتقل سِراج للسؤال التالي.
-            </div>
+            <label className="flex items-start gap-3 border border-border p-4 cursor-pointer hover:border-accent transition">
+              <input
+                type="checkbox"
+                checked={handsFree}
+                onChange={(e) => setHandsFree(e.target.checked)}
+                className="mt-1 w-4 h-4 accent-accent"
+              />
+              <div className="flex-1">
+                <p className="font-semibold flex items-center gap-2"><Zap className="w-4 h-4 text-accent" /> الوضع التلقائي (بلا يدين)</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  يتحدث سِراج، ثم يبدأ الاستماع تلقائياً بمجرد أن تنطق، ويتوقف من نفسه عند صمتك ثم يطرح السؤال التالي.
+                </p>
+              </div>
+            </label>
 
             <button
               onClick={startInterview}
@@ -235,25 +361,34 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
           <div className="space-y-5">
             <div className="flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground">
               <span>السؤال {step + 1} / {plan.questions.length}</span>
-              <span>{plan.title}</span>
+              <span className="flex items-center gap-2">
+                {handsFree && <span className="inline-flex items-center gap-1 text-accent"><Zap className="w-3 h-3" /> تلقائي</span>}
+                <button
+                  onClick={() => setHandsFree((v) => !v)}
+                  className="text-[10px] px-2 py-0.5 border border-border hover:border-accent"
+                >
+                  {handsFree ? "إيقاف التلقائي" : "تفعيل التلقائي"}
+                </button>
+              </span>
             </div>
 
             <div className="border border-accent/40 bg-accent/5 p-5">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-accent text-accent-foreground flex items-center justify-center shrink-0">
+                <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${speaking ? "bg-accent text-accent-foreground animate-pulse" : "bg-accent text-accent-foreground"}`}>
                   <Radio className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-widest text-accent font-semibold">سِراج يسأل</p>
+                  <p className="text-[10px] uppercase tracking-widest text-accent font-semibold">
+                    {speaking ? "سِراج يتحدث…" : "سِراج يسأل"}
+                  </p>
                   <p className="mt-2 font-display text-xl leading-relaxed">{plan.questions[step]}</p>
                 </div>
               </div>
               <button
                 onClick={replayQuestion}
-                disabled={speaking || recording}
-                className="mt-4 inline-flex items-center gap-2 text-xs text-accent border border-accent/40 px-3 py-1.5 hover:bg-accent/10 transition disabled:opacity-50"
+                className="mt-4 inline-flex items-center gap-2 text-xs text-accent border border-accent/40 px-3 py-1.5 hover:bg-accent/10 transition"
               >
-                <Volume2 className="w-3.5 h-3.5" /> {speaking ? "يتحدّث…" : "أعد الاستماع"}
+                <Volume2 className="w-3.5 h-3.5" /> أعد الاستماع
               </button>
             </div>
 
@@ -268,19 +403,30 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
                   onClick={startRecording}
                   disabled={speaking}
                   className="w-20 h-20 rounded-full bg-accent text-accent-foreground flex items-center justify-center shadow-lg hover:scale-105 transition disabled:opacity-50"
+                  title="اضغط لبدء الإجابة"
                 >
                   <Mic className="w-8 h-8" />
                 </button>
               ) : (
-                <button
-                  onClick={stopRecording}
-                  className="w-20 h-20 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg animate-pulse"
-                >
-                  <Square className="w-8 h-8" />
-                </button>
+                <div className="relative">
+                  <div
+                    className="absolute inset-0 rounded-full bg-red-500/30"
+                    style={{ transform: `scale(${1 + micLevel * 0.6})`, transition: "transform 80ms linear" }}
+                  />
+                  <button
+                    onClick={stopRecording}
+                    className="relative w-20 h-20 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg"
+                  >
+                    <Square className="w-8 h-8" />
+                  </button>
+                </div>
               )}
               <p className="text-sm text-muted-foreground text-center">
-                {recording ? "جارٍ التسجيل… اضغط للإيقاف" : transcribing ? "يحلّل إجابتك…" : speaking ? "استمع للسؤال ثم أجب" : "اضغط الميكروفون وأجب بصوتك"}
+                {recording
+                  ? handsFree ? "أستمع لك… سأتوقف تلقائياً عند صمتك" : "جارٍ التسجيل… اضغط للإيقاف"
+                  : transcribing ? "يحلّل إجابتك…"
+                  : speaking ? "استمع للسؤال…"
+                  : handsFree ? "سيبدأ التسجيل تلقائياً بعد السؤال" : "اضغط الميكروفون وأجب"}
               </p>
             </div>
 
@@ -381,7 +527,7 @@ export default function VoiceInterviewDialog({ open, onClose }: { open: boolean;
               <button onClick={reset} className="flex-1 py-2 border border-border hover:border-accent text-sm font-semibold flex items-center justify-center gap-2">
                 <RotateCcw className="w-4 h-4" /> مقابلة جديدة
               </button>
-              <button onClick={() => { reset(); onClose(); }} className="flex-1 py-2 bg-primary text-primary-foreground text-sm font-semibold">
+              <button onClick={closeAll} className="flex-1 py-2 bg-primary text-primary-foreground text-sm font-semibold">
                 إنهاء
               </button>
             </div>
