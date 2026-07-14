@@ -4,17 +4,19 @@ import {
   LayoutDashboard, Users, BookOpen, HelpCircle, Settings, Shield,
   Database, Megaphone, LogOut, Plus, Trash2, Save, Download, Upload,
   Eye, EyeOff, Lock, Sparkles, TrendingUp, Bell, Palette, Bot, Wand2,
+  LifeBuoy, RefreshCw, Mail, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   ensureDefaultPassword, verifyPassword, changePassword,
-  startSession, isAuthed, endSession,
+  startSession, isAuthed, endSession, getAdminPassword,
 } from "@/lib/adminAuth";
 import { content, pickLocalized, type Teacher, type Course, type FAQItem, type Announcement, type AiPersona, type Localized } from "@/lib/siteContent";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { supabase } from "@/lib/supabase";
 import logo from "@/assets/lugha-logo.png";
 
-type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aicontent" | "settings" | "security" | "backup";
+type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aicontent" | "support" | "settings" | "security" | "backup";
 
 const Admin = () => {
   const { t } = useLanguage();
@@ -60,6 +62,7 @@ const Admin = () => {
           {section === "settings" && <SiteSettingsPanel data={data} setData={setData} />}
           {section === "ai" && <AIPersonaPanel data={data} setData={setData} />}
           {section === "aicontent" && <AIContentPanel />}
+          {section === "support" && <SupportPanel />}
           {section === "security" && <SecurityPanel />}
           {section === "backup" && <BackupPanel setData={setData} />}
         </div>
@@ -125,6 +128,7 @@ const navItems: { key: Section; labelKey: string; icon: any }[] = [
   { key: "announcements", labelKey: "admin.nav.announcements", icon: Megaphone },
   { key: "ai", labelKey: "admin.nav.ai", icon: Bot },
   { key: "aicontent", labelKey: "admin.nav.aiContent", icon: Wand2 },
+  { key: "support", labelKey: "admin.nav.support", icon: LifeBuoy },
   { key: "settings", labelKey: "admin.nav.settings", icon: Settings },
   { key: "security", labelKey: "admin.nav.security", icon: Shield },
   { key: "backup", labelKey: "admin.nav.backup", icon: Database },
