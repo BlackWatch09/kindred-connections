@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { PenLine, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import ToolShell from "./ToolShell";
 import { analyzeWriting, type WritingResult as Result } from "@/lib/aiFn";
+import { friendlyError, MAX_TEXT_LEN } from "@/lib/errors";
 
 export default function WritingAssistDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [text, setText] = useState("");
@@ -11,10 +13,16 @@ export default function WritingAssistDialog({ open, onClose }: { open: boolean; 
   const [result, setResult] = useState<Result | null>(null);
 
   const analyze = async () => {
-    if (!text.trim()) return;
+    const trimmed = text.trim();
+    if (!trimmed) { toast.error("اكتب فقرة قصيرة أولاً."); return; }
+    if (trimmed.length < 3) { toast.error("النص قصير جداً للتحليل."); return; }
+    if (trimmed.length > MAX_TEXT_LEN) {
+      toast.error(`النص طويل جداً (الحد ${MAX_TEXT_LEN} حرف).`);
+      return;
+    }
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await analyzeWriting(text, level)); }
-    catch (e: any) { setError(e.message || "تعذّر التحليل."); }
+    try { setResult(await analyzeWriting(trimmed, level)); }
+    catch (e) { setError(friendlyError(e)); }
     finally { setLoading(false); }
   };
 
