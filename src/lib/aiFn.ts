@@ -2,6 +2,7 @@
 // Uses the shared user Gemini key (see getGeminiKey) so we don't depend on edge functions.
 
 import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+import { supabase } from "@/lib/supabase";
 
 const MODEL = "gemini-2.5-flash-lite";
 const AUDIO_MODEL = "gemini-2.5-flash";
@@ -404,8 +405,6 @@ export interface ScanResult {
   keywords?: string[];
   word_count: number;
 }
-
-import { supabase } from "@/lib/supabase";
 
 export async function scanImageText(image_base64: string, mime_type: string): Promise<ScanResult> {
   const { data, error } = await supabase.functions.invoke("smart-scan", {
