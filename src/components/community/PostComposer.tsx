@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import { contributeChallenge, ensureFaction, FactionId, mentionsSiraj, triggerSirajReply } from "@/lib/community";
+import { contributeChallenge, FactionId, mentionsSiraj, triggerSirajReply } from "@/lib/community";
 import { ImagePlus, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,10 +19,13 @@ export const PostComposer = ({ faction, onPosted }: Props) => {
 
   const submit = async () => {
     if (!user || !content.trim()) return;
+    if (!faction) {
+      toast.error("اختر تحالفك أولاً من أعلى الصفحة");
+      return;
+    }
     setBusy(true);
     try {
-      let fac = faction;
-      if (!fac) fac = await ensureFaction(user.id);
+      const fac = faction;
       const { data: post, error } = await supabase
         .from("community_posts")
         .insert({
