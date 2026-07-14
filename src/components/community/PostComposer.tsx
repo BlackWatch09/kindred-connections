@@ -45,7 +45,9 @@ export const PostComposer = ({ faction, onPosted }: Props) => {
           post.id,
           content,
           profile?.full_name || user.email?.split("@")[0],
-        ).catch(() => toast.error("سراج مشغول الآن، حاول لاحقاً"));
+        )
+          .then(() => onPosted())
+          .catch((e) => { console.error("[siraj] reply failed", e); toast.error("سراج مشغول الآن، حاول لاحقاً"); });
         toast.success("تم النشر — سراج يكتب رداً…", { icon: "🌙" });
       } else {
         toast.success("تم النشر");
