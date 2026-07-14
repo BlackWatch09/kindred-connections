@@ -1,27 +1,23 @@
-// Client-side Gemini integration — no Lovable Cloud / Edge Functions required.
-// The user's Gemini API key is stored in localStorage under GEMINI_API_KEY.
-// Get a free key at: https://aistudio.google.com/apikey
+// Gemini integration — routed through the `gemini-proxy` Supabase Edge Function
+// so the API key stays server-side (env: GEMINI_API_KEY).
 
 const MODEL = "gemini-2.5-flash-lite";
-const STORAGE_KEY = "GEMINI_API_KEY";
-const DEFAULT_KEY = "AIzaSyBOCcW0jMIyLM71zj8WcQead9WMPi3dc7g";
+const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
+const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
-export function getGeminiKey(): string {
-  if (typeof window === "undefined") return DEFAULT_KEY;
-  return window.localStorage.getItem(STORAGE_KEY) || DEFAULT_KEY;
+/** Build the proxied Gemini endpoint URL. Extra query params optional (e.g. `alt=sse`). */
+export function geminiEndpoint(model: string, method: string, extraQuery?: string): string {
+  const q = extraQuery ? `?${extraQuery}` : "";
+  return `${PROXY_BASE}/v1beta/models/${model}:${method}${q}`;
 }
 
-export function setGeminiKey(key: string) {
-  window.localStorage.setItem(STORAGE_KEY, key.trim());
-}
+// Kept for backwards compatibility with existing UI code — the key is no longer
+// used in the browser; the proxy always has access to the server-side key.
+export function getGeminiKey(): string { return "server"; }
+export function setGeminiKey(_key: string) { /* no-op */ }
+export function clearGeminiKey() { /* no-op */ }
 
-export function clearGeminiKey() {
-  window.localStorage.removeItem(STORAGE_KEY);
-}
-
-function requireKey(): string {
-  return getGeminiKey();
-}
+function requireKey(): string { return "server"; }
 
 function buildSystemPrompt(o: {
   worldId: string;
@@ -105,7 +101,8 @@ export async function streamStoryChat(
     contents.push({ role: "user", parts: [{ text: String(userMessage ?? "") }] });
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  void apiKey;
+  const url = geminiEndpoint(MODEL, "streamGenerateContent", "alt=sse");
 
   const res = await fetch(url, {
     method: "POST",
@@ -166,7 +163,8 @@ export async function checkGrammar(text: string, level: string) {
 إذا كانت الجملة سليمة أعد has_error=false وhint فارغة.
 new_words = كلمات عربية جديرة بالحفظ من جملة الطالب (0-3 كلمات).`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+  void apiKey;
+  const url = geminiEndpoint(MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -195,7 +193,8 @@ new_words = كلمات عربية جديرة بالحفظ من جملة الطا
 
 export async function transcribeAudio(base64: string, mimeType: string) {
   const apiKey = requireKey();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+  void apiKey;
+  const url = geminiEndpoint(MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

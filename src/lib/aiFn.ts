@@ -1,7 +1,6 @@
-// Direct client-side Gemini calls for AI Hub tools.
-// Uses the shared user Gemini key (see getGeminiKey) so we don't depend on edge functions.
+// Gemini calls for AI Hub tools, routed via the `gemini-proxy` Edge Function.
 
-import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 import { supabase } from "@/lib/supabase";
 import { AppError, friendlyError, withTimeout } from "@/lib/errors";
 
@@ -14,9 +13,7 @@ type Part =
   | { inlineData: { mimeType: string; data: string } };
 
 async function generateJson<T = any>(parts: Part[], model = MODEL, temperature = 0.4): Promise<T> {
-  const key = getGeminiKey();
-  if (!key) throw new AppError("مفتاح الذكاء الاصطناعي غير متوفر. تواصل مع الدعم.", "NO_AI_KEY");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  const url = geminiEndpoint(model, "generateContent");
 
   let res: Response;
   try {

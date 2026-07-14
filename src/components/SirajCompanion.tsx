@@ -16,7 +16,7 @@ type ChatMsg = { role: "user" | "assistant"; content: string };
 const STORAGE_KEY = "lugha.siraj.chat.v1";
 const OPEN_EVENT = "siraj:open";
 
-import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 
 const GEMINI_MODEL = "gemini-2.5-flash-lite";
 
@@ -184,13 +184,6 @@ const SirajCompanion = () => {
     abortRef.current = controller;
 
     try {
-      const apiKey = getGeminiKey();
-      if (!apiKey) {
-        setError(strings.error);
-        setBusy(false);
-        return;
-      }
-
       const systemInstruction = buildSirajSystem({
         language,
         tutorName,
@@ -204,7 +197,7 @@ const SirajCompanion = () => {
         parts: [{ text: m.content }],
       }));
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`;
+      const url = geminiEndpoint(GEMINI_MODEL, "streamGenerateContent", "alt=sse");
 
       const res = await fetch(url, {
         method: "POST",

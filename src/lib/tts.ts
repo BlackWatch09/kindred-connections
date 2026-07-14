@@ -94,9 +94,8 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 async function fetchGeminiSpeech(text: string): Promise<string | null> {
-  const key = getGeminiKey();
-  if (!key) return null;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${key}`;
+  const { geminiEndpoint } = await import("@/features/story-world/lib/streamChat");
+  const url = geminiEndpoint(TTS_MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
