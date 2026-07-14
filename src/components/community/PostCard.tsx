@@ -54,9 +54,15 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(post.content);
+  const [content, setContent] = useState(post.content);
+  const [editedAt, setEditedAt] = useState<string | null>(post.edited_at || null);
   const faction = factionOf(post.faction);
   const authorName = post.author?.full_name || "طالب";
   const authorInitial = authorName.charAt(0).toUpperCase() || "ط";
+  const isOwner = user?.id === post.user_id;
 
   useEffect(() => {
     if (!user) return;
@@ -133,10 +139,42 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   };
 
   const deletePost = async () => {
-    if (!user || user.id !== post.user_id) return;
+    if (!isOwner) return;
+    setMenuOpen(false);
     if (!confirm("حذف هذا المنشور؟")) return;
-    await supabase.from("community_posts").delete().eq("id", post.id);
+    const { error } = await supabase.from("community_posts").delete().eq("id", post.id);
+    if (error) return toast.error("تعذر الحذف: " + error.message);
+    toast.success("تم حذف المنشور");
     onDeleted?.();
+  };
+
+  const startEdit = () => {
+    setEditText(content);
+    setEditing(true);
+    setMenuOpen(false);
+  };
+
+  const saveEdit = async () => {
+    const next = editText.trim();
+    if (!isOwner || !next || next === content) { setEditing(false); return; }
+    setBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from("community_posts")
+        .update({ content: next, edited_at: new Date().toISOString() })
+        .eq("id", post.id)
+        .select("content, edited_at")
+        .single();
+      if (error) throw error;
+      setContent(data.content);
+      setEditedAt(data.edited_at);
+      setEditing(false);
+      toast.success("تم حفظ التعديل");
+    } catch (e) {
+      toast.error("تعذر التعديل: " + (e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const renderContent = (text: string) =>
@@ -160,24 +198,75 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
               <span className="font-arabic text-sm font-semibold text-foreground">{authorName}</span>
               <FactionBadge factionId={post.faction} />
             </div>
-            <span className="text-[11px] text-muted-foreground font-mono">{timeAgo(post.created_at)}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">
+              {timeAgo(post.created_at)}
+              {editedAt && <span className="mr-1 text-accent"> · معدَّل</span>}
+            </span>
           </div>
         </div>
-        {user?.id === post.user_id && (
-          <button onClick={deletePost} className="text-muted-foreground hover:text-destructive p-1">
-            <Trash2 className="w-4 h-4" />
-          </button>
+        {isOwner && (
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="text-muted-foreground hover:text-foreground p-1"
+              aria-label="خيارات"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute top-full left-0 mt-1 bg-card border border-border shadow-lg min-w-[140px] z-20">
+                  <button onClick={startEdit} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary text-right">
+                    <Pencil className="w-3.5 h-3.5" /> تعديل
+                  </button>
+                  <button onClick={deletePost} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-secondary text-right">
+                    <Trash2 className="w-3.5 h-3.5" /> حذف
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </header>
 
       <div className="p-4">
-        <p dir="auto" className="font-arabic text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
-          {renderContent(post.content)}
-        </p>
-        {post.image_url && (
+        {editing ? (
+          <div className="space-y-2">
+            <textarea
+              dir="auto"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              className="w-full resize-none border border-accent/40 bg-background p-2 font-arabic text-[15px] text-foreground focus:outline-none focus:border-accent"
+            />
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => { setEditing(false); setEditText(content); }}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5"
+              >
+                <X className="w-3.5 h-3.5" /> إلغاء
+              </button>
+              <button
+                onClick={saveEdit}
+                disabled={busy || !editText.trim() || editText.trim() === content}
+                className="bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest px-4 py-1.5 hover:bg-emerald disabled:opacity-50"
+              >
+                حفظ
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p dir="auto" className="font-arabic text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
+            {renderContent(content)}
+          </p>
+        )}
+        {post.image_url && !editing && (
           <img src={post.image_url} alt="" className="mt-3 max-h-96 w-full object-cover border border-border" />
         )}
       </div>
+
 
       <div className="flex items-center gap-1 px-4 py-2 border-t border-border">
         <button
