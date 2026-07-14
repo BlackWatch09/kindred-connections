@@ -72,6 +72,7 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
+  const isAr = language === "ar";
   const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview" | "scanner">(null);
 
   const toolsMap: Record<ToolKey, Tool> = {
