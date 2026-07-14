@@ -3,10 +3,12 @@ import {
   Layers, Loader2, Sparkles, ChevronRight, ChevronLeft, Check, X, RotateCcw, Trophy, RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import ToolShell from "./ToolShell";
 import { generateFlashcards, type FlashcardDeck, type Flashcard } from "@/lib/aiFn";
 import { addPoints } from "@/lib/points";
 import { useAuth } from "@/hooks/useAuth";
+import { friendlyError, MAX_TOPIC_LEN } from "@/lib/errors";
 
 type Level = "beginner" | "intermediate" | "advanced";
 type Lang = "en" | "tr" | "ar";
@@ -55,14 +57,19 @@ export default function FlashcardsDialog({ open, onClose }: { open: boolean; onC
   }, [open]);
 
   const generate = async () => {
+    const t = topic.trim();
+    if (t.length > MAX_TOPIC_LEN) {
+      toast.error(`الموضوع طويل جداً (الحد ${MAX_TOPIC_LEN} حرف).`);
+      return;
+    }
     setLoading(true); setError(null); setDeck(null);
     setIdx(0); setFlipped(false); setJudgements({}); setFinished(false); setAwarded(null);
     try {
-      const data = await generateFlashcards(topic, level, count, lang);
+      const data = await generateFlashcards(t, level, count, lang);
       if (!data.cards.length) throw new Error("لم تُنشأ بطاقات — جرّب موضوعاً آخر.");
       setDeck(data);
-    } catch (e: any) {
-      setError(e.message || "تعذّر توليد البطاقات.");
+    } catch (e) {
+      setError(friendlyError(e));
     } finally {
       setLoading(false);
     }

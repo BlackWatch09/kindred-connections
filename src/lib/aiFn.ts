@@ -3,9 +3,11 @@
 
 import { getGeminiKey } from "@/features/story-world/lib/streamChat";
 import { supabase } from "@/lib/supabase";
+import { AppError, friendlyError, withTimeout } from "@/lib/errors";
 
 const MODEL = "gemini-2.5-flash-lite";
 const AUDIO_MODEL = "gemini-2.5-flash";
+const REQUEST_TIMEOUT_MS = 45_000;
 
 type Part =
   | { text: string }
@@ -13,25 +15,50 @@ type Part =
 
 async function generateJson<T = any>(parts: Part[], model = MODEL, temperature = 0.4): Promise<T> {
   const key = getGeminiKey();
-  if (!key) throw new Error("مفتاح Gemini غير متوفر.");
+  if (!key) throw new AppError("مفتاح الذكاء الاصطناعي غير متوفر. تواصل مع الدعم.", "NO_AI_KEY");
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts }],
-      generationConfig: { temperature, responseMimeType: "application/json", maxOutputTokens: 2048 },
-    }),
-  });
+
+  let res: Response;
+  try {
+    res = await withTimeout(
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts }],
+          generationConfig: { temperature, responseMimeType: "application/json", maxOutputTokens: 2048 },
+        }),
+      }),
+      REQUEST_TIMEOUT_MS,
+      "الاتصال بالخادم",
+    );
+  } catch (e) {
+    // network / timeout / abort
+    throw new AppError(friendlyError(e), "NETWORK", e);
+  }
+
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
-    if (res.status === 429) throw new Error("تم تجاوز حد الطلبات، حاول بعد قليل.");
-    if (res.status === 402 || res.status === 403) throw new Error("انتهى رصيد Gemini أو المفتاح غير مصرّح.");
-    throw new Error(`فشل الطلب (${res.status}): ${txt.slice(0, 200)}`);
+    const err = new AppError(friendlyError({ status: res.status, message: txt.slice(0, 200) }), "HTTP");
+    (err as any).status = res.status;
+    throw err;
   }
-  const data = await res.json();
+
+  let data: any;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new AppError("استقبل النظام ردّاً غير صالح. حاول مرة أخرى.", "BAD_JSON", e);
+  }
   const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-  try { return JSON.parse(raw) as T; } catch { return { _raw: raw } as any; }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    // Keep working when the model returns non-JSON: caller code already tolerates _raw.
+    // eslint-disable-next-line no-console
+    console.warn("[aiFn] non-JSON response, returning raw string");
+    return { _raw: raw } as any;
+  }
 }
 
 // ---------- Pronunciation Coach ----------
@@ -215,10 +242,18 @@ export interface DailyChallenge {
   tasks: DailyTask[];
 }
 export async function generateDailyChallenge(level: string, seed: string): Promise<DailyChallenge> {
-  const { data, error } = await supabase.functions.invoke("ai-json", {
-    body: { task: "daily-challenge", input: { level, seed } },
-  });
-  if (error) throw new Error(error.message || "فشل توليد التحدّي");
+  let data: any; let error: any;
+  try {
+    const res = await withTimeout(
+      supabase.functions.invoke("ai-json", { body: { task: "daily-challenge", input: { level, seed } } }),
+      REQUEST_TIMEOUT_MS,
+      "توليد التحدّي",
+    );
+    data = res.data; error = res.error;
+  } catch (e) {
+    throw new AppError(friendlyError(e), "NETWORK", e);
+  }
+  if (error) throw new AppError(friendlyError(error), "FUNCTION", error);
   const r: any = data || {};
   // Server returns a simplified shape; adapt to the DailyChallenge structure used by the UI.
   const tasks: DailyTask[] = Array.isArray(r?.tasks)
@@ -407,17 +442,19 @@ export interface ScanResult {
 }
 
 export async function scanImageText(image_base64: string, mime_type: string): Promise<ScanResult> {
-  const { data, error } = await supabase.functions.invoke("smart-scan", {
-    body: { image_base64, mime_type },
-  });
-  if (error) {
-    const msg = (error as any)?.context?.status === 429
-      ? "تم تجاوز حد الطلبات، حاول بعد قليل."
-      : (error as any)?.context?.status === 402
-      ? "انتهى رصيد الذكاء الاصطناعي."
-      : error.message || "فشل المسح";
-    throw new Error(msg);
+  if (!image_base64) throw new AppError("لا توجد صورة للمسح.", "VALIDATION");
+  let data: any; let error: any;
+  try {
+    const res = await withTimeout(
+      supabase.functions.invoke("smart-scan", { body: { image_base64, mime_type } }),
+      REQUEST_TIMEOUT_MS,
+      "المسح الضوئي",
+    );
+    data = res.data; error = res.error;
+  } catch (e) {
+    throw new AppError(friendlyError(e), "NETWORK", e);
   }
+  if (error) throw new AppError(friendlyError(error), "FUNCTION", error);
   const d: any = data || {};
   return {
     language: d.language === "en" || d.language === "mixed" ? d.language : "ar",

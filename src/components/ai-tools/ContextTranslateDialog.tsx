@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Languages, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import ToolShell from "./ToolShell";
 import { contextTranslate, type TranslateResult as Result } from "@/lib/aiFn";
+import { friendlyError, MAX_SENTENCE_LEN } from "@/lib/errors";
 
 export default function ContextTranslateDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [sentence, setSentence] = useState("ذَهَبَ الفارِسُ إلى المَعْرَكَة بِقَلْبٍ شُجاع.");
@@ -12,10 +14,16 @@ export default function ContextTranslateDialog({ open, onClose }: { open: boolea
   const [result, setResult] = useState<Result | null>(null);
 
   const analyze = async () => {
-    if (!sentence.trim()) return;
+    const s = sentence.trim();
+    if (!s) { toast.error("اكتب جملة أولاً."); return; }
+    if (s.length > MAX_SENTENCE_LEN) {
+      toast.error(`الجملة طويلة جداً (الحد ${MAX_SENTENCE_LEN} حرف).`);
+      return;
+    }
+    if (word && word.length > 60) { toast.error("الكلمة المستهدفة طويلة جداً."); return; }
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await contextTranslate(sentence, word, lang)); }
-    catch (e: any) { setError(e.message || "تعذّر التحليل."); }
+    try { setResult(await contextTranslate(s, word.trim(), lang)); }
+    catch (e) { setError(friendlyError(e)); }
     finally { setLoading(false); }
   };
 

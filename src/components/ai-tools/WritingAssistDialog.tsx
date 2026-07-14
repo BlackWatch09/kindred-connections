@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { PenLine, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import ToolShell from "./ToolShell";
 import { analyzeWriting, type WritingResult as Result } from "@/lib/aiFn";
+import { friendlyError, MAX_TEXT_LEN } from "@/lib/errors";
 
 export default function WritingAssistDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [text, setText] = useState("");
@@ -11,10 +13,16 @@ export default function WritingAssistDialog({ open, onClose }: { open: boolean; 
   const [result, setResult] = useState<Result | null>(null);
 
   const analyze = async () => {
-    if (!text.trim()) return;
+    const trimmed = text.trim();
+    if (!trimmed) { toast.error("اكتب فقرة قصيرة أولاً."); return; }
+    if (trimmed.length < 3) { toast.error("النص قصير جداً للتحليل."); return; }
+    if (trimmed.length > MAX_TEXT_LEN) {
+      toast.error(`النص طويل جداً (الحد ${MAX_TEXT_LEN} حرف).`);
+      return;
+    }
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await analyzeWriting(text, level)); }
-    catch (e: any) { setError(e.message || "تعذّر التحليل."); }
+    try { setResult(await analyzeWriting(trimmed, level)); }
+    catch (e) { setError(friendlyError(e)); }
     finally { setLoading(false); }
   };
 
@@ -32,9 +40,15 @@ export default function WritingAssistDialog({ open, onClose }: { open: boolean; 
           ))}
         </div>
 
-        <textarea value={text} onChange={(e) => setText(e.target.value)} dir="rtl" rows={6}
-          placeholder="اكتب فقرة قصيرة بالعربية…"
-          className="w-full border border-border bg-background p-3 font-display text-lg leading-loose focus:outline-none focus:border-accent" />
+        <div>
+          <textarea value={text} onChange={(e) => setText(e.target.value)} dir="rtl" rows={6}
+            maxLength={MAX_TEXT_LEN}
+            placeholder="اكتب فقرة قصيرة بالعربية…"
+            className="w-full border border-border bg-background p-3 font-display text-lg leading-loose focus:outline-none focus:border-accent" />
+          <div className="mt-1 text-[10px] text-muted-foreground text-left tabular-nums">
+            {text.length} / {MAX_TEXT_LEN}
+          </div>
+        </div>
 
         <button onClick={analyze} disabled={loading || !text.trim()}
           className="w-full py-3 bg-primary text-primary-foreground font-semibold hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center gap-2 disabled:opacity-60">
