@@ -6,17 +6,24 @@ import PostComposer from "@/components/community/PostComposer";
 import PostCard, { CommunityPost } from "@/components/community/PostCard";
 import ChallengeCard from "@/components/community/ChallengeCard";
 import FactionLeaderboard from "@/components/community/FactionLeaderboard";
-import { Loader2, Users2 } from "lucide-react";
+import FactionPicker from "@/components/community/FactionPicker";
+import { Loader2, Sparkles, Users2 } from "lucide-react";
 
 const Community = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [faction, setFaction] = useState<FactionId | null>(null);
+  const [factionLoaded, setFactionLoaded] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    ensureFaction(user.id).then(setFaction);
+    ensureFaction(user.id).then((f) => {
+      setFaction(f);
+      setFactionLoaded(true);
+      if (!f) setShowPicker(true);
+    });
   }, [user]);
 
   const loadPosts = async () => {
