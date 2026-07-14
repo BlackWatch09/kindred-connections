@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import { contributeChallenge, ensureFaction, FactionId, mentionsSiraj, triggerSirajReply } from "@/lib/community";
+import { contributeChallenge, FactionId, mentionsSiraj, triggerSirajReply } from "@/lib/community";
 import { ImagePlus, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
