@@ -17,7 +17,7 @@ import FlashcardsDialog from "@/components/ai-tools/FlashcardsDialog";
 import VoiceInterviewDialog from "@/components/ai-tools/VoiceInterviewDialog";
 import SmartScannerDialog from "@/components/ai-tools/SmartScannerDialog";
 
-type ToolKey = "tutor" | "voice" | "placement" | "story" | "translate" | "writing" | "daily" | "flash" | "interview";
+type ToolKey = "tutor" | "voice" | "placement" | "story" | "translate" | "writing" | "daily" | "flash" | "interview" | "scanner";
 
 type Tool = {
   key: ToolKey;
@@ -48,6 +48,12 @@ const CATEGORIES: Category[] = [
     eyebrow: { ar: "القراءة والكتابة", en: "Reading & Writing" },
     title: { ar: "اقرأ بعمق واكتب بثقة.", en: "Read deeply, write with confidence." },
     keys: ["story", "writing", "translate"],
+  },
+  {
+    id: "capture",
+    eyebrow: { ar: "الالتقاط الذكي", en: "Smart Capture" },
+    title: { ar: "من الورق إلى الشاشة في لحظة.", en: "From paper to screen in a heartbeat." },
+    keys: ["scanner"],
   },
   {
     id: "practice",
