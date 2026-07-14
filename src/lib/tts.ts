@@ -2,7 +2,7 @@
 // existing shared Gemini API key (same as the other AI Hub tools). No edge
 // function required. Falls back to browser SpeechSynthesis when Gemini fails.
 
-import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+// gemini endpoint helper imported dynamically inside fetchGeminiSpeech
 import { TTS_AUDIO } from "@/generated/ttsManifest";
 
 const TTS_MODEL = "gemini-2.5-flash-preview-tts";

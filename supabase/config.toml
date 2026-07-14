@@ -33,4 +33,14 @@ verify_jwt = false
 [functions.community-siraj]
 verify_jwt = false
 
+[functions.gemini-proxy]
+verify_jwt = false
+
+[functions.ai-json]
+verify_jwt = false
+
+[functions.smart-scan]
+verify_jwt = false
+
+
 
