@@ -134,13 +134,21 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
         faction: currentFaction,
       });
       if (error) throw error;
+      setCommentText("");
+      setShowComments(true);
+      await loadComments();
       contributeChallenge(currentFaction);
       if (mentionsSiraj(text)) {
+        toast.success("سراج يكتب رداً…", { icon: "🌙" });
         triggerSirajReply(post.id, text, profile?.full_name || user.email?.split("@")[0])
-          .catch(() => toast.error("سراج مشغول الآن"));
+          .then(() => loadComments())
+          .catch((e) => {
+            console.error("[siraj] reply failed", e);
+            toast.error("سراج مشغول الآن");
+          });
       }
-      setCommentText("");
     } catch (e) {
+      console.error("[comment] insert failed", e);
       toast.error("تعذر التعليق: " + (e as Error).message);
     } finally {
       setBusy(false);
