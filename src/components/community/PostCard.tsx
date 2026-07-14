@@ -59,6 +59,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   const [editText, setEditText] = useState(post.content);
   const [content, setContent] = useState(post.content);
   const [editedAt, setEditedAt] = useState<string | null>(post.edited_at || null);
+  const [commentsCount, setCommentsCount] = useState(post.comments_count);
   const faction = factionOf(post.faction);
   const authorName = post.author?.full_name || "طالب";
   const authorInitial = authorName.charAt(0).toUpperCase() || "ط";
