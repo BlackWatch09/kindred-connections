@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { MessageCircle, X, Send, Sparkles, Trash2, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAiPersona } from "@/hooks/useAiPersona";
+import { useAuth } from "@/hooks/useAuth";
 import { pickLocalized } from "@/lib/siteContent";
 import sirajAvatarUrl from "@/assets/siraj-avatar.png";
 import sirajChatAvatarUrl from "@/assets/siraj-chat-avatar.png";
@@ -116,6 +117,7 @@ const SirajCompanion = () => {
   const { language, dir } = useLanguage();
   const persona = useAiPersona();
   const { pathname } = useLocation();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>(() => {
     try {
@@ -279,7 +281,7 @@ const SirajCompanion = () => {
     setError(null);
   };
 
-  if (hidden) return null;
+  if (hidden || !user) return null;
 
   const panelSide = dir === "rtl" ? "left-5" : "right-5";
 

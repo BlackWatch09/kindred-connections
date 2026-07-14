@@ -13,14 +13,11 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- Data API grants (required for PostgREST)
 grant select, insert, update on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 
--- Enable RLS
 alter table public.profiles enable row level security;
 
--- Policies: users can read/update ONLY their own profile
 drop policy if exists "Profiles are viewable by owner" on public.profiles;
 create policy "Profiles are viewable by owner"
   on public.profiles for select
@@ -77,3 +74,30 @@ drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
+
+-- ============================================================
+-- 4) Support tickets (contact form → admin panel)
+-- ============================================================
+create table if not exists public.support_tickets (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  name text not null,
+  email text not null,
+  message text not null,
+  status text not null default 'new',
+  created_at timestamptz not null default now()
+);
+
+grant insert on public.support_tickets to authenticated;
+grant all on public.support_tickets to service_role;
+
+alter table public.support_tickets enable row level security;
+
+-- Authenticated users may only create their own ticket. No SELECT for regular
+-- users — reads are performed by the `admin-support` edge function using the
+-- service role, gated by the ADMIN_PASSWORD secret.
+drop policy if exists "Users can create their own ticket" on public.support_tickets;
+create policy "Users can create their own ticket"
+  on public.support_tickets for insert
+  to authenticated
+  with check (auth.uid() = user_id);

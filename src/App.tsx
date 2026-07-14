@@ -55,10 +55,53 @@ const App = () => (
             <Chrome>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/learn" element={<Learn />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/teachers" element={<Teachers />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/admin" element={<Admin />} />
+
+                {/* Protected — must be signed in */}
+                <Route
+                  path="/courses"
+                  element={
+                    <ProtectedRoute>
+                      <Courses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/course/:slug"
+                  element={
+                    <ProtectedRoute>
+                      <CoursePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/learn"
+                  element={
+                    <ProtectedRoute>
+                      <Learn />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/ai"
+                  element={
+                    <ProtectedRoute>
+                      <AIHub />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/placement-test"
+                  element={
+                    <ProtectedRoute>
+                      <PlacementTest />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/dashboard"
                   element={
@@ -67,9 +110,6 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/teachers" element={<Teachers />} />
-                <Route path="/placement-test" element={<PlacementTest />} />
-                <Route path="/course/:slug" element={<CoursePage />} />
                 <Route
                   path="/story"
                   element={
@@ -86,9 +126,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/ai" element={<AIHub />} />
-                <Route path="/admin" element={<Admin />} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Chrome>

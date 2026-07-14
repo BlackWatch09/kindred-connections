@@ -26,3 +26,7 @@ verify_jwt = false
 
 [functions.context-translate]
 verify_jwt = false
+
+[functions.admin-support]
+verify_jwt = false
+

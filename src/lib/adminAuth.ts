@@ -1,6 +1,7 @@
 // Admin auth: password hash in localStorage. Default: "abuhantash123"
 const HASH_KEY = "lugha_admin_pw_hash";
 const SESSION_KEY = "lugha_admin_session";
+const SESSION_PW_KEY = "lugha_admin_session_pw";
 const DEFAULT_PW = "abuhantash123";
 
 async function sha256(s: string): Promise<string> {
@@ -16,13 +17,16 @@ export async function ensureDefaultPassword() {
 
 export async function verifyPassword(pw: string): Promise<boolean> {
   await ensureDefaultPassword();
-  return (await sha256(pw)) === localStorage.getItem(HASH_KEY);
+  const ok = (await sha256(pw)) === localStorage.getItem(HASH_KEY);
+  if (ok) sessionStorage.setItem(SESSION_PW_KEY, pw);
+  return ok;
 }
 
 export async function changePassword(current: string, next: string): Promise<boolean> {
   if (!(await verifyPassword(current))) return false;
   if (next.length < 6) return false;
   localStorage.setItem(HASH_KEY, await sha256(next));
+  sessionStorage.setItem(SESSION_PW_KEY, next);
   return true;
 }
 
@@ -37,4 +41,9 @@ export function isAuthed(): boolean {
 
 export function endSession() {
   sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_PW_KEY);
+}
+
+export function getAdminPassword(): string | null {
+  return sessionStorage.getItem(SESSION_PW_KEY);
 }
