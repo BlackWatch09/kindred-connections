@@ -2,7 +2,7 @@
 // existing shared Gemini API key (same as the other AI Hub tools). No edge
 // function required. Falls back to browser SpeechSynthesis when Gemini fails.
 
-import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+// gemini endpoint helper imported dynamically inside fetchGeminiSpeech
 import { TTS_AUDIO } from "@/generated/ttsManifest";
 
 const TTS_MODEL = "gemini-2.5-flash-preview-tts";
@@ -94,9 +94,8 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 async function fetchGeminiSpeech(text: string): Promise<string | null> {
-  const key = getGeminiKey();
-  if (!key) return null;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${key}`;
+  const { geminiEndpoint } = await import("@/features/story-world/lib/streamChat");
+  const url = geminiEndpoint(TTS_MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
