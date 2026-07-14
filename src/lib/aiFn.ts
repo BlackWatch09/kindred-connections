@@ -419,3 +419,79 @@ ${transcript}
     summary: r?.summary || "",
   };
 }
+
+// ---------- Smart AI Scanner (OCR) ----------
+export interface ScanResult {
+  language: "ar" | "en" | "mixed";
+  title?: string;
+  text: string;
+  summary?: string;
+  keywords?: string[];
+  word_count: number;
+}
+
+export async function scanImageText(image_base64: string, mime_type: string): Promise<ScanResult> {
+  // Step 1: high-fidelity OCR — return raw text only, preserve line breaks
+  const ocrPrompt = `أنت ماسح ضوئي ذكي متخصّص في استخراج النصوص العربية والإنجليزية من الصور بأعلى دقّة ممكنة.
+اقرأ الصورة المرفقة واستخرج **كل** النص المرئي فيها حرفياً وبدون أي تعديل، تلخيص، أو ترجمة.
+
+قواعد صارمة:
+- حافظ على أسطر النص وترتيبها كما تظهر في الصورة.
+- شكّل الكلمات العربية بالتشكيل إن ظهر واضحاً، وإلا اتركها بدون تشكيل.
+- لا تُضف علامات ترقيم غير موجودة، ولا تُصحّح أخطاء الكاتب.
+- إن كان جزء غير واضح، ضع مكانه [...] بدل التخمين.
+- لا تُخرج أي شرح أو مقدمة، فقط النص المستخرج بصيغة نصّ عادي.`;
+
+  const key = getGeminiKey();
+  if (!key) throw new Error("مفتاح Gemini غير متوفر.");
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [
+        { text: ocrPrompt },
+        { inlineData: { mimeType: mime_type, data: image_base64 } },
+      ]}],
+      generationConfig: { temperature: 0.05, maxOutputTokens: 4096 },
+    }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    if (res.status === 429) throw new Error("تم تجاوز حد الطلبات، حاول بعد قليل.");
+    if (res.status === 402 || res.status === 403) throw new Error("انتهى رصيد Gemini أو المفتاح غير مصرّح.");
+    throw new Error(`فشل المسح (${res.status}): ${txt.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  const rawText: string = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
+
+  if (!rawText) {
+    return { language: "ar", text: "", word_count: 0, summary: "لم يُعثر على نصوص واضحة في الصورة." };
+  }
+
+  // Step 2: enrich with metadata (title, summary, keywords) — best effort
+  try {
+    const metaPrompt = `النص التالي مستخرج من ورقة ممسوحة. أعطني JSON فقط بالحقول:
+{
+  "language": "ar" أو "en" أو "mixed",
+  "title": "عنوان قصير مقترح (٢-٦ كلمات) بلغة النص، أو '' إذا لم يكن مناسباً",
+  "summary": "ملخّص من سطرين بلغة النص",
+  "keywords": ["٣-٦ كلمات مفتاحية بلغة النص"]
+}
+النص:
+"""
+${rawText.slice(0, 3500)}
+"""`;
+    const meta = await generateJson<any>([{ text: metaPrompt }], MODEL, 0.2);
+    return {
+      language: (meta?.language === "en" || meta?.language === "mixed") ? meta.language : "ar",
+      title: typeof meta?.title === "string" ? meta.title : "",
+      text: rawText,
+      summary: typeof meta?.summary === "string" ? meta.summary : "",
+      keywords: Array.isArray(meta?.keywords) ? meta.keywords.map(String).slice(0, 6) : [],
+      word_count: rawText.split(/\s+/).filter(Boolean).length,
+    };
+  } catch {
+    return { language: "ar", text: rawText, word_count: rawText.split(/\s+/).filter(Boolean).length };
+  }
+}
