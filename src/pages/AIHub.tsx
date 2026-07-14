@@ -120,6 +120,7 @@ const AIHub = () => {
               key === "writing" ? () => setOpenTool("writing") :
               key === "daily" ? () => setOpenTool("daily") :
               key === "flash" ? () => setOpenTool("flash") :
+              key === "interview" ? () => setOpenTool("interview") :
               undefined;
             if (handler) {
               return (
