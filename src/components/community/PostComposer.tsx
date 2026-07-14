@@ -36,15 +36,6 @@ export const PostComposer = ({ faction, onPosted }: Props) => {
         })
         .select()
         .single();
-        .from("community_posts")
-        .insert({
-          user_id: user.id,
-          content: content.trim(),
-          image_url: imageUrl.trim() || null,
-          faction: fac,
-        })
-        .select()
-        .single();
       if (error) throw error;
 
       contributeChallenge(fac);
