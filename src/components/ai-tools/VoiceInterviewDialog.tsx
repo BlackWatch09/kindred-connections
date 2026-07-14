@@ -6,6 +6,7 @@ import { transcribeAudio } from "@/features/story-world/lib/streamChat";
 import { speakArabic, stopSpeaking } from "@/lib/tts";
 import { addPoints } from "@/lib/points";
 import { useAuth } from "@/hooks/useAuth";
+import { friendlyError } from "@/lib/errors";
 
 type Phase = "setup" | "loading" | "interview" | "scoring" | "done" | "error";
 

@@ -5,6 +5,7 @@ import ToolShell from "./ToolShell";
 import { generateDailyChallenge, type DailyChallenge, type DailyTask } from "@/lib/aiFn";
 import { addPoints } from "@/lib/points";
 import { useAuth } from "@/hooks/useAuth";
+import { friendlyError } from "@/lib/errors";
 
 type Level = "beginner" | "intermediate" | "advanced";
 
@@ -81,8 +82,8 @@ export default function DailyChallengeDialog({ open, onClose }: { open: boolean;
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({ date: todaySeed(), level, data }));
       } catch { /* ignore */ }
-    } catch (e: any) {
-      setError(e.message || "تعذّر توليد تحدّي اليوم.");
+    } catch (e) {
+      setError(friendlyError(e));
     } finally {
       setLoading(false);
     }

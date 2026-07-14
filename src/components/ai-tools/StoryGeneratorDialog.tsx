@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { BookOpen, Loader2, Sparkles, Check, X, Trophy, RotateCcw, Minus, Plus, Type } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import ToolShell from "./ToolShell";
 import { generateStory, type StoryResult as Story, type StoryQuestion } from "@/lib/aiFn";
 import { addPoints } from "@/lib/points";
 import { useAuth } from "@/hooks/useAuth";
+import { friendlyError, MAX_INTERESTS_LEN } from "@/lib/errors";
 
 type Level = "beginner" | "intermediate" | "advanced";
 
@@ -57,11 +59,16 @@ export default function StoryGeneratorDialog({ open, onClose }: { open: boolean;
   };
 
   const generate = async () => {
+    if (interests && interests.length > MAX_INTERESTS_LEN) {
+      toast.error(`قائمة الاهتمامات طويلة جداً (الحد ${MAX_INTERESTS_LEN} حرف).`);
+      return;
+    }
     setLoading(true); setError(null); setStory(null); resetQuiz();
     try {
-      const data = await generateStory(level, interests, length);
+      const data = await generateStory(level, interests.trim(), length);
+      if (!data?.story?.trim()) throw new Error("لم يُنشأ نصّ للقصة. جرّب موضوعاً آخر أو أعد المحاولة.");
       setStory(data);
-    } catch (e: any) { setError(e.message || "تعذّر توليد القصة."); }
+    } catch (e) { setError(friendlyError(e)); }
     finally { setLoading(false); }
   };
 

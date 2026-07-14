@@ -40,9 +40,15 @@ export default function WritingAssistDialog({ open, onClose }: { open: boolean; 
           ))}
         </div>
 
-        <textarea value={text} onChange={(e) => setText(e.target.value)} dir="rtl" rows={6}
-          placeholder="اكتب فقرة قصيرة بالعربية…"
-          className="w-full border border-border bg-background p-3 font-display text-lg leading-loose focus:outline-none focus:border-accent" />
+        <div>
+          <textarea value={text} onChange={(e) => setText(e.target.value)} dir="rtl" rows={6}
+            maxLength={MAX_TEXT_LEN}
+            placeholder="اكتب فقرة قصيرة بالعربية…"
+            className="w-full border border-border bg-background p-3 font-display text-lg leading-loose focus:outline-none focus:border-accent" />
+          <div className="mt-1 text-[10px] text-muted-foreground text-left tabular-nums">
+            {text.length} / {MAX_TEXT_LEN}
+          </div>
+        </div>
 
         <button onClick={analyze} disabled={loading || !text.trim()}
           className="w-full py-3 bg-primary text-primary-foreground font-semibold hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center gap-2 disabled:opacity-60">

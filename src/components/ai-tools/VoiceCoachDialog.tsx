@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2, Play, Sparkles } from "lucide-react";
 import ToolShell from "./ToolShell";
 import { pronunciationCoach, type PronResult as Result } from "@/lib/aiFn";
+import { friendlyError } from "@/lib/errors";
 
 const SUGGESTIONS = [
   "السَّلامُ عَلَيْكُم",
@@ -54,13 +55,17 @@ export default function VoiceCoachDialog({ open, onClose }: { open: boolean; onC
   const stop = () => { recorderRef.current?.stop(); setRecording(false); };
 
   const analyze = async (blob: Blob) => {
+    if (!blob || blob.size < 500) {
+      setError("التسجيل قصير جداً. حاول مرة أخرى وانطق الجملة بوضوح.");
+      return;
+    }
     setLoading(true); setError(null);
     try {
       const base64 = await blobToBase64(blob);
       const data = await pronunciationCoach(base64, mimeRef.current, target);
       setResult(data);
-    } catch (e: any) {
-      setError(e.message || "تعذّر التحليل، حاول مرة أخرى.");
+    } catch (e) {
+      setError(friendlyError(e));
     } finally { setLoading(false); }
   };
 
