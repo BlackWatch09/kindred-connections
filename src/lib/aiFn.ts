@@ -269,3 +269,61 @@ export async function generateDailyChallenge(level: string, seed: string): Promi
     tasks,
   };
 }
+
+// ---------- Smart Flashcards ----------
+export interface Flashcard {
+  word: string;           // Arabic word (with tashkeel)
+  translation: string;    // meaning in target language
+  example: string;        // Arabic example sentence (with tashkeel)
+  example_translation: string;
+  root?: string;
+  pos?: string;           // part of speech
+}
+export interface FlashcardDeck {
+  title: string;
+  cards: Flashcard[];
+}
+export async function generateFlashcards(
+  topic: string,
+  level: string,
+  count: number,
+  target_lang: "en" | "tr" | "ar",
+): Promise<FlashcardDeck> {
+  const langName = target_lang === "tr" ? "Turkish" : target_lang === "ar" ? "عربي مبسّط" : "English";
+  const prompt = `أنت مصمّم بطاقات تعليمية للغة العربية. أنشئ مجموعة بطاقات مفردات للطالب.
+
+الموضوع/الدرس: ${topic || "مفردات عامة يومية"}
+المستوى: ${level}
+لغة الترجمة: ${langName}
+عدد البطاقات: ${count}
+
+أعد JSON فقط:
+{
+  "title": "عنوان قصير للمجموعة",
+  "cards": [
+    {
+      "word": "الكلمة العربية مشكّلة",
+      "translation": "الترجمة إلى ${langName}",
+      "example": "جملة مثالية قصيرة تستخدم الكلمة، مشكّلة بالكامل",
+      "example_translation": "ترجمة الجملة إلى ${langName}",
+      "root": "الجذر بدون تشكيل أو نص فارغ",
+      "pos": "اسم|فعل|صفة|ظرف|حرف"
+    }
+  ]
+}
+- اجعل الكلمات متنوعة ومناسبة للمستوى (بدون تكرار).
+- شكّل جميع الكلمات والجمل العربية بالحركات الكاملة.
+- اجعل الأمثلة مفيدة وواقعية.`;
+  const r = await generateJson<FlashcardDeck>([{ text: prompt }], MODEL, 0.7);
+  const cards: Flashcard[] = Array.isArray(r?.cards)
+    ? (r.cards as any[]).map((c) => ({
+        word: String(c?.word || ""),
+        translation: String(c?.translation || ""),
+        example: String(c?.example || ""),
+        example_translation: String(c?.example_translation || ""),
+        root: c?.root ? String(c.root) : "",
+        pos: c?.pos ? String(c.pos) : "",
+      })).filter((c) => c.word && c.translation)
+    : [];
+  return { title: r?.title || topic || "بطاقات مفردات", cards };
+}
