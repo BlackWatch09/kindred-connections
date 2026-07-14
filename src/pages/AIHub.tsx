@@ -88,7 +88,7 @@ const AIHub = () => {
     scanner:   { key: "scanner",   icon: ScanLine,      title: isAr ? "الماسح الضوئي الذكي" : "Smart AI Scanner", desc: isAr ? "صوّر أي ورقة واستخرج نصّها بدقّة عالية — قابل للتحرير والنسخ والتحميل." : "Snap any page and extract its text with high accuracy — editable, copyable, downloadable.", cta: isAr ? "ابدأ المسح" : "Start scan", badge: isAr ? "جديد" : "New" },
   };
 
-  const isAr = language === "ar";
+
 
   const handlerFor = (key: ToolKey) => {
     if (key === "tutor") return openSiraj;
