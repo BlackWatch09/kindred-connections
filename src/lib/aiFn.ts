@@ -2,6 +2,7 @@
 // Uses the shared user Gemini key (see getGeminiKey) so we don't depend on edge functions.
 
 import { getGeminiKey } from "@/features/story-world/lib/streamChat";
+import { supabase } from "@/lib/supabase";
 
 const MODEL = "gemini-2.5-flash-lite";
 const AUDIO_MODEL = "gemini-2.5-flash";
@@ -214,45 +215,12 @@ export interface DailyChallenge {
   tasks: DailyTask[];
 }
 export async function generateDailyChallenge(level: string, seed: string): Promise<DailyChallenge> {
-  const prompt = `أنت مصمّم تمارين لغة عربية لطالب مستواه (${level}).
-اليوم مرجعي: ${seed}. اجعل التمارين متنوعة ومتوسطة الصعوبة وممتعة، وركّز على الاستخدام اليومي (سفر، طعام، عمل، أصدقاء).
-
-أعد JSON فقط بهذا الشكل:
-{
-  "title": "عنوان قصير للتحدي",
-  "intro": "جملة تحفيزية قصيرة",
-  "tasks": [
-    {
-      "kind": "mcq",
-      "prompt": "سؤال فهم مفرد",
-      "options": ["خيار 1","خيار 2","خيار 3","خيار 4"],
-      "correct": "الخيار الصحيح كنص كامل مطابق لأحد options",
-      "explanation": "شرح قصير"
-    },
-    {
-      "kind": "fill",
-      "prompt": "أكمل الفراغ بالكلمة المناسبة",
-      "context": "جملة بها فراغ ____ يجب ملؤه",
-      "options": ["كلمة 1","كلمة 2","كلمة 3","كلمة 4"],
-      "correct": "الكلمة الصحيحة كنص مطابق لأحد options",
-      "explanation": "شرح"
-    },
-    {
-      "kind": "translate",
-      "prompt": "ترجم الجملة إلى العربية",
-      "context": "The English sentence to translate.",
-      "correct": "الترجمة العربية النموذجية المشكّلة",
-      "explanation": "ملاحظة عن التركيب"
-    }
-  ]
-}
-
-الشروط:
-- 4 مهام بالضبط (يمكنك تكرار الأنواع بترتيب مختلف).
-- شكّل الكلمات العربية بالحركات الكاملة.
-- لكل mcq و fill: أربعة خيارات مختلفة وواحدة صحيحة فقط، و correct يجب أن يطابق أحدها حرفياً.
-- لـ translate: correct هي إجابة نموذجية واحدة (نقبل مطابقة تقريبية).`;
-  const r = await generateJson<DailyChallenge>([{ text: prompt }], MODEL, 0.7);
+  const { data, error } = await supabase.functions.invoke("ai-json", {
+    body: { task: "daily-challenge", input: { level, seed } },
+  });
+  if (error) throw new Error(error.message || "فشل توليد التحدّي");
+  const r: any = data || {};
+  // Server returns a simplified shape; adapt to the DailyChallenge structure used by the UI.
   const tasks: DailyTask[] = Array.isArray(r?.tasks)
     ? (r.tasks as any[]).map((t) => ({
         kind: (["mcq", "fill", "translate"].includes(t?.kind) ? t.kind : "mcq") as DailyTask["kind"],
@@ -262,13 +230,21 @@ export async function generateDailyChallenge(level: string, seed: string): Promi
         correct: String(t?.correct || ""),
         explanation: t?.explanation ? String(t.explanation) : "",
       })).filter((t) => t.prompt && t.correct)
-    : [];
+    : [{
+        // Fallback: if the simple preset returned a single task, wrap it
+        kind: "translate" as DailyTask["kind"],
+        prompt: String(r?.instruction || "تحدّي اليوم"),
+        context: String(r?.prompt || ""),
+        correct: String(r?.expected || ""),
+        explanation: String(r?.hint || ""),
+      }].filter((t) => t.correct);
   return {
     title: r?.title || "تحدّي اليوم",
-    intro: r?.intro || "",
+    intro: r?.intro || r?.instruction || "",
     tasks,
   };
 }
+
 
 // ---------- Smart Flashcards ----------
 export interface Flashcard {
@@ -431,67 +407,25 @@ export interface ScanResult {
 }
 
 export async function scanImageText(image_base64: string, mime_type: string): Promise<ScanResult> {
-  // Step 1: high-fidelity OCR — return raw text only, preserve line breaks
-  const ocrPrompt = `أنت ماسح ضوئي ذكي متخصّص في استخراج النصوص العربية والإنجليزية من الصور بأعلى دقّة ممكنة.
-اقرأ الصورة المرفقة واستخرج **كل** النص المرئي فيها حرفياً وبدون أي تعديل، تلخيص، أو ترجمة.
-
-قواعد صارمة:
-- حافظ على أسطر النص وترتيبها كما تظهر في الصورة.
-- شكّل الكلمات العربية بالتشكيل إن ظهر واضحاً، وإلا اتركها بدون تشكيل.
-- لا تُضف علامات ترقيم غير موجودة، ولا تُصحّح أخطاء الكاتب.
-- إن كان جزء غير واضح، ضع مكانه [...] بدل التخمين.
-- لا تُخرج أي شرح أو مقدمة، فقط النص المستخرج بصيغة نصّ عادي.`;
-
-  const key = getGeminiKey();
-  if (!key) throw new Error("مفتاح Gemini غير متوفر.");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [
-        { text: ocrPrompt },
-        { inlineData: { mimeType: mime_type, data: image_base64 } },
-      ]}],
-      generationConfig: { temperature: 0.05, maxOutputTokens: 4096 },
-    }),
+  const { data, error } = await supabase.functions.invoke("smart-scan", {
+    body: { image_base64, mime_type },
   });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    if (res.status === 429) throw new Error("تم تجاوز حد الطلبات، حاول بعد قليل.");
-    if (res.status === 402 || res.status === 403) throw new Error("انتهى رصيد Gemini أو المفتاح غير مصرّح.");
-    throw new Error(`فشل المسح (${res.status}): ${txt.slice(0, 200)}`);
+  if (error) {
+    const msg = (error as any)?.context?.status === 429
+      ? "تم تجاوز حد الطلبات، حاول بعد قليل."
+      : (error as any)?.context?.status === 402
+      ? "انتهى رصيد الذكاء الاصطناعي."
+      : error.message || "فشل المسح";
+    throw new Error(msg);
   }
-  const data = await res.json();
-  const rawText: string = (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
-
-  if (!rawText) {
-    return { language: "ar", text: "", word_count: 0, summary: "لم يُعثر على نصوص واضحة في الصورة." };
-  }
-
-  // Step 2: enrich with metadata (title, summary, keywords) — best effort
-  try {
-    const metaPrompt = `النص التالي مستخرج من ورقة ممسوحة. أعطني JSON فقط بالحقول:
-{
-  "language": "ar" أو "en" أو "mixed",
-  "title": "عنوان قصير مقترح (٢-٦ كلمات) بلغة النص، أو '' إذا لم يكن مناسباً",
-  "summary": "ملخّص من سطرين بلغة النص",
-  "keywords": ["٣-٦ كلمات مفتاحية بلغة النص"]
+  const d: any = data || {};
+  return {
+    language: d.language === "en" || d.language === "mixed" ? d.language : "ar",
+    title: typeof d.title === "string" ? d.title : "",
+    text: String(d.text || ""),
+    summary: typeof d.summary === "string" ? d.summary : "",
+    keywords: Array.isArray(d.keywords) ? d.keywords.map(String).slice(0, 6) : [],
+    word_count: Number(d.word_count) || 0,
+  };
 }
-النص:
-"""
-${rawText.slice(0, 3500)}
-"""`;
-    const meta = await generateJson<any>([{ text: metaPrompt }], MODEL, 0.2);
-    return {
-      language: (meta?.language === "en" || meta?.language === "mixed") ? meta.language : "ar",
-      title: typeof meta?.title === "string" ? meta.title : "",
-      text: rawText,
-      summary: typeof meta?.summary === "string" ? meta.summary : "",
-      keywords: Array.isArray(meta?.keywords) ? meta.keywords.map(String).slice(0, 6) : [],
-      word_count: rawText.split(/\s+/).filter(Boolean).length,
-    };
-  } catch {
-    return { language: "ar", text: rawText, word_count: rawText.split(/\s+/).filter(Boolean).length };
-  }
-}
+
