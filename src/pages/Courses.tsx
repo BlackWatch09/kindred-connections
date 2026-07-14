@@ -91,7 +91,7 @@ const getCompletedLessons = (): string[] => {
 };
 
 const Courses = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
@@ -222,9 +222,9 @@ const Courses = () => {
                             <BookOpen className="w-4 h-4 text-accent flex-shrink-0" />
                           )}
                           <span
-                            className={`flex-1 ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}
+                            className={`flex-1 ${language === "ar" ? "font-arabic text-right" : ""} ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}
                           >
-                            {lesson}
+                            {getLessonLabel(lesson, language)}
                           </span>
                         </div>
                       );
