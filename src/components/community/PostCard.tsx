@@ -96,7 +96,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   };
 
   // Keep local count in sync when parent refreshes post prop
-  useEffect(() => { setCommentsCount(post.comments_count); }, [post.comments_count]);
+  useEffect(() => { setCommentsCount((c) => Math.max(c, post.comments_count)); }, [post.comments_count]);
 
   useEffect(() => {
     if (!showComments) return;
