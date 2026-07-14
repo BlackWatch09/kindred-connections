@@ -30,3 +30,7 @@ verify_jwt = false
 [functions.admin-support]
 verify_jwt = false
 
+[functions.community-siraj]
+verify_jwt = false
+
+

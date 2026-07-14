@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import Admin from "./pages/Admin";
 import AIHub from "./pages/AIHub";
+import Community from "./pages/Community";
 import SirajCompanion from "@/components/SirajCompanion";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,14 @@ const App = () => (
                 <Route path="/admin" element={<Admin />} />
 
                 {/* Protected — must be signed in */}
+                <Route
+                  path="/community"
+                  element={
+                    <ProtectedRoute>
+                      <Community />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/courses"
                   element={
