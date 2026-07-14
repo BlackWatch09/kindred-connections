@@ -103,7 +103,7 @@ async function fetchGeminiSpeech(text: string): Promise<string | null> {
     body: JSON.stringify({
       contents: [{
         parts: [{
-          text: `اقرأ النص التالي بالعربية الفصحى بصوت واضح ودافئ ومناسب لمتعلّم اللغة، مع نطق سليم للحروف: ${text}`,
+          text: `Read the following Arabic text aloud in clear, warm Modern Standard Arabic (فصحى) at a natural pace suitable for a language learner. Pronounce every letter carefully. Text: ${text}`,
         }],
       }],
       generationConfig: {
