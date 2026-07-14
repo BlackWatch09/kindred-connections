@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Sparkles, Mic, MessageCircle, BookOpen, Languages, PenLine,
-  Wand2, Calendar, Layers, GraduationCap, Radio, ArrowUpRight,
+  Wand2, Calendar, Layers, GraduationCap, Radio, ArrowUpRight, ScanLine,
 } from "lucide-react";
 import { pickLocalized } from "@/lib/siteContent";
 import { useAiPersona } from "@/hooks/useAiPersona";
@@ -15,6 +15,7 @@ import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog
 import DailyChallengeDialog from "@/components/ai-tools/DailyChallengeDialog";
 import FlashcardsDialog from "@/components/ai-tools/FlashcardsDialog";
 import VoiceInterviewDialog from "@/components/ai-tools/VoiceInterviewDialog";
+import SmartScannerDialog from "@/components/ai-tools/SmartScannerDialog";
 
 type ToolKey = "tutor" | "voice" | "placement" | "story" | "translate" | "writing" | "daily" | "flash" | "interview";
 
