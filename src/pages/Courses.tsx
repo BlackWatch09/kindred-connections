@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BookOpen, CheckCircle2, MessagesSquare, ArrowLeft, Sparkles } from "lucide-react";
 import { slugify } from "@/pages/CoursePage";
+import { getLessonLabel } from "@/data/courseLessons";
 
 const courses = [
   {
