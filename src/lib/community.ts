@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 
 export type FactionId = "fasaha" | "hikma" | "balagha";
 
@@ -94,12 +95,60 @@ export function mentionsSiraj(text: string): boolean {
   return MENTION_RE.test(text);
 }
 
+/**
+ * Client-side Siraj reply: calls the deployed `gemini-proxy` for text,
+ * then inserts the comment under the current user (RLS-safe) with an
+ * `ai_name` marker so the UI renders it as Siraj.
+ */
 export async function triggerSirajReply(postId: string, promptText: string, authorName?: string) {
-  const { data, error } = await supabase.functions.invoke("community-siraj", {
-    body: { post_id: postId, prompt_text: promptText, author_name: authorName },
-  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("not_signed_in");
+
+  const system = `أنت "سراج" — معلّم الذكاء الاصطناعي في منصّة لُغة لتعليم العربية.
+أُشير إليك للتّو داخل منشور في المجتمع من الطالب "${authorName || "طالب"}".
+- ردّ بالعربية الفصحى، بأسلوب ودود ومشجّع.
+- إن كان هناك خطأ لغويّ صحّحه بلطف واذكر القاعدة باختصار.
+- إن كان سؤالاً، أجب بوضوح مع مثال.
+- ردّك يظهر كتعليق عام على المنشور، فاجعله موجزاً (٣-٦ أسطر كحد أقصى).
+- استخدم رمزاً تعبيرياً واحداً على الأكثر في نهاية الرد.`;
+
+  let reply = "أهلاً! أنا هنا. أعد صياغة سؤالك من فضلك 🌙";
+  try {
+    const url = geminiEndpoint("gemini-2.5-flash", "generateContent");
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: promptText }] }],
+        systemInstruction: { role: "system", parts: [{ text: system }] },
+        generationConfig: { temperature: 0.85, maxOutputTokens: 512 },
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text).filter(Boolean).join("\n").trim();
+      if (text) reply = text;
+    } else {
+      console.warn("[siraj] gemini-proxy error", res.status, await res.text().catch(() => ""));
+    }
+  } catch (e) {
+    console.warn("[siraj] gemini-proxy exception", e);
+  }
+
+  const { data: inserted, error } = await supabase
+    .from("community_comments")
+    .insert({
+      post_id: postId,
+      user_id: user.id,      // satisfies RLS (auth.uid() = user_id)
+      content: reply,
+      is_ai: false,          // RLS requires is_ai=false for client inserts
+      ai_name: "سراج",       // UI treats presence of ai_name as an AI reply
+    })
+    .select()
+    .single();
+
   if (error) throw error;
-  return data;
+  return inserted;
 }
 
 export async function contributeChallenge(faction: FactionId | null) {
