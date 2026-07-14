@@ -1,23 +1,61 @@
-// Gemini integration — routed through the `gemini-proxy` Supabase Edge Function
-// so the API key stays server-side (env: GEMINI_API_KEY).
+// Gemini integration — calls Google Generative Language API directly from the
+// browser, using an API key the user pastes once and we store in localStorage.
+// This avoids needing any deployed Edge Function or server proxy.
 
 const MODEL = "gemini-2.5-flash-lite";
-const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
-const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
+const GEMINI_BASE = "https://generativelanguage.googleapis.com";
+const KEY_STORAGE = "lugha.gemini.key.v1";
+const KEY_EVENT = "lugha:gemini-key-changed";
 
-/** Build the proxied Gemini endpoint URL. Extra query params optional (e.g. `alt=sse`). */
-export function geminiEndpoint(model: string, method: string, extraQuery?: string): string {
-  const q = extraQuery ? `?${extraQuery}` : "";
-  return `${PROXY_BASE}/v1beta/models/${model}:${method}${q}`;
+export function getGeminiKey(): string {
+  if (typeof window === "undefined") return "";
+  try { return window.localStorage.getItem(KEY_STORAGE) || ""; } catch { return ""; }
+}
+export function setGeminiKey(key: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(KEY_STORAGE, key.trim());
+    window.dispatchEvent(new CustomEvent(KEY_EVENT));
+  } catch { /* ignore */ }
+}
+export function clearGeminiKey() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(KEY_STORAGE);
+    window.dispatchEvent(new CustomEvent(KEY_EVENT));
+  } catch { /* ignore */ }
+}
+export function hasGeminiKey(): boolean { return !!getGeminiKey(); }
+export function onGeminiKeyChange(cb: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => cb();
+  window.addEventListener(KEY_EVENT, handler);
+  window.addEventListener("storage", handler);
+  return () => {
+    window.removeEventListener(KEY_EVENT, handler);
+    window.removeEventListener("storage", handler);
+  };
 }
 
-// Kept for backwards compatibility with existing UI code — the key is no longer
-// used in the browser; the proxy always has access to the server-side key.
-export function getGeminiKey(): string { return "server"; }
-export function setGeminiKey(_key: string) { /* no-op */ }
-export function clearGeminiKey() { /* no-op */ }
+function requireKey(): string {
+  const k = getGeminiKey();
+  if (!k) {
+    // Fire an event so the app can open the key-entry dialog.
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("lugha:gemini-key-missing"));
+    }
+    throw new Error("لم يتم إعداد مفتاح الذكاء الاصطناعي بعد. الرجاء إضافته من الإعدادات.");
+  }
+  return k;
+}
 
-function requireKey(): string { return "server"; }
+/** Build a direct Google Gemini endpoint URL with the user's key. */
+export function geminiEndpoint(model: string, method: string, extraQuery?: string): string {
+  const key = requireKey();
+  const params = new URLSearchParams(extraQuery || "");
+  params.set("key", key);
+  return `${GEMINI_BASE}/v1beta/models/${model}:${method}?${params.toString()}`;
+}
 
 function buildSystemPrompt(o: {
   worldId: string;
@@ -61,7 +99,6 @@ export async function streamStoryChat(
   body: Record<string, unknown>,
   onDelta: (chunk: string) => void,
 ): Promise<string> {
-  const apiKey = requireKey();
   const {
     worldId,
     characterName,
@@ -101,7 +138,6 @@ export async function streamStoryChat(
     contents.push({ role: "user", parts: [{ text: String(userMessage ?? "") }] });
   }
 
-  void apiKey;
   const url = geminiEndpoint(MODEL, "streamGenerateContent", "alt=sse");
 
   const res = await fetch(url, {
@@ -149,7 +185,6 @@ export async function streamStoryChat(
 }
 
 export async function checkGrammar(text: string, level: string) {
-  const apiKey = requireKey();
   const prompt = `أنت معلم لغة عربية لطيف. حلل جملة الطالب (مستوى ${level ?? "مبتدئ"}) واكتشف أخطاء نحوية أو صرفية بسيطة.
 جملة الطالب: "${text}"
 
@@ -163,7 +198,6 @@ export async function checkGrammar(text: string, level: string) {
 إذا كانت الجملة سليمة أعد has_error=false وhint فارغة.
 new_words = كلمات عربية جديرة بالحفظ من جملة الطالب (0-3 كلمات).`;
 
-  void apiKey;
   const url = geminiEndpoint(MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",
@@ -192,8 +226,6 @@ new_words = كلمات عربية جديرة بالحفظ من جملة الطا
 }
 
 export async function transcribeAudio(base64: string, mimeType: string) {
-  const apiKey = requireKey();
-  void apiKey;
   const url = geminiEndpoint(MODEL, "generateContent");
   const res = await fetch(url, {
     method: "POST",

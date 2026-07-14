@@ -26,6 +26,7 @@ import Admin from "./pages/Admin";
 import AIHub from "./pages/AIHub";
 import Community from "./pages/Community";
 import SirajCompanion from "@/components/SirajCompanion";
+import GeminiKeyGate from "@/components/GeminiKeyGate";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const Chrome = ({ children }: { children: React.ReactNode }) => {
       </main>
       {!immersive && <Footer />}
       <SirajCompanion />
+      <GeminiKeyGate />
     </>
   );
 };
