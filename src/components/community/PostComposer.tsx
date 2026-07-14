@@ -19,11 +19,23 @@ export const PostComposer = ({ faction, onPosted }: Props) => {
 
   const submit = async () => {
     if (!user || !content.trim()) return;
+    if (!faction) {
+      toast.error("اختر تحالفك أولاً من أعلى الصفحة");
+      return;
+    }
     setBusy(true);
     try {
-      let fac = faction;
-      if (!fac) fac = await ensureFaction(user.id);
+      const fac = faction;
       const { data: post, error } = await supabase
+        .from("community_posts")
+        .insert({
+          user_id: user.id,
+          content: content.trim(),
+          image_url: imageUrl.trim() || null,
+          faction: fac,
+        })
+        .select()
+        .single();
         .from("community_posts")
         .insert({
           user_id: user.id,
