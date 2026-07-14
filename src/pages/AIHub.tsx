@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Sparkles, Mic, MessageCircle, BookOpen, Languages, PenLine,
-  Wand2, Calendar, Layers, GraduationCap, Radio, ArrowUpRight,
+  Wand2, Calendar, Layers, GraduationCap, Radio, ArrowUpRight, ScanLine,
 } from "lucide-react";
 import { pickLocalized } from "@/lib/siteContent";
 import { useAiPersona } from "@/hooks/useAiPersona";
@@ -15,8 +15,9 @@ import ContextTranslateDialog from "@/components/ai-tools/ContextTranslateDialog
 import DailyChallengeDialog from "@/components/ai-tools/DailyChallengeDialog";
 import FlashcardsDialog from "@/components/ai-tools/FlashcardsDialog";
 import VoiceInterviewDialog from "@/components/ai-tools/VoiceInterviewDialog";
+import SmartScannerDialog from "@/components/ai-tools/SmartScannerDialog";
 
-type ToolKey = "tutor" | "voice" | "placement" | "story" | "translate" | "writing" | "daily" | "flash" | "interview";
+type ToolKey = "tutor" | "voice" | "placement" | "story" | "translate" | "writing" | "daily" | "flash" | "interview" | "scanner";
 
 type Tool = {
   key: ToolKey;
@@ -49,6 +50,12 @@ const CATEGORIES: Category[] = [
     keys: ["story", "writing", "translate"],
   },
   {
+    id: "capture",
+    eyebrow: { ar: "الالتقاط الذكي", en: "Smart Capture" },
+    title: { ar: "من الورق إلى الشاشة في لحظة.", en: "From paper to screen in a heartbeat." },
+    keys: ["scanner"],
+  },
+  {
     id: "practice",
     eyebrow: { ar: "التقييم والتدريب", en: "Assessment & Practice" },
     title: { ar: "قِس مستواك ودرّبه يوميًا.", en: "Measure and train your level daily." },
@@ -65,7 +72,8 @@ const AIHub = () => {
   const tutorTitle = pickLocalized(persona.tutorTitle, language);
   const tutorGreeting = pickLocalized(persona.tutorGreeting, language);
 
-  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview">(null);
+  const isAr = language === "ar";
+  const [openTool, setOpenTool] = useState<null | "voice" | "story" | "translate" | "writing" | "daily" | "flash" | "interview" | "scanner">(null);
 
   const toolsMap: Record<ToolKey, Tool> = {
     tutor:     { key: "tutor",     icon: MessageCircle, title: `${t("aihub.tools.tutor")} — ${tutorName}`, desc: t("aihub.tools.tutor.desc"), cta: t("aihub.cta.talk"), badge: t("aihub.badge.flagship") },
@@ -77,9 +85,10 @@ const AIHub = () => {
     daily:     { key: "daily",     icon: Calendar,      title: t("aihub.tools.daily"),   desc: t("aihub.tools.daily.desc"),   cta: t("aihub.cta.today") },
     flash:     { key: "flash",     icon: Layers,        title: t("aihub.tools.flash"),   desc: t("aihub.tools.flash.desc"),   cta: t("aihub.cta.review") },
     interview: { key: "interview", icon: Radio,         title: t("aihub.tools.interview"), desc: t("aihub.tools.interview.desc"), cta: t("aihub.cta.begin") },
+    scanner:   { key: "scanner",   icon: ScanLine,      title: isAr ? "الماسح الضوئي الذكي" : "Smart AI Scanner", desc: isAr ? "صوّر أي ورقة واستخرج نصّها بدقّة عالية — قابل للتحرير والنسخ والتحميل." : "Snap any page and extract its text with high accuracy — editable, copyable, downloadable.", cta: isAr ? "ابدأ المسح" : "Start scan", badge: isAr ? "جديد" : "New" },
   };
 
-  const isAr = language === "ar";
+
 
   const handlerFor = (key: ToolKey) => {
     if (key === "tutor") return openSiraj;
@@ -244,6 +253,7 @@ const AIHub = () => {
       <DailyChallengeDialog open={openTool === "daily"} onClose={() => setOpenTool(null)} />
       <FlashcardsDialog open={openTool === "flash"} onClose={() => setOpenTool(null)} />
       <VoiceInterviewDialog open={openTool === "interview"} onClose={() => setOpenTool(null)} />
+      <SmartScannerDialog open={openTool === "scanner"} onClose={() => setOpenTool(null)} />
     </div>
   );
 };
