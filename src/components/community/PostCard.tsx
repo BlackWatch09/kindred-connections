@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { contributeChallenge, FactionId, factionOf, mentionsSiraj, triggerSirajReply } from "@/lib/community";
 import FactionBadge from "./FactionBadge";
-import { Heart, MessageCircle, Sparkles, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Pencil, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import sirajAvatar from "@/assets/siraj-chat-avatar.png";
 
@@ -16,6 +16,7 @@ export interface CommunityPost {
   likes_count: number;
   comments_count: number;
   created_at: string;
+  edited_at?: string | null;
   author?: { full_name: string | null; avatar_url: string | null } | null;
 }
 
