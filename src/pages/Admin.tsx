@@ -725,4 +725,172 @@ const AIContentPanel = () => {
   );
 };
 
+// ==================== SUPPORT TICKETS ====================
+type SupportTicket = {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string;
+  message: string;
+  status: string;
+  created_at: string;
+};
+
+const SupportPanel = () => {
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "new" | "resolved">("all");
+
+  const callFn = async (method: "GET" | "POST" | "DELETE", opts: { id?: string; status?: string } = {}) => {
+    const pw = getAdminPassword();
+    if (!pw) throw new Error("جلسة الأدمن انتهت، سجّل دخولك مجدداً.");
+    const url = new URL(
+      `${(import.meta as any).env?.VITE_SUPABASE_URL ?? "https://zekkojrgknpvmxskyqno.supabase.co"}/functions/v1/admin-support`,
+    );
+    if (method === "DELETE" && opts.id) url.searchParams.set("id", opts.id);
+    const res = await fetch(url.toString(), {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": pw,
+      },
+      body: method === "POST" ? JSON.stringify(opts) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+    return data;
+  };
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { tickets } = await callFn("GET");
+      setTickets(tickets ?? []);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const markResolved = async (id: string, next: string) => {
+    try {
+      await callFn("POST", { id, status: next });
+      setTickets((t) => t.map((x) => (x.id === id ? { ...x, status: next } : x)));
+      toast.success("تم التحديث");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!window.confirm("حذف هذه الرسالة نهائياً؟")) return;
+    try {
+      await callFn("DELETE", { id });
+      setTickets((t) => t.filter((x) => x.id !== id));
+      toast.success("تم الحذف");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const visible = tickets.filter((t) => filter === "all" || t.status === filter);
+
+  return (
+    <SectionShell title="الدعم الفني" desc="رسائل المستخدمين المرسلة من صفحة الدعم.">
+      <div className="flex items-center gap-2 mb-5 flex-wrap">
+        {(["all", "new", "resolved"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 text-xs uppercase tracking-widest font-semibold ${
+              filter === f ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground"
+            }`}
+          >
+            {f === "all" ? "الكل" : f === "new" ? "جديد" : "منتهي"} ({f === "all" ? tickets.length : tickets.filter((t) => t.status === f).length})
+          </button>
+        ))}
+        <button
+          onClick={load}
+          className="ms-auto text-xs uppercase tracking-widest font-semibold text-accent hover:underline flex items-center gap-1.5"
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} تحديث
+        </button>
+      </div>
+
+      {error && (
+        <div className="border border-destructive/40 bg-destructive/10 text-destructive text-sm p-4 mb-4">
+          تعذّر تحميل الرسائل: {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {loading && tickets.length === 0 && (
+          <div className="text-center py-16 text-muted-foreground text-sm flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" /> جاري التحميل…
+          </div>
+        )}
+
+        {!loading && visible.length === 0 && <Empty label="لا توجد رسائل هنا." />}
+
+        {visible.map((t) => (
+          <div
+            key={t.id}
+            className={`border bg-card p-5 ${t.status === "new" ? "border-accent/60" : "border-border"}`}
+          >
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="font-display text-lg font-semibold text-primary">{t.name}</span>
+                  <span
+                    className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 ${
+                      t.status === "new" ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {t.status === "new" ? "جديد" : "منتهي"}
+                  </span>
+                </div>
+                <a
+                  href={`mailto:${t.email}`}
+                  className="text-xs text-muted-foreground flex items-center gap-1 hover:text-accent"
+                >
+                  <Mail className="w-3 h-3" /> {t.email}
+                </a>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+                  {new Date(t.created_at).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => markResolved(t.id, t.status === "new" ? "resolved" : "new")}
+                  className="text-xs px-3 py-1.5 border border-border hover:border-accent hover:text-accent"
+                >
+                  {t.status === "new" ? "وضع علامة منتهي" : "إعادة فتح"}
+                </button>
+                <button
+                  onClick={() => remove(t.id)}
+                  className="text-muted-foreground hover:text-destructive p-1.5"
+                  title="حذف"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <p className="mt-3 text-sm text-foreground whitespace-pre-wrap leading-relaxed border-t border-border pt-3">
+              {t.message}
+            </p>
+          </div>
+        ))}
+      </div>
+    </SectionShell>
+  );
+};
+
 export default Admin;
