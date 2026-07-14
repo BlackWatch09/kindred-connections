@@ -1,6 +1,8 @@
-// community-siraj — When a user @mentions Siraj in a post or comment,
-// this function calls the AI gateway and inserts the reply as an AI comment
-// using the service role (bypassing RLS's is_ai=false rule).
+// community-siraj — Insert an AI reply from "Siraj" as a comment when
+// a user @mentions him in a community post. Uses service role to bypass
+// the RLS policy that forbids clients from inserting is_ai=true rows.
+// deploy-tag: v3
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -9,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const MODEL = "google/gemini-2.5-flash-lite";
+const MODEL = "google/gemini-2.5-flash";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -19,10 +21,12 @@ Deno.serve(async (req) => {
     const supaUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!apiKey || !supaUrl || !serviceKey) {
+      console.error("missing_env", { hasApi: !!apiKey, hasUrl: !!supaUrl, hasSvc: !!serviceKey });
       return json({ error: "missing_env" }, 500);
     }
 
-    const { post_id, prompt_text, author_name } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { post_id, prompt_text, author_name } = body ?? {};
     if (!post_id || !prompt_text) return json({ error: "post_id & prompt_text required" }, 400);
 
     const system = `أنت "سراج" — معلّم الذكاء الاصطناعي في منصّة لُغة لتعليم العربية.
@@ -33,26 +37,35 @@ Deno.serve(async (req) => {
 - ردّك يظهر كتعليق عام على المنشور، فاجعله موجزاً (٣-٦ أسطر كحد أقصى) وممتعاً.
 - استخدم رمزاً تعبيرياً واحداً على الأكثر في نهاية الرد.`;
 
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.85,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: prompt_text },
-        ],
-      }),
-    });
-
-    if (!upstream.ok) {
-      if (upstream.status === 429) return json({ error: "rate_limited" }, 429);
-      if (upstream.status === 402) return json({ error: "credits_exhausted" }, 402);
-      return json({ error: "upstream_error", status: upstream.status }, 500);
+    let reply = "أهلاً! أنا هنا. أعد صياغة سؤالك من فضلك 🌙";
+    try {
+      const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          temperature: 0.85,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt_text },
+          ],
+        }),
+      });
+      if (!upstream.ok) {
+        const errText = await upstream.text().catch(() => "");
+        console.error("ai_gateway_error", upstream.status, errText);
+        if (upstream.status === 429) return json({ error: "rate_limited" }, 429);
+        if (upstream.status === 402) return json({ error: "credits_exhausted" }, 402);
+      } else {
+        const data = await upstream.json();
+        reply = data?.choices?.[0]?.message?.content?.trim() || reply;
+      }
+    } catch (e) {
+      console.error("ai_gateway_exception", e);
     }
-    const data = await upstream.json();
-    const reply = data?.choices?.[0]?.message?.content?.trim() || "أهلاً! أنا هنا. أعد صياغة سؤالك من فضلك 🌙";
 
     const supa = createClient(supaUrl, serviceKey);
     const { data: inserted, error } = await supa
@@ -66,10 +79,14 @@ Deno.serve(async (req) => {
       })
       .select()
       .single();
-    if (error) return json({ error: error.message }, 500);
+    if (error) {
+      console.error("insert_error", error);
+      return json({ error: error.message }, 500);
+    }
 
     return json({ ok: true, comment: inserted });
   } catch (e) {
+    console.error("fatal", e);
     return json({ error: String((e as Error).message || e) }, 500);
   }
 });
