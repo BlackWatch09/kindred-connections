@@ -300,7 +300,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <MessageCircle className="w-4 h-4" />
-          <span className="font-mono text-xs">{post.comments_count}</span>
+          <span className="font-mono text-xs">{commentsCount}</span>
         </button>
       </div>
 
