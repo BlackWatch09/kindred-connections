@@ -140,6 +140,18 @@ drop policy if exists "Users delete own post" on public.community_posts;
 create policy "Users delete own post"
   on public.community_posts for delete to authenticated using (auth.uid() = user_id);
 
+drop policy if exists "Users update own post" on public.community_posts;
+create policy "Users update own post"
+  on public.community_posts for update to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Ensure UPDATE grant exists (posts table)
+grant update on public.community_posts to authenticated;
+
+-- Add edited_at column so UI can show "(معدَّل)"
+alter table public.community_posts
+  add column if not exists edited_at timestamptz;
+
 -- 5.3 Comments (supports Siraj AI replies via service role)
 create table if not exists public.community_comments (
   id uuid primary key default gen_random_uuid(),
