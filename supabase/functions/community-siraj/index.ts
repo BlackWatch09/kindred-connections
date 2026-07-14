@@ -1,7 +1,7 @@
 // community-siraj — Insert an AI reply from "Siraj" as a comment when
 // a user @mentions him in a community post. Uses service role to bypass
 // the RLS policy that forbids clients from inserting is_ai=true rows.
-// deploy-tag: v3
+// deploy-tag: v5
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 

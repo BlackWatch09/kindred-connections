@@ -53,19 +53,38 @@ export function factionOf(id?: string | null): Faction | null {
   return (FACTIONS as Record<string, Faction>)[id] || null;
 }
 
+const factionCacheKey = (userId: string) => `lugha.faction.${userId}`;
+
 /** Returns the user's current faction, or null if not chosen yet. */
 export async function ensureFaction(userId: string): Promise<FactionId | null> {
-  const { data: prof } = await supabase
+  // Local cache first — avoids re-showing the picker if the DB round-trip is slow or fails.
+  const cached = typeof window !== "undefined" ? window.localStorage.getItem(factionCacheKey(userId)) : null;
+  const { data: prof, error } = await supabase
     .from("profiles")
     .select("faction")
     .eq("id", userId)
     .maybeSingle();
-  return (prof?.faction as FactionId | null) || null;
+  if (error) {
+    console.warn("[faction] load error", error.message);
+    return (cached as FactionId | null) || null;
+  }
+  const dbVal = (prof?.faction as FactionId | null) || null;
+  if (dbVal && typeof window !== "undefined") {
+    window.localStorage.setItem(factionCacheKey(userId), dbVal);
+  }
+  return dbVal || (cached as FactionId | null) || null;
 }
 
-/** Persist the user's chosen faction. */
+/** Persist the user's chosen faction. Throws if the DB update fails. */
 export async function chooseFaction(userId: string, faction: FactionId): Promise<FactionId> {
-  await supabase.from("profiles").update({ faction }).eq("id", userId);
+  const { error } = await supabase.from("profiles").update({ faction }).eq("id", userId);
+  if (error) {
+    console.error("[faction] save error", error);
+    throw new Error(error.message);
+  }
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(factionCacheKey(userId), faction);
+  }
   return faction;
 }
 
