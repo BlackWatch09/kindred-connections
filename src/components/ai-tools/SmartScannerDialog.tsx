@@ -139,25 +139,36 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
       {/* IDLE — upload options */}
       {stage === "idle" && (
         <div className="space-y-6">
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <button
               onClick={() => fileRef.current?.click()}
-              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-8 text-center transition-all overflow-hidden"
+              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-6 text-center transition-all overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Upload className="w-10 h-10 mx-auto mb-3 text-accent" />
-              <p className="font-display text-lg font-bold text-primary">ارفع صورة</p>
-              <p className="text-xs text-muted-foreground mt-1">JPG / PNG / WEBP · حتى 8MB</p>
+              <Upload className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">ارفع صورة</p>
+              <p className="text-[11px] text-muted-foreground mt-1">JPG / PNG / WEBP · حتى 8MB</p>
             </button>
 
             <button
               onClick={() => camRef.current?.click()}
-              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-8 text-center transition-all overflow-hidden"
+              className="group relative border-2 border-dashed border-border hover:border-accent bg-card p-6 text-center transition-all overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Camera className="w-10 h-10 mx-auto mb-3 text-accent" />
-              <p className="font-display text-lg font-bold text-primary">صوّر بالكاميرا</p>
-              <p className="text-xs text-muted-foreground mt-1">يعمل على الجوال والحاسوب</p>
+              <Camera className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">صوّر بالكاميرا</p>
+              <p className="text-[11px] text-muted-foreground mt-1">يعمل على الجوال والحاسوب</p>
+            </button>
+
+            <button
+              onClick={() => setStage("device")}
+              className="group relative border-2 border-dashed border-accent/50 hover:border-accent bg-gradient-to-br from-accent/5 to-transparent p-6 text-center transition-all overflow-hidden"
+            >
+              <span className="absolute top-2 left-2 text-[9px] uppercase tracking-[0.24em] bg-accent text-accent-foreground px-1.5 py-0.5 font-bold">جديد</span>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/10 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Printer className="w-9 h-9 mx-auto mb-3 text-accent" />
+              <p className="font-display text-base font-bold text-primary">جهاز Scanner</p>
+              <p className="text-[11px] text-muted-foreground mt-1">USB أو شبكة · احترافي</p>
             </button>
           </div>
 
@@ -173,6 +184,13 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
             type="file"
             accept="image/*"
             capture="environment"
+            className="hidden"
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+          <input
+            ref={scanFileRef}
+            type="file"
+            accept="image/*,application/pdf"
             className="hidden"
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
