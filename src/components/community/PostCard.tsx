@@ -77,11 +77,12 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   }, [user, post.id]);
 
   const loadComments = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("community_comments")
       .select("*")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true });
+    if (error) { console.warn("[comments] load error", error.message); return; }
     if (!data) return;
     const userIds = Array.from(new Set(data.filter((c) => c.user_id).map((c) => c.user_id as string)));
     let profiles: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
@@ -89,8 +90,13 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
       const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", userIds);
       profs?.forEach((p) => { profiles[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url }; });
     }
-    setComments(data.map((c) => ({ ...c, author: c.user_id ? profiles[c.user_id] || null : null })) as Comment[]);
+    const rows = data.map((c) => ({ ...c, author: c.user_id ? profiles[c.user_id] || null : null })) as Comment[];
+    setComments(rows);
+    setCommentsCount(rows.length);
   };
+
+  // Keep local count in sync when parent refreshes post prop
+  useEffect(() => { setCommentsCount(post.comments_count); }, [post.comments_count]);
 
   useEffect(() => {
     if (!showComments) return;
@@ -99,7 +105,9 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
       .channel(`comments-${post.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "community_comments", filter: `post_id=eq.${post.id}` }, loadComments)
       .subscribe();
-    return () => { supabase.removeChannel(sub); };
+    // Fallback poll every 4s in case realtime is disabled on the DB publication
+    const iv = window.setInterval(loadComments, 4000);
+    return () => { supabase.removeChannel(sub); window.clearInterval(iv); };
   }, [showComments, post.id]);
 
   const toggleLike = async () => {
