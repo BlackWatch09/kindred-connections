@@ -50,7 +50,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   const { user, profile } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes_count);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [busy, setBusy] = useState(false);
