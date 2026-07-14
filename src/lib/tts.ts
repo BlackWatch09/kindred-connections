@@ -1,13 +1,14 @@
-// Arabic TTS helper for course audio.
-// Plays browser speech immediately inside the user's click gesture, then warms
-// the premium TTS cache when the edge function is available.
-import { supabase } from "@/lib/supabase";
+// Arabic TTS — calls Google Gemini TTS directly from the client using the
+// existing shared Gemini API key (same as the other AI Hub tools). No edge
+// function required. Falls back to browser SpeechSynthesis when Gemini fails.
+
+import { getGeminiKey } from "@/features/story-world/lib/streamChat";
 import { TTS_AUDIO } from "@/generated/ttsManifest";
 
-const TTS_URL = `https://zekkojrgknpvmxskyqno.supabase.co/functions/v1/tts`;
-const SUPABASE_ANON = "sb_publishable_fbcN8yLZl8_5VMGokMH24g_4LaaOnCu";
+const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+const VOICE = "Kore"; // warm neutral voice, good for Arabic
 
-const cache = new Map<string, string>(); // text -> object URL
+const cache = new Map<string, string>(); // text -> object URL (session cache)
 let currentAudio: HTMLAudioElement | null = null;
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 
@@ -26,7 +27,7 @@ function speakWithBrowser(text: string): Promise<void> {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "ar-SA";
-    u.rate = 0.85;
+    u.rate = 0.9;
     u.pitch = 1;
     const voice = getArabicVoice();
     if (voice) u.voice = voice;
@@ -34,13 +35,14 @@ function speakWithBrowser(text: string): Promise<void> {
     u.onerror = () => resolve();
     currentUtterance = u;
     window.speechSynthesis.speak(u);
+    // Safety timeout: some browsers never fire onend for Arabic.
+    setTimeout(() => resolve(), Math.max(3000, text.length * 90));
   });
 }
 
 export function stopSpeaking() {
   if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
+    try { currentAudio.pause(); } catch { /* ignore */ }
     currentAudio = null;
   }
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -49,34 +51,83 @@ export function stopSpeaking() {
   }
 }
 
-async function fetchPremiumSpeech(text: string): Promise<string | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token ?? SUPABASE_ANON;
-  const res = await fetch(TTS_URL, {
+// Parse mimeType like "audio/L16;codec=pcm;rate=24000" to get sample rate.
+function parseSampleRate(mime: string): number {
+  const m = /rate=(\d+)/i.exec(mime || "");
+  return m ? parseInt(m[1], 10) : 24000;
+}
+
+// Wrap raw PCM (16-bit LE mono) as a WAV blob so <audio> can play it.
+function pcmToWav(pcm: Uint8Array, sampleRate: number): Blob {
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+  const blockAlign = numChannels * bitsPerSample / 8;
+  const dataSize = pcm.length;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeStr = (offset: number, s: string) => {
+    for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+  };
+  writeStr(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);          // PCM chunk size
+  view.setUint16(20, 1, true);            // format = PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitsPerSample, true);
+  writeStr(36, "data");
+  view.setUint32(40, dataSize, true);
+  new Uint8Array(buffer, 44).set(pcm);
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
+function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function fetchGeminiSpeech(text: string): Promise<string | null> {
+  const key = getGeminiKey();
+  if (!key) return null;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${key}`;
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ text }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `Read the following Arabic text aloud in clear, warm Modern Standard Arabic (فصحى) at a natural pace suitable for a language learner. Pronounce every letter carefully. Text: ${text}`,
+        }],
+      }],
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } },
+        },
+      },
+    }),
   });
-
-  const contentType = res.headers.get("Content-Type") || "";
-  if (contentType.includes("application/json")) {
-    const payload = await res.json().catch(() => null);
-    if (payload?.fallback) return null;
-    throw new Error(payload?.error || `tts ${res.status}`);
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`gemini-tts ${res.status}: ${err.slice(0, 200)}`);
   }
-
-  if (!res.ok) throw new Error(`tts ${res.status}`);
-  if (!contentType.includes("audio")) throw new Error(`tts invalid content type: ${contentType || "unknown"}`);
-
-  const blob = await res.blob();
-  if (!blob.size) throw new Error("tts empty audio");
-  const url = URL.createObjectURL(blob);
-  cache.set(text, url);
-  return url;
+  const data = await res.json();
+  const part = data?.candidates?.[0]?.content?.parts?.find((p: any) => p?.inlineData?.data);
+  const b64 = part?.inlineData?.data;
+  const mime = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+  if (!b64) return null;
+  const pcm = base64ToBytes(b64);
+  const wav = pcmToWav(pcm, parseSampleRate(mime));
+  const objectUrl = URL.createObjectURL(wav);
+  cache.set(text, objectUrl);
+  return objectUrl;
 }
 
 function playUrl(url: string): Promise<void> {
@@ -96,7 +147,7 @@ function playUrl(url: string): Promise<void> {
 
 /**
  * Speak Arabic text. Resolves when playback ENDS (or immediately on failure).
- * Tries local pre-generated audio → session cache → premium edge function → browser speech.
+ * Order: local pre-generated audio → session cache → Gemini TTS → browser speech.
  */
 export async function speakArabic(text: string): Promise<void> {
   if (!text) return;
@@ -114,16 +165,14 @@ export async function speakArabic(text: string): Promise<void> {
     return;
   }
 
-  // Fetch premium first; only fall back to browser speech on failure so we
-  // wait for the natural Arabic voice when it is available.
   try {
-    const url = await fetchPremiumSpeech(text);
+    const url = await fetchGeminiSpeech(text);
     if (url) {
       await playUrl(url);
       return;
     }
   } catch (err) {
-    console.warn("[tts] premium audio unavailable, using browser speech:", err);
+    console.warn("[tts] Gemini TTS unavailable, using browser speech:", err);
   }
 
   await speakWithBrowser(text);
