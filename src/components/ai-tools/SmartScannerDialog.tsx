@@ -34,8 +34,11 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [editedText, setEditedText] = useState<string>("");
+  const [detectedDevice, setDetectedDevice] = useState<string>("");
+  const [probing, setProbing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
+  const scanFileRef = useRef<HTMLInputElement>(null);
 
   const handleReset = () => {
     setStage("idle");
@@ -44,6 +47,31 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
     setErrorMsg("");
     setEditedText("");
     setCopied(false);
+  };
+
+  // WebUSB probe for still-image class devices (USB class 6 = Still Imaging / PTP)
+  const probeUsbScanner = async () => {
+    const nav: any = navigator;
+    if (!nav?.usb?.requestDevice) {
+      toast.error("متصفحك لا يدعم WebUSB — جرّب Chrome أو Edge على الحاسوب");
+      return;
+    }
+    try {
+      setProbing(true);
+      const device: any = await nav.usb.requestDevice({
+        // Class 6 = Image (scanners/cameras). Include class 7 (Printer, for MFPs) as a fallback.
+        filters: [{ classCode: 6 }, { classCode: 7 }, {}],
+      });
+      const name = [device?.manufacturerName, device?.productName].filter(Boolean).join(" ") || "جهاز غير مُعرَّف";
+      setDetectedDevice(name);
+      toast.success(`تم التعرّف على: ${name}`);
+    } catch (err: any) {
+      if (err?.name !== "NotFoundError") {
+        toast.error("تعذّر الوصول إلى الجهاز");
+      }
+    } finally {
+      setProbing(false);
+    }
   };
 
   const handleFile = async (file: File | undefined) => {
