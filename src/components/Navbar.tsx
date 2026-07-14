@@ -37,8 +37,11 @@ const Navbar = () => {
     { to: "/courses", label: t("nav.courses") },
     { to: "/learn", label: t("nav.learn") },
     { to: "/ai", label: hubLabel, highlight: true },
+    { to: "/community", label: t("nav.community") },
     { to: "/support", label: t("nav.support") },
     { to: "/dashboard", label: t("nav.dashboard") },
+    { to: "/teachers", label: t("nav.teachers") },
+    { to: "/faq", label: t("nav.faq") },
     { to: "/teachers", label: t("nav.teachers") },
     { to: "/faq", label: t("nav.faq") },
   ];
