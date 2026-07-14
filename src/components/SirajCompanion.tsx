@@ -4,8 +4,10 @@ import { MessageCircle, X, Send, Sparkles, Trash2, Loader2 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
-import sirajAvatar from "@/assets/siraj-avatar.png.asset.json";
-import sirajChatAvatar from "@/assets/siraj-chat-avatar.png.asset.json";
+import sirajAvatarUrl from "@/assets/siraj-avatar.png";
+import sirajChatAvatarUrl from "@/assets/siraj-chat-avatar.png";
+const sirajAvatar = { url: sirajAvatarUrl };
+const sirajChatAvatar = { url: sirajChatAvatarUrl };
 
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
