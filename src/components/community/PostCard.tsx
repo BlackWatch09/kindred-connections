@@ -59,6 +59,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   const [editText, setEditText] = useState(post.content);
   const [content, setContent] = useState(post.content);
   const [editedAt, setEditedAt] = useState<string | null>(post.edited_at || null);
+  const [commentsCount, setCommentsCount] = useState(post.comments_count);
   const faction = factionOf(post.faction);
   const authorName = post.author?.full_name || "طالب";
   const authorInitial = authorName.charAt(0).toUpperCase() || "ط";
@@ -76,11 +77,12 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
   }, [user, post.id]);
 
   const loadComments = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("community_comments")
       .select("*")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true });
+    if (error) { console.warn("[comments] load error", error.message); return; }
     if (!data) return;
     const userIds = Array.from(new Set(data.filter((c) => c.user_id).map((c) => c.user_id as string)));
     let profiles: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
@@ -88,8 +90,13 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
       const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", userIds);
       profs?.forEach((p) => { profiles[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url }; });
     }
-    setComments(data.map((c) => ({ ...c, author: c.user_id ? profiles[c.user_id] || null : null })) as Comment[]);
+    const rows = data.map((c) => ({ ...c, author: c.user_id ? profiles[c.user_id] || null : null })) as Comment[];
+    setComments(rows);
+    setCommentsCount(rows.length);
   };
+
+  // Keep local count in sync when parent refreshes post prop
+  useEffect(() => { setCommentsCount((c) => Math.max(c, post.comments_count)); }, [post.comments_count]);
 
   useEffect(() => {
     if (!showComments) return;
@@ -98,7 +105,9 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
       .channel(`comments-${post.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "community_comments", filter: `post_id=eq.${post.id}` }, loadComments)
       .subscribe();
-    return () => { supabase.removeChannel(sub); };
+    // Fallback poll every 4s in case realtime is disabled on the DB publication
+    const iv = window.setInterval(loadComments, 4000);
+    return () => { supabase.removeChannel(sub); window.clearInterval(iv); };
   }, [showComments, post.id]);
 
   const toggleLike = async () => {
@@ -125,13 +134,21 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
         faction: currentFaction,
       });
       if (error) throw error;
+      setCommentText("");
+      setShowComments(true);
+      await loadComments();
       contributeChallenge(currentFaction);
       if (mentionsSiraj(text)) {
+        toast.success("سراج يكتب رداً…", { icon: "🌙" });
         triggerSirajReply(post.id, text, profile?.full_name || user.email?.split("@")[0])
-          .catch(() => toast.error("سراج مشغول الآن"));
+          .then(() => loadComments())
+          .catch((e) => {
+            console.error("[siraj] reply failed", e);
+            toast.error("سراج مشغول الآن");
+          });
       }
-      setCommentText("");
     } catch (e) {
+      console.error("[comment] insert failed", e);
       toast.error("تعذر التعليق: " + (e as Error).message);
     } finally {
       setBusy(false);
@@ -283,7 +300,7 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <MessageCircle className="w-4 h-4" />
-          <span className="font-mono text-xs">{post.comments_count}</span>
+          <span className="font-mono text-xs">{commentsCount}</span>
         </button>
       </div>
 
