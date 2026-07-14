@@ -53,18 +53,20 @@ export function factionOf(id?: string | null): Faction | null {
   return (FACTIONS as Record<string, Faction>)[id] || null;
 }
 
-/** Assign a random faction to the user's profile if none set yet. Returns the faction id. */
-export async function ensureFaction(userId: string): Promise<FactionId> {
+/** Returns the user's current faction, or null if not chosen yet. */
+export async function ensureFaction(userId: string): Promise<FactionId | null> {
   const { data: prof } = await supabase
     .from("profiles")
     .select("faction")
     .eq("id", userId)
     .maybeSingle();
-  const current = (prof?.faction as FactionId | null) || null;
-  if (current) return current;
-  const chosen = FACTION_IDS[Math.floor(Math.random() * FACTION_IDS.length)];
-  await supabase.from("profiles").update({ faction: chosen }).eq("id", userId);
-  return chosen;
+  return (prof?.faction as FactionId | null) || null;
+}
+
+/** Persist the user's chosen faction. */
+export async function chooseFaction(userId: string, faction: FactionId): Promise<FactionId> {
+  await supabase.from("profiles").update({ faction }).eq("id", userId);
+  return faction;
 }
 
 /** Detects an @Siraj / @سراج mention */
