@@ -67,7 +67,7 @@ export default function SmartScannerDialog({ open, onClose }: Props) {
       setEditedText(r.text);
       setStage("done");
       if (r.text.trim().length > 0) {
-        addPoints(15, "smart-scanner");
+        addPoints(null, { tool: "smart-scanner", label: "الماسح الضوئي الذكي", points: 15 });
         toast.success("تم استخراج النص بنجاح +15 نقطة");
       }
     } catch (err: any) {
