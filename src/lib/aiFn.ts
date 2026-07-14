@@ -198,3 +198,74 @@ export async function contextTranslate(sentence: string, word: string, target_la
     notes: r?.notes || "",
   };
 }
+
+// ---------- Daily Challenge ----------
+export interface DailyTask {
+  kind: "mcq" | "fill" | "translate";
+  prompt: string;      // instruction / question
+  context?: string;    // sentence with ____ or extra info
+  options?: string[];  // for mcq
+  correct: string;     // canonical correct answer (option text or exact string)
+  explanation?: string;
+}
+export interface DailyChallenge {
+  title: string;
+  intro: string;
+  tasks: DailyTask[];
+}
+export async function generateDailyChallenge(level: string, seed: string): Promise<DailyChallenge> {
+  const prompt = `أنت مصمّم تمارين لغة عربية لطالب مستواه (${level}).
+اليوم مرجعي: ${seed}. اجعل التمارين متنوعة ومتوسطة الصعوبة وممتعة، وركّز على الاستخدام اليومي (سفر، طعام، عمل، أصدقاء).
+
+أعد JSON فقط بهذا الشكل:
+{
+  "title": "عنوان قصير للتحدي",
+  "intro": "جملة تحفيزية قصيرة",
+  "tasks": [
+    {
+      "kind": "mcq",
+      "prompt": "سؤال فهم مفرد",
+      "options": ["خيار 1","خيار 2","خيار 3","خيار 4"],
+      "correct": "الخيار الصحيح كنص كامل مطابق لأحد options",
+      "explanation": "شرح قصير"
+    },
+    {
+      "kind": "fill",
+      "prompt": "أكمل الفراغ بالكلمة المناسبة",
+      "context": "جملة بها فراغ ____ يجب ملؤه",
+      "options": ["كلمة 1","كلمة 2","كلمة 3","كلمة 4"],
+      "correct": "الكلمة الصحيحة كنص مطابق لأحد options",
+      "explanation": "شرح"
+    },
+    {
+      "kind": "translate",
+      "prompt": "ترجم الجملة إلى العربية",
+      "context": "The English sentence to translate.",
+      "correct": "الترجمة العربية النموذجية المشكّلة",
+      "explanation": "ملاحظة عن التركيب"
+    }
+  ]
+}
+
+الشروط:
+- 4 مهام بالضبط (يمكنك تكرار الأنواع بترتيب مختلف).
+- شكّل الكلمات العربية بالحركات الكاملة.
+- لكل mcq و fill: أربعة خيارات مختلفة وواحدة صحيحة فقط، و correct يجب أن يطابق أحدها حرفياً.
+- لـ translate: correct هي إجابة نموذجية واحدة (نقبل مطابقة تقريبية).`;
+  const r = await generateJson<DailyChallenge>([{ text: prompt }], MODEL, 0.7);
+  const tasks: DailyTask[] = Array.isArray(r?.tasks)
+    ? (r.tasks as any[]).map((t) => ({
+        kind: (["mcq", "fill", "translate"].includes(t?.kind) ? t.kind : "mcq") as DailyTask["kind"],
+        prompt: String(t?.prompt || ""),
+        context: t?.context ? String(t.context) : undefined,
+        options: Array.isArray(t?.options) ? t.options.map(String).slice(0, 4) : undefined,
+        correct: String(t?.correct || ""),
+        explanation: t?.explanation ? String(t.explanation) : "",
+      })).filter((t) => t.prompt && t.correct)
+    : [];
+  return {
+    title: r?.title || "تحدّي اليوم",
+    intro: r?.intro || "",
+    tasks,
+  };
+}
