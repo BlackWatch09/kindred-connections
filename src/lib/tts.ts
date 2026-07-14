@@ -17,18 +17,24 @@ function getArabicVoice(): SpeechSynthesisVoice | undefined {
   return voices.find((voice) => /^ar([-_]|$)/i.test(voice.lang)) ?? voices.find((voice) => /arabic/i.test(voice.name));
 }
 
-function speakWithBrowser(text: string) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "ar-SA";
-  u.rate = 0.85;
-  u.pitch = 1;
-  const voice = getArabicVoice();
-  if (voice) u.voice = voice;
-  currentUtterance = u;
-  window.speechSynthesis.speak(u);
-  return true;
+function speakWithBrowser(text: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      resolve();
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ar-SA";
+    u.rate = 0.85;
+    u.pitch = 1;
+    const voice = getArabicVoice();
+    if (voice) u.voice = voice;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+  });
 }
 
 export function stopSpeaking() {
@@ -73,46 +79,52 @@ async function fetchPremiumSpeech(text: string): Promise<string | null> {
   return url;
 }
 
+function playUrl(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    const audio = new Audio(url);
+    audio.preload = "auto";
+    currentAudio = audio;
+    const done = () => resolve();
+    audio.onended = done;
+    audio.onerror = done;
+    audio.play().catch((err) => {
+      console.warn("[tts] audio play failed:", err);
+      resolve();
+    });
+  });
+}
+
+/**
+ * Speak Arabic text. Resolves when playback ENDS (or immediately on failure).
+ * Tries local pre-generated audio → session cache → premium edge function → browser speech.
+ */
 export async function speakArabic(text: string): Promise<void> {
   if (!text) return;
   stopSpeaking();
 
   const localUrl = TTS_AUDIO[text];
   if (localUrl) {
-    try {
-      const audio = new Audio(localUrl);
-      audio.preload = "auto";
-      currentAudio = audio;
-      await audio.play();
-      return;
-    } catch (err) {
-      console.warn("[tts] local audio blocked, using browser speech:", err);
-      speakWithBrowser(text);
-      return;
-    }
+    await playUrl(localUrl);
+    return;
   }
 
   const cachedUrl = cache.get(text);
   if (cachedUrl) {
-    try {
-      const audio = new Audio(cachedUrl);
-      currentAudio = audio;
-      await audio.play();
-      return;
-    } catch (err) {
-      console.warn("[tts] cached audio blocked, using browser speech:", err);
-      speakWithBrowser(text);
+    await playUrl(cachedUrl);
+    return;
+  }
+
+  // Fetch premium first; only fall back to browser speech on failure so we
+  // wait for the natural Arabic voice when it is available.
+  try {
+    const url = await fetchPremiumSpeech(text);
+    if (url) {
+      await playUrl(url);
       return;
     }
-  }
-
-  // Important for mobile browsers: this happens synchronously during the click.
-  speakWithBrowser(text);
-
-  try {
-    await fetchPremiumSpeech(text);
   } catch (err) {
-    // Browser speech is already playing, so remote service issues cannot make the UI silent.
-    console.warn("[tts] premium audio unavailable; browser speech is active:", err);
+    console.warn("[tts] premium audio unavailable, using browser speech:", err);
   }
+
+  await speakWithBrowser(text);
 }
