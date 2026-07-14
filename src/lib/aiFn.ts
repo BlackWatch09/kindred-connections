@@ -442,17 +442,19 @@ export interface ScanResult {
 }
 
 export async function scanImageText(image_base64: string, mime_type: string): Promise<ScanResult> {
-  const { data, error } = await supabase.functions.invoke("smart-scan", {
-    body: { image_base64, mime_type },
-  });
-  if (error) {
-    const msg = (error as any)?.context?.status === 429
-      ? "تم تجاوز حد الطلبات، حاول بعد قليل."
-      : (error as any)?.context?.status === 402
-      ? "انتهى رصيد الذكاء الاصطناعي."
-      : error.message || "فشل المسح";
-    throw new Error(msg);
+  if (!image_base64) throw new AppError("لا توجد صورة للمسح.", "VALIDATION");
+  let data: any; let error: any;
+  try {
+    const res = await withTimeout(
+      supabase.functions.invoke("smart-scan", { body: { image_base64, mime_type } }),
+      REQUEST_TIMEOUT_MS,
+      "المسح الضوئي",
+    );
+    data = res.data; error = res.error;
+  } catch (e) {
+    throw new AppError(friendlyError(e), "NETWORK", e);
   }
+  if (error) throw new AppError(friendlyError(error), "FUNCTION", error);
   const d: any = data || {};
   return {
     language: d.language === "en" || d.language === "mixed" ? d.language : "ar",
