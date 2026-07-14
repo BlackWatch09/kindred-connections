@@ -317,13 +317,14 @@ export const PostCard = ({ post, currentFaction, onDeleted }: Props) => {
 
 const CommentRow = ({ c }: { c: Comment }) => {
   const f = factionOf(c.faction);
-  if (c.is_ai) {
+  const isAi = c.is_ai || !!c.ai_name;
+  if (isAi) {
     return (
       <div className="flex items-start gap-2.5 border-l-2 border-accent bg-accent/5 p-3">
         <img src={sirajAvatar} alt="سراج" className="w-8 h-8 rounded-none object-cover border border-accent/40" />
         <div className="flex-1">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="font-arabic text-xs font-bold text-accent">سراج</span>
+            <span className="font-arabic text-xs font-bold text-accent">{c.ai_name || "سراج"}</span>
             <Sparkles className="w-3 h-3 text-accent" />
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">AI</span>
           </div>
