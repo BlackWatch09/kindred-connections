@@ -276,7 +276,7 @@ const SirajCompanion = () => {
 
   if (hidden || !user) return null;
 
-  const panelSide = dir === "rtl" ? "left-5" : "right-5";
+  const panelSide = "right-5";
 
   return (
     <>
@@ -286,7 +286,7 @@ const SirajCompanion = () => {
           onClick={() => setOpen(true)}
           aria-label={strings.open}
           title={tutorName}
-          className="fixed -bottom-5 left-4 md:-bottom-7 md:left-6 z-[60] group focus:outline-none"
+          className="fixed -bottom-5 right-4 md:-bottom-7 md:right-6 z-[60] group focus:outline-none"
         >
           {/* Glow halo */}
           <span
@@ -303,7 +303,7 @@ const SirajCompanion = () => {
           {/* Online dot */}
           <span
             aria-hidden
-            className="absolute top-8 right-8 md:top-12 md:right-12 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
+            className="absolute top-8 left-8 md:top-12 md:left-12 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-background shadow-md animate-pulse"
           />
         </button>
       )}
