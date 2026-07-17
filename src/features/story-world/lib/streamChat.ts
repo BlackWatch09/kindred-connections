@@ -95,7 +95,7 @@ export async function streamStoryChat(
     contents.push({ role: "user", parts: [{ text: String(userMessage ?? "") }] });
   }
 
-  const url = geminiEndpoint(MODEL, "streamGenerateContent", "alt=sse");
+  const url = geminiEndpoint(getAiModel(), "streamGenerateContent", "alt=sse");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -151,7 +151,7 @@ export async function checkGrammar(text: string, level: string) {
 إذا كانت الجملة سليمة أعد has_error=false وhint فارغة.
 new_words = كلمات عربية جديرة بالحفظ من جملة الطالب (0-3 كلمات).`;
 
-  const url = geminiEndpoint(MODEL, "generateContent");
+  const url = geminiEndpoint(getAiModel(), "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -177,7 +177,7 @@ new_words = كلمات عربية جديرة بالحفظ من جملة الطا
 }
 
 export async function transcribeAudio(base64: string, mimeType: string) {
-  const url = geminiEndpoint(MODEL, "generateContent");
+  const url = geminiEndpoint(getAiModel(), "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
