@@ -5,7 +5,6 @@ import { getAiModel } from "@/lib/aiModel";
 
 const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
 const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
-const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
 /** Build the proxied Gemini endpoint URL. Extra query params optional (e.g. `alt=sse`). */
 export function geminiEndpoint(model: string, method: string, extraQuery?: string): string {
