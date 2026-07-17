@@ -490,6 +490,7 @@ export const translations: Record<Language, Record<string, string>> = {
     // Admin: AI Persona
     "admin.nav.ai": "AI Persona",
     "admin.nav.aiModel": "AI Model",
+    "admin.nav.support": "Support",
     "admin.ai.title": "AI Persona & Hub",
     "admin.ai.desc": "Rename the AI Hub and your AI tutor. Changes reflect instantly across the site.",
     "admin.ai.hubName": "Hub name (shown in header & AI page)",
@@ -1000,6 +1001,7 @@ export const translations: Record<Language, Record<string, string>> = {
     // لوحة التحكم: شخصية الذكاء الاصطناعي
     "admin.nav.ai": "شخصية الذكاء الاصطناعي",
     "admin.nav.aiModel": "نموذج الذكاء الاصطناعي",
+    "admin.nav.support": "الدعم الفني",
     "admin.ai.title": "شخصية ومحور الذكاء الاصطناعي",
     "admin.ai.desc": "غيّر اسم المِحراب واسم رفيق الذكاء الاصطناعي. التغييرات تنعكس فوراً على الموقع.",
     "admin.ai.hubName": "اسم القسم (يظهر في الهيدر وصفحة المِحراب)",
@@ -1457,6 +1459,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav.aihub": "Lugha Meclisi",
     "admin.nav.ai": "AI Kişiliği",
     "admin.nav.aiModel": "AI Modeli",
+    "admin.nav.support": "Destek",
     "admin.nav.aiContent": "AI İçerik Araçları",
     "admin.ai.editLang": "Düzenleme dili",
     "admin.ai.livePreview": "Canlı önizleme",
