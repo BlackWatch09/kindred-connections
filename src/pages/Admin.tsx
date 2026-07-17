@@ -12,11 +12,12 @@ import {
   startSession, isAuthed, endSession, getAdminPassword,
 } from "@/lib/adminAuth";
 import { content, pickLocalized, type Teacher, type Course, type FAQItem, type Announcement, type AiPersona, type Localized } from "@/lib/siteContent";
+import { GEMINI_MODEL_OPTIONS, DEFAULT_GEMINI_MODEL, type GeminiModelId } from "@/lib/aiModel";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import logo from "@/assets/lugha-logo.png";
 
-type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aicontent" | "support" | "settings" | "security" | "backup";
+type Section = "overview" | "teachers" | "courses" | "faqs" | "announcements" | "ai" | "aimodel" | "aicontent" | "support" | "settings" | "security" | "backup";
 
 const Admin = () => {
   const { t } = useLanguage();
@@ -61,6 +62,7 @@ const Admin = () => {
           {section === "announcements" && <AnnouncementsManager data={data} setData={setData} />}
           {section === "settings" && <SiteSettingsPanel data={data} setData={setData} />}
           {section === "ai" && <AIPersonaPanel data={data} setData={setData} />}
+          {section === "aimodel" && <AIModelPanel data={data} setData={setData} />}
           {section === "aicontent" && <AIContentPanel />}
           {section === "support" && <SupportPanel />}
           {section === "security" && <SecurityPanel />}
@@ -127,6 +129,7 @@ const navItems: { key: Section; labelKey: string; icon: any }[] = [
   { key: "faqs", labelKey: "admin.nav.faqs", icon: HelpCircle },
   { key: "announcements", labelKey: "admin.nav.announcements", icon: Megaphone },
   { key: "ai", labelKey: "admin.nav.ai", icon: Bot },
+  { key: "aimodel", labelKey: "admin.nav.aiModel", icon: Sparkles },
   { key: "aicontent", labelKey: "admin.nav.aiContent", icon: Wand2 },
   { key: "support", labelKey: "admin.nav.support", icon: LifeBuoy },
   { key: "settings", labelKey: "admin.nav.settings", icon: Settings },
