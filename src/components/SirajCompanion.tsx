@@ -97,6 +97,21 @@ const UI = {
     starter: "Merhaba! Ben Siraj. Arapça hakkında herhangi bir soruyu bana sor.",
     hints: ["«kitab» ne demek?", "Sabah selamı öğret", "Düzelt: Pazara gidiyorum", "Bugünün kelimesi nedir?"],
   },
+  es: {
+    open: "Abrir chat de Siraj",
+    close: "Cerrar",
+    placeholder: "Pregúntale a Siraj cualquier cosa sobre el árabe…",
+    send: "Enviar",
+    clear: "Borrar chat",
+    online: "En línea",
+    footer: "Impulsado por Lugha AI",
+    error: "No se pudo contactar con Siraj. Inténtalo de nuevo.",
+    rateLimit: "Demasiadas solicitudes. Inténtalo de nuevo en un momento.",
+    credits: "Créditos de IA agotados. Recarga para continuar.",
+    thinking: "Siraj está pensando…",
+    starter: "¡Hola! Soy Siraj. Pregúntame cualquier palabra, frase o duda de árabe.",
+    hints: ["¿Qué significa «kitab»?", "Enséñame un saludo matinal", "Corrige: Yo voy al mercado", "Dame la palabra del día"],
+  },
 } as const;
 
 const routeHints: Array<{ match: RegExp; hint: string }> = [
