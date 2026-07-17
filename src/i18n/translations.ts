@@ -489,6 +489,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "aihub.tools.interview.desc": "A 3-minute spoken interview scored on fluency, pronunciation and range.",
     // Admin: AI Persona
     "admin.nav.ai": "AI Persona",
+    "admin.nav.aiModel": "AI Model",
     "admin.ai.title": "AI Persona & Hub",
     "admin.ai.desc": "Rename the AI Hub and your AI tutor. Changes reflect instantly across the site.",
     "admin.ai.hubName": "Hub name (shown in header & AI page)",
@@ -998,6 +999,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "aihub.tools.interview.desc": "مقابلة صوتية 3 دقائق تُقيّم طلاقتك ونطقك وتنوّع مفرداتك.",
     // لوحة التحكم: شخصية الذكاء الاصطناعي
     "admin.nav.ai": "شخصية الذكاء الاصطناعي",
+    "admin.nav.aiModel": "نموذج الذكاء الاصطناعي",
     "admin.ai.title": "شخصية ومحور الذكاء الاصطناعي",
     "admin.ai.desc": "غيّر اسم المِحراب واسم رفيق الذكاء الاصطناعي. التغييرات تنعكس فوراً على الموقع.",
     "admin.ai.hubName": "اسم القسم (يظهر في الهيدر وصفحة المِحراب)",
@@ -1454,6 +1456,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "admin.backup.resetConfirm": "Tüm içeriği varsayılanlara sıfırla? Geri alınamaz.",
     "nav.aihub": "Lugha Meclisi",
     "admin.nav.ai": "AI Kişiliği",
+    "admin.nav.aiModel": "AI Modeli",
     "admin.nav.aiContent": "AI İçerik Araçları",
     "admin.ai.editLang": "Düzenleme dili",
     "admin.ai.livePreview": "Canlı önizleme",
