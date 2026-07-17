@@ -7,7 +7,18 @@ import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
 import logo from "@/assets/lugha-logo.png";
 
-const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR" };
+const langLabels: Record<Language, string> = {
+  en: "English",
+  ar: "العربية",
+  tr: "Türkçe",
+  es: "Español",
+};
+const langShort: Record<Language, string> = {
+  en: "EN",
+  ar: "AR",
+  tr: "TR",
+  es: "ES",
+};
 
 const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
