@@ -39,6 +39,7 @@ export type SiteSettings = {
   maintenanceMode: boolean;
   announcementBar: string;
   aiPersona: AiPersona;
+  aiModel: string;
 };
 export type Announcement = { id: string; message: string; type: "info" | "warning" | "success"; createdAt: string };
 
@@ -114,6 +115,7 @@ const DEFAULTS: Store = {
     maintenanceMode: false,
     announcementBar: "",
     aiPersona: DEFAULT_PERSONA,
+    aiModel: "gemini-2.5-flash-lite",
   },
   announcements: [],
 };
