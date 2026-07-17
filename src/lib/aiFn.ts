@@ -246,7 +246,7 @@ export async function generateDailyChallenge(level: string, seed: string): Promi
   let data: any; let error: any;
   try {
     const res = await withTimeout(
-      supabase.functions.invoke("ai-json", { body: { task: "daily-challenge", input: { level, seed } } }),
+      supabase.functions.invoke("ai-json", { body: { task: "daily-challenge", input: { level, seed }, model: getGatewayModel() } }),
       REQUEST_TIMEOUT_MS,
       "توليد التحدّي",
     );
@@ -447,7 +447,7 @@ export async function scanImageText(image_base64: string, mime_type: string): Pr
   let data: any; let error: any;
   try {
     const res = await withTimeout(
-      supabase.functions.invoke("smart-scan", { body: { image_base64, mime_type } }),
+      supabase.functions.invoke("smart-scan", { body: { image_base64, mime_type, model: getGatewayModel() } }),
       REQUEST_TIMEOUT_MS,
       "المسح الضوئي",
     );
