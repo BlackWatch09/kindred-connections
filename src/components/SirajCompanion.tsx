@@ -215,7 +215,7 @@ const SirajCompanion = () => {
         parts: [{ text: m.content }],
       }));
 
-      const url = geminiEndpoint(GEMINI_MODEL, "streamGenerateContent", "alt=sse");
+      const url = geminiEndpoint(getAiModel(), "streamGenerateContent", "alt=sse");
 
       const res = await fetch(url, {
         method: "POST",

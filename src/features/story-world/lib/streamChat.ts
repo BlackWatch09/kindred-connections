@@ -1,8 +1,10 @@
 // Gemini integration — routed through the `gemini-proxy` Supabase Edge Function
 // so the API key stays server-side (env: GEMINI_API_KEY). Zero user setup.
 
-const MODEL = "gemini-2.5-flash-lite";
+import { getAiModel } from "@/lib/aiModel";
+
 const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
+const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
 /** Build the proxied Gemini endpoint URL. Extra query params optional (e.g. `alt=sse`). */
