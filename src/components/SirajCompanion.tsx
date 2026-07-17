@@ -205,7 +205,6 @@ const SirajCompanion = () => {
 
     try {
       const systemInstruction = buildSirajSystem({
-        language,
         tutorName,
         tutorTitle,
         tutorAccent: pickLocalized(persona.tutorAccent, language, ""),
