@@ -69,17 +69,20 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "LOVABLE_API_KEY missing" }, 500);
 
-    const body = (await req.json()) as Body;
+    const body = (await req.json()) as Body & { model?: string };
     const task = String(body?.task || "");
     const spec = TASKS[task];
     if (!spec) return json({ error: "unknown task" }, 400);
+
+    const overrideModel =
+      typeof body?.model === "string" && body.model.startsWith("google/") ? body.model : null;
 
     const prompt = spec.build(body.input || {});
     const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
       body: JSON.stringify({
-        model: spec.model || DEFAULT_MODEL,
+        model: overrideModel || spec.model || DEFAULT_MODEL,
         temperature: spec.temperature ?? 0.4,
         response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
