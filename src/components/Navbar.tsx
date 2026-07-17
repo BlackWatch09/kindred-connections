@@ -7,7 +7,18 @@ import { useAiPersona } from "@/hooks/useAiPersona";
 import { pickLocalized } from "@/lib/siteContent";
 import logo from "@/assets/lugha-logo.png";
 
-const langLabels: Record<Language, string> = { en: "EN", ar: "عربي", tr: "TR" };
+const langLabels: Record<Language, string> = {
+  en: "English",
+  ar: "العربية",
+  tr: "Türkçe",
+  es: "Español",
+};
+const langShort: Record<Language, string> = {
+  en: "EN",
+  ar: "AR",
+  tr: "TR",
+  es: "ES",
+};
 
 const Navbar = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -85,16 +96,17 @@ const Navbar = () => {
               {langLabels[language]}
             </button>
             {langOpen && (
-              <div className="absolute top-full mt-1 right-0 bg-card border border-border shadow-lg py-1 min-w-[100px]">
-                {(["en", "ar", "tr"] as Language[]).map((lang) => (
+              <div className="absolute top-full mt-1 right-0 bg-card border border-border shadow-lg py-1 min-w-[160px] z-50">
+                {(["en", "ar", "tr", "es"] as Language[]).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => { setLanguage(lang); setLangOpen(false); }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors ${
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors flex items-center justify-between gap-3 ${
                       language === lang ? "text-accent font-semibold" : "text-foreground"
                     }`}
                   >
-                    {langLabels[lang]}
+                    <span>{langLabels[lang]}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{langShort[lang]}</span>
                   </button>
                 ))}
               </div>
@@ -170,8 +182,8 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <div className="flex items-center gap-2 pt-3 border-t border-border mt-3">
-            {(["en", "ar", "tr"] as Language[]).map((lang) => (
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border mt-3">
+            {(["en", "ar", "tr", "es"] as Language[]).map((lang) => (
               <button
                 key={lang}
                 onClick={() => { setLanguage(lang); setMobileOpen(false); }}

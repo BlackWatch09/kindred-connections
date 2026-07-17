@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { translations } from "@/i18n/translations";
 
-export type Language = "en" | "ar" | "tr";
+export type Language = "en" | "ar" | "tr" | "es";
 
 interface LanguageContextType {
   language: Language;
@@ -17,7 +17,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window === "undefined") return "en";
     const saved = window.localStorage.getItem(STORAGE_KEY) as Language | null;
-    return saved && ["en", "ar", "tr"].includes(saved) ? saved : "en";
+    return saved && ["en", "ar", "tr", "es"].includes(saved) ? saved : "en";
   });
 
   const setLanguage = (lang: Language) => {
@@ -26,7 +26,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const t = (key: string, params?: Record<string, string>): string => {
-    let text = translations[language][key] || key;
+    // Fallback chain: current language → English → key
+    let text = translations[language]?.[key] ?? translations.en[key] ?? key;
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
         text = text.replace(`{${k}}`, v);

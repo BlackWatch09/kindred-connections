@@ -1,7 +1,7 @@
 // Site content store: localStorage-backed, JSON export/import for full control.
 import type { Language } from "@/contexts/LanguageContext";
 
-export type Localized = { en: string; ar: string; tr: string };
+export type Localized = { en: string; ar: string; tr: string; es?: string };
 
 export const pickLocalized = (
   value: Localized | string | undefined | null,
@@ -10,7 +10,7 @@ export const pickLocalized = (
 ): string => {
   if (!value) return fallback;
   if (typeof value === "string") return value || fallback;
-  return value[lang] || value.ar || value.en || value.tr || fallback;
+  return value[lang] || value.en || value.ar || value.tr || fallback;
 };
 
 export type Teacher = { id: string; name: string; title: string; city: string; bio: string; avatar?: string };
