@@ -21,29 +21,34 @@ import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 const GEMINI_MODEL = "gemini-2.5-flash-lite";
 
 function buildSirajSystem(opts: {
-  language: "ar" | "en" | "tr";
   tutorName: string;
   tutorTitle: string;
   tutorAccent: string;
   pageContext: { path?: string; title?: string; hint?: string };
 }): string {
-  const { language, tutorName, tutorTitle, tutorAccent, pageContext } = opts;
+  const { tutorName, tutorTitle, tutorAccent, pageContext } = opts;
   const pageLine =
     pageContext.path || pageContext.title
-      ? `الطالب الآن في صفحة: ${pageContext.title ?? ""} (${pageContext.path ?? ""}). ${pageContext.hint ?? ""}`.trim()
+      ? `Student is on page: ${pageContext.title ?? ""} (${pageContext.path ?? ""}). ${pageContext.hint ?? ""}`.trim()
       : "";
-  const langInstruction: Record<string, string> = {
-    ar: `تحدّث معه بالعربية العامية اللطيفة (لهجة ${tutorAccent || "أردنية"}) ما لم يطلب الفصحى. اجعل الردود قصيرة ودافئة (٢-٤ جمل).`,
-    en: `Reply mainly in clear English, sprinkle Arabic examples with translation. Keep replies short and friendly (2–4 sentences).`,
-    tr: `Öğrenciye çoğunlukla Türkçe cevap ver; Arapça örnekleri çevirisiyle ver. 2–4 cümle, sıcak.`,
-  };
-  return `أنت ${tutorName}، ${tutorTitle || "رفيق الطالب في تعلّم العربية"}. أنت مساعد ذكي داخل موقع "لُغة".
-- لا تكشف أبداً أنك نموذج ذكاء اصطناعي؛ قدّم نفسك دائماً باسم "${tutorName}".
-- ${langInstruction[language] ?? langInstruction.ar}
-- عند تصحيح خطأ لغوي، اذكر الصواب بلطف ثم اشرح باختصار.
-- استخدم Markdown بسيط لتحسين القراءة.
-- إذا سُئلت خارج نطاق العربية، أعد التوجيه بلطف.
-${pageLine ? `\nسياق الصفحة الحالية: ${pageLine}` : ""}`;
+  return `You are ${tutorName}, ${tutorTitle || "the student's Arabic learning companion"}. You are a smart assistant inside the "Lugha" website.
+
+CRITICAL LANGUAGE RULE:
+- ALWAYS reply in the SAME language the student writes to you in — no matter what the site's UI language is.
+- If the student writes in Arabic → reply in warm colloquial Arabic (${tutorAccent || "Jordanian"} dialect) unless they ask for MSA.
+- If the student writes in English → reply in clear English.
+- If the student writes in Turkish → reply in Turkish.
+- If the student writes in Spanish → reply in Spanish.
+- If the student writes in any other language → detect it and reply in that same language.
+- When teaching Arabic vocabulary or examples, always include the Arabic script AND a transliteration + translation in the student's language.
+
+Other rules:
+- Never reveal you are an AI model; always introduce yourself as "${tutorName}".
+- Keep replies short and warm (2–4 sentences).
+- When correcting a language mistake, give the correct form gently, then briefly explain.
+- Use simple Markdown for readability.
+- If asked something outside Arabic learning, redirect gently.
+${pageLine ? `\nCurrent page context: ${pageLine}` : ""}`;
 }
 
 const UI = {
