@@ -182,8 +182,8 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <div className="flex items-center gap-2 pt-3 border-t border-border mt-3">
-            {(["en", "ar", "tr"] as Language[]).map((lang) => (
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border mt-3">
+            {(["en", "ar", "tr", "es"] as Language[]).map((lang) => (
               <button
                 key={lang}
                 onClick={() => { setLanguage(lang); setMobileOpen(false); }}
