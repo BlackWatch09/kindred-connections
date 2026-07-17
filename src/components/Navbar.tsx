@@ -96,16 +96,17 @@ const Navbar = () => {
               {langLabels[language]}
             </button>
             {langOpen && (
-              <div className="absolute top-full mt-1 right-0 bg-card border border-border shadow-lg py-1 min-w-[100px]">
-                {(["en", "ar", "tr"] as Language[]).map((lang) => (
+              <div className="absolute top-full mt-1 right-0 bg-card border border-border shadow-lg py-1 min-w-[160px] z-50">
+                {(["en", "ar", "tr", "es"] as Language[]).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => { setLanguage(lang); setLangOpen(false); }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors ${
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors flex items-center justify-between gap-3 ${
                       language === lang ? "text-accent font-semibold" : "text-foreground"
                     }`}
                   >
-                    {langLabels[lang]}
+                    <span>{langLabels[lang]}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{langShort[lang]}</span>
                   </button>
                 ))}
               </div>
