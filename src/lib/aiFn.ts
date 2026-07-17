@@ -3,9 +3,12 @@
 import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
 import { supabase } from "@/lib/supabase";
 import { AppError, friendlyError, withTimeout } from "@/lib/errors";
+import { getAiModel, getGatewayModel } from "@/lib/aiModel";
 
-const MODEL = "gemini-2.5-flash-lite";
-const AUDIO_MODEL = "gemini-2.5-flash";
+// These constants are read at call time via getAiModel(); kept as sentinels so
+// caller code that passes MODEL / AUDIO_MODEL still resolves to the admin choice.
+const MODEL = "__admin__";
+const AUDIO_MODEL = "__admin__";
 const REQUEST_TIMEOUT_MS = 45_000;
 
 type Part =
@@ -13,7 +16,8 @@ type Part =
   | { inlineData: { mimeType: string; data: string } };
 
 async function generateJson<T = any>(parts: Part[], model = MODEL, temperature = 0.4): Promise<T> {
-  const url = geminiEndpoint(model, "generateContent");
+  const activeModel = !model || model === "__admin__" ? getAiModel() : model;
+  const url = geminiEndpoint(activeModel, "generateContent");
 
   let res: Response;
   try {
