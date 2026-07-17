@@ -701,7 +701,6 @@ const AIPersonaPanel = ({ data, setData }: any) => {
 
 // ==================== AI MODEL PICKER ====================
 const AIModelPanel = ({ data, setData }: any) => {
-  const { t } = useLanguage();
   const current: GeminiModelId = (data.settings.aiModel as GeminiModelId) || DEFAULT_GEMINI_MODEL;
   const [selected, setSelected] = useState<GeminiModelId>(current);
   useEffect(() => setSelected((data.settings.aiModel as GeminiModelId) || DEFAULT_GEMINI_MODEL), [data.settings.aiModel]);
@@ -709,7 +708,7 @@ const AIModelPanel = ({ data, setData }: any) => {
   const save = () => {
     const next = { ...data, settings: { ...data.settings, aiModel: selected } };
     content.save(next); setData(next);
-    toast.success(t("admin.aiModel.saved") || "تم حفظ نموذج الذكاء الاصطناعي");
+    toast.success("تم حفظ نموذج الذكاء الاصطناعي");
   };
 
   const badgeStyle: Record<string, string> = {
@@ -717,73 +716,70 @@ const AIModelPanel = ({ data, setData }: any) => {
     balanced: "bg-primary/10 text-primary border-primary/25",
     premium: "bg-emerald/15 text-emerald border-emerald/30",
   };
-  const badgeLabel: Record<string, string> = {
-    fast: t("admin.aiModel.badge.fast") || "سريع",
-    balanced: t("admin.aiModel.badge.balanced") || "متوازن",
-    premium: t("admin.aiModel.badge.premium") || "متميّز",
-  };
+  const badgeLabel: Record<string, string> = { fast: "سريع", balanced: "متوازن", premium: "متميّز" };
+  const activeOpt = GEMINI_MODEL_OPTIONS.find((o) => o.id === current);
 
   return (
     <SectionShell
-      title={t("admin.aiModel.title") || "نموذج الذكاء الاصطناعي"}
-      desc={t("admin.aiModel.desc") || "اختر نموذج جيميني الذي يعمل به سِراج وجميع أدوات مجلس لُغة. التغيير فوري ولا يتطلّب إعادة نشر."}
+      title="نموذج الذكاء الاصطناعي"
+      desc="اختر نموذج جيميني الذي يعمل به سِراج وجميع أدوات مجلس لُغة. التغيير فوري بلا إعادة نشر."
     >
-      <div className="max-w-5xl space-y-6">
-        <div className="border-2 border-accent/40 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 p-6 flex items-start gap-4">
+      <div className="max-w-5xl space-y-6" dir="rtl">
+        {/* Active model banner */}
+        <div className="border-2 border-accent/40 bg-gradient-to-bl from-primary/5 via-transparent to-accent/5 p-6 flex items-start gap-4">
           <div className="w-14 h-14 shrink-0 bg-primary text-primary-foreground flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-accent" />
           </div>
-          <div className="flex-1">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold">
-              {t("admin.aiModel.active") || "النموذج النشط"}
-            </p>
-            <h3 className="font-display text-2xl italic font-semibold text-primary mt-1">
-              {GEMINI_MODEL_OPTIONS.find((o) => o.id === current)?.label ?? current}
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-accent font-semibold">النموذج النشط الآن</p>
+            <h3 className="font-display text-2xl italic font-semibold text-primary mt-1 truncate">
+              {activeOpt?.label ?? current}
             </h3>
-            <p className="text-xs text-muted-foreground mt-2">
-              {t("admin.aiModel.activeHint") ||
-                "يستخدمه سِراج، عالم القصص، مركز لُغة الذكي، والماسح الضوئي فوراً بعد الحفظ."}
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              يستخدمه سِراج، عالم القصص، مركز لُغة الذكي، والماسح الضوئي فور الحفظ.
             </p>
           </div>
         </div>
 
+        {/* Model cards */}
         <div className="grid md:grid-cols-2 gap-4">
           {GEMINI_MODEL_OPTIONS.map((opt) => {
             const active = selected === opt.id;
             return (
               <button
                 key={opt.id}
+                type="button"
                 onClick={() => setSelected(opt.id)}
-                className={`text-left border-2 p-5 transition-all group ${
+                className={`text-right border-2 p-5 transition-all group ${
                   active
                     ? "border-accent bg-accent/5 shadow-[0_8px_24px_-12px_hsl(var(--accent)/0.4)]"
                     : "border-border bg-card hover:border-accent/50"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="font-display text-lg font-bold text-primary group-hover:text-accent transition-colors">
                       {opt.label}
                     </p>
-                    <p className="text-[10px] font-mono text-muted-foreground mt-1">{opt.id}</p>
+                    <p className="text-[10px] font-mono text-muted-foreground mt-1 ltr:text-left" dir="ltr">
+                      {opt.id}
+                    </p>
                   </div>
                   <span
-                    className={`shrink-0 text-[9px] uppercase tracking-[0.2em] font-bold px-2 py-1 border ${badgeStyle[opt.badge]}`}
+                    className={`shrink-0 text-[10px] font-bold px-2.5 py-1 border ${badgeStyle[opt.badge]}`}
                   >
                     {badgeLabel[opt.badge]}
                   </span>
                 </div>
                 <p className="text-xs text-foreground/70 mt-3 leading-relaxed">{opt.tagline}</p>
-                <div className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold">
+                <div className="mt-4 flex items-center gap-2 text-[11px] font-bold">
                   {active ? (
                     <span className="text-accent flex items-center gap-1.5">
                       <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                      {t("admin.aiModel.selected") || "محدّد"}
+                      مُحدَّد
                     </span>
                   ) : (
-                    <span className="text-muted-foreground group-hover:text-accent">
-                      {t("admin.aiModel.pick") || "اختيار"} →
-                    </span>
+                    <span className="text-muted-foreground group-hover:text-accent">اضغط للاختيار ←</span>
                   )}
                 </div>
               </button>
@@ -791,34 +787,31 @@ const AIModelPanel = ({ data, setData }: any) => {
           })}
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Save row */}
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={save}
             disabled={selected === current}
-            className="bg-primary text-primary-foreground px-8 py-3 text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="bg-primary text-primary-foreground px-8 py-3 text-sm font-bold flex items-center gap-2 hover:bg-emerald transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Save className="w-4 h-4" /> {t("admin.aiModel.save") || "حفظ النموذج"}
+            <Save className="w-4 h-4" /> حفظ النموذج
           </button>
           {selected !== current && (
-            <span className="text-xs text-accent uppercase tracking-widest font-semibold">
-              {t("admin.aiModel.pending") || "تغييرات غير محفوظة"}
-            </span>
+            <span className="text-xs text-accent font-semibold">لديك تغييرات غير محفوظة</span>
           )}
         </div>
 
+        {/* Note */}
         <div className="border border-border/60 bg-muted/30 p-4 text-xs text-muted-foreground leading-relaxed">
-          <p className="font-semibold text-foreground mb-1">
-            {t("admin.aiModel.noteTitle") || "ملاحظة"}
-          </p>
-          <p>
-            {t("admin.aiModel.note") ||
-              "جميع النماذج من عائلة جيميني، فلا حاجة لتغيير مفتاح API. يمكنك التبديل في أي وقت بدون توقّف."}
-          </p>
+          <p className="font-semibold text-foreground mb-1">ملاحظة</p>
+          <p>جميع النماذج من عائلة جيميني، فلا حاجة لتغيير مفتاح API أبداً. يمكنك التبديل بينها في أي وقت بدون أي توقّف.</p>
         </div>
       </div>
     </SectionShell>
   );
 };
+
+
 
 // ==================== AI CONTENT STUDIO ====================
 const AIContentPanel = () => {
