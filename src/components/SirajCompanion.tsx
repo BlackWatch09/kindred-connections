@@ -17,8 +17,7 @@ const STORAGE_KEY = "lugha.siraj.chat.v1";
 const OPEN_EVENT = "siraj:open";
 
 import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
-
-const GEMINI_MODEL = "gemini-2.5-flash-lite";
+import { getAiModel } from "@/lib/aiModel";
 
 function buildSirajSystem(opts: {
   tutorName: string;
