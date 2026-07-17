@@ -13,6 +13,7 @@ const META_MODEL = "google/gemini-2.5-flash-lite";
 interface Body {
   image_base64: string;
   mime_type: string;
+  model?: string;
 }
 
 const OCR_PROMPT = `أنت ماسح ضوئي ذكي متخصّص في استخراج النصوص العربية والإنجليزية من الصور بأعلى دقّة ممكنة.
@@ -36,6 +37,10 @@ Deno.serve(async (req) => {
     const body = (await req.json()) as Body;
     const b64 = String(body?.image_base64 || "");
     const mime = String(body?.mime_type || "image/jpeg");
+    const overrideModel =
+      typeof body?.model === "string" && body.model.startsWith("google/") ? body.model : null;
+    const ocrModel = overrideModel || OCR_MODEL;
+    const metaModel = overrideModel || META_MODEL;
 
     if (!b64) return json({ error: "image_base64 required" }, 400);
     // rough byte-size check (base64 → 3/4). Cap at ~10 MB decoded.
@@ -49,7 +54,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
       body: JSON.stringify({
-        model: OCR_MODEL,
+        model: ocrModel,
         temperature: 0.05,
         max_tokens: 4096,
         messages: [{

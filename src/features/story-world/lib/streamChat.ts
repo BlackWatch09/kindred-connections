@@ -1,7 +1,8 @@
 // Gemini integration — routed through the `gemini-proxy` Supabase Edge Function
 // so the API key stays server-side (env: GEMINI_API_KEY). Zero user setup.
 
-const MODEL = "gemini-2.5-flash-lite";
+import { getAiModel } from "@/lib/aiModel";
+
 const SUPABASE_URL = "https://zekkojrgknpvmxskyqno.supabase.co";
 const PROXY_BASE = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
@@ -94,7 +95,7 @@ export async function streamStoryChat(
     contents.push({ role: "user", parts: [{ text: String(userMessage ?? "") }] });
   }
 
-  const url = geminiEndpoint(MODEL, "streamGenerateContent", "alt=sse");
+  const url = geminiEndpoint(getAiModel(), "streamGenerateContent", "alt=sse");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -150,7 +151,7 @@ export async function checkGrammar(text: string, level: string) {
 إذا كانت الجملة سليمة أعد has_error=false وhint فارغة.
 new_words = كلمات عربية جديرة بالحفظ من جملة الطالب (0-3 كلمات).`;
 
-  const url = geminiEndpoint(MODEL, "generateContent");
+  const url = geminiEndpoint(getAiModel(), "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -176,7 +177,7 @@ new_words = كلمات عربية جديرة بالحفظ من جملة الطا
 }
 
 export async function transcribeAudio(base64: string, mimeType: string) {
-  const url = geminiEndpoint(MODEL, "generateContent");
+  const url = geminiEndpoint(getAiModel(), "generateContent");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

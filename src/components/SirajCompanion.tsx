@@ -17,8 +17,7 @@ const STORAGE_KEY = "lugha.siraj.chat.v1";
 const OPEN_EVENT = "siraj:open";
 
 import { geminiEndpoint } from "@/features/story-world/lib/streamChat";
-
-const GEMINI_MODEL = "gemini-2.5-flash-lite";
+import { getAiModel } from "@/lib/aiModel";
 
 function buildSirajSystem(opts: {
   tutorName: string;
@@ -216,7 +215,7 @@ const SirajCompanion = () => {
         parts: [{ text: m.content }],
       }));
 
-      const url = geminiEndpoint(GEMINI_MODEL, "streamGenerateContent", "alt=sse");
+      const url = geminiEndpoint(getAiModel(), "streamGenerateContent", "alt=sse");
 
       const res = await fetch(url, {
         method: "POST",
