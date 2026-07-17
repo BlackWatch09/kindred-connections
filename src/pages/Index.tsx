@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import heroImg from "@/assets/lugha-hero.jpg";
 import manuscriptImg from "@/assets/lugha-manuscript.jpg";
 import WhyArabicSection from "@/components/WhyArabicSection";
+import FAQSection from "@/components/FAQSection";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
@@ -148,6 +149,13 @@ const Index = () => {
       </section>
 
       <WhyArabicSection />
+
+      {/* FAQ */}
+      <section className="border-t border-border bg-background">
+        <div className="container mx-auto px-4 py-14 md:py-20">
+          <FAQSection />
+        </div>
+      </section>
 
       {/* CLOSING */}
       <section className="bg-primary text-primary-foreground">
